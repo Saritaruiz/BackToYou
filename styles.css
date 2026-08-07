@@ -1,0 +1,30 @@
+/* Centralized styles for BackToYou minimal app */
+:root{--accent:#2b7a78;--accent-2:#17252a;--muted:#666}
+body{font-family:Inter,Segoe UI,Arial,Helvetica,sans-serif;margin:0;background:#f3f4f6;color:#111}
+.container{max-width:980px;margin:28px auto;padding:22px;background:#fff;border-radius:8px;box-shadow:0 6px 18px rgba(16,24,40,0.06)}
+header{display:flex;align-items:center;justify-content:space-between;padding:8px 0}
+nav a{margin-left:12px;color:var(--accent-2);text-decoration:none;font-weight:600}
+h1{color:var(--accent);margin:0}
+form{max-width:700px}
+label{display:block;margin-top:10px;font-weight:600}
+input[type=text],input[type=email],input[type=password],input[type=date],select,textarea{width:100%;padding:8px;border:1px solid #e6e9ee;border-radius:6px;margin-top:6px}
+button{background:var(--accent);color:#fff;border:none;padding:10px 14px;border-radius:6px;cursor:pointer}
+button:hover{opacity:0.95}
+.message{padding:10px;border-radius:6px;margin-bottom:12px}
+.message.success{background:#e8f5e9;color:#2e7d32;border:1px solid #c8e6c9}
+.message.error{background:#fff0f0;color:#c62828;border:1px solid #ffd2d2}
+footer{color:var(--muted);font-size:0.95rem;margin-top:20px;padding-top:12px;border-top:1px solid #f0f0f0}
+.feed-actions{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.button-link{display:inline-block;padding:10px 16px;background:var(--accent);color:#fff;border-radius:8px;text-decoration:none;font-weight:700}
+.button-secondary{background:#17252a}
+.feed{display:grid;gap:18px}
+.report-card{padding:18px;border:1px solid #e5e7eb;border-radius:14px;background:#f9fafb}
+.report-card-header{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+.report-meta{color:var(--muted);font-size:0.92rem}
+.report-image-wrap{margin:14px 0}
+.report-image{max-width:100%;border-radius:10px;display:block}
+.report-details{color:var(--muted);font-size:0.95rem;margin-top:8px;line-height:1.5}
+.report-card-footer{margin-top:14px}
+.report-card-footer a{color:var(--accent);font-weight:700;text-decoration:none}
+.empty-feed{padding:18px;background:#fff3cd;border:1px solid #ffeeba;border-radius:10px;color:#856404}
+@media (max-width:600px){.container{margin:12px;padding:14px}nav{display:none}}

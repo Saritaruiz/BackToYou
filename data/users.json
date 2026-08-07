@@ -1,0 +1,32 @@
+[
+  {
+    "FullName": "Sara Ruiz",
+    "Email": "sruizo@eafit.edu.co",
+    "Password": "nieveshermosa",
+    "Role": "RegularUser"
+  },
+  {
+    "FullName": "Test User 0a54aa41",
+    "Email": "testuser0a54aa41@eafit.edu.co",
+    "Password": "TestPass123",
+    "Role": "RegularUser"
+  },
+  {
+    "FullName": "Test User a1bc090d",
+    "Email": "testusera1bc090d@eafit.edu.co",
+    "Password": "TestPass123",
+    "Role": "RegularUser"
+  },
+  {
+    "FullName": "Test User 77e6e65a",
+    "Email": "testuser77e6e65a@eafit.edu.co",
+    "Password": "TestPass123",
+    "Role": "RegularUser"
+  },
+  {
+    "FullName": "Test User 7a6bf4c3",
+    "Email": "testuser7a6bf4c3@eafit.edu.co",
+    "Password": "TestPass123",
+    "Role": "RegularUser"
+  }
+]

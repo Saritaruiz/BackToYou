@@ -1,0 +1,16 @@
+<h1>Login</h1>
+{{Message}}
+<p>
+    Don't have an account? <a href="/">Register</a>
+</p>
+<form action="/login" method="post">
+    <input type="hidden" name="next" value="{{NextUrl}}">
+
+    <label for="institutionalEmail">Institutional Email</label>
+    <input id="institutionalEmail" name="institutionalEmail" type="email">
+
+    <label for="password">Password</label>
+    <input id="password" name="password" type="password">
+
+    <button type="submit">Login</button>
+</form>

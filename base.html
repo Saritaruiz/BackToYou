@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>{{Title}}</title>
+    <link rel="stylesheet" href="/styles.css">
+    <style>
+        /* Fallback minimal styles if styles.css is missing */
+        :root { --accent: #2b7a78; --accent-2: #17252a; --muted: #666; }
+        body { font-family: Arial, Helvetica, sans-serif; margin: 0; background:#f7f7f8; color:#222; }
+        .container { max-width: 980px; margin: 24px auto; padding: 20px; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
+        header { display:flex; align-items:center; justify-content:space-between; padding:12px 0; }
+        nav a { margin-left:12px; color:var(--accent-2); text-decoration:none; font-weight:600; }
+        footer { color:var(--muted); font-size:0.9rem; margin-top:20px; padding-top:12px; border-top:1px solid #eee; }
+        .message { padding:10px; border-radius:4px; margin-bottom:12px; }
+        .message.success { background:#e8f5e9; color:#2e7d32; border:1px solid #c8e6c9; }
+        .message.error { background:#ffebee; color:#c62828; border:1px solid #ffcdd2; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div>
+                <h1 style="margin:0; font-size:1.25rem; color:var(--accent)">BackToYou</h1>
+                <div style="font-size:0.85rem; color:var(--muted)">Lost & Found basic system</div>
+            </div>
+            <nav>
+                <a href="/">Home</a>
+                <a href="/">Register</a>
+                <a href="/login">Login</a>
+                <a href="/report/create?type=Lost">Create Lost</a>
+                <a href="/report/create?type=Found">Create Found</a>
+                <a href="/dashboard">Dashboard</a>
+            </nav>
+        </header>
+
+        {{Message}}
+
+        <main>
+            {{BodyContent}}
+        </main>
+
+        <footer>
+            <div>© BackToYou</div>
+        </footer>
+    </div>
+</body>
+</html>

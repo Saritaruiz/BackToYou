@@ -1,0 +1,58 @@
+<h1>{{ActionName}}</h1>
+{{Message}}
+<form action="/report/create" method="post" enctype="multipart/form-data">
+    <input type="hidden" name="type" value="{{Type}}">
+
+    <label for="title">Report Title</label>
+    <input id="title" name="title" type="text">
+
+    <label for="description">Description</label>
+    <textarea id="description" name="description" rows="4"></textarea>
+
+    <label for="category">Category</label>
+    <select id="category" name="category">
+        <option value="Electronics">Electronics</option>
+        <option value="Documents">Documents</option>
+        <option value="Clothing">Clothing</option>
+        <option value="Accessories">Accessories</option>
+        <option value="Other">Other</option>
+    </select>
+
+    <label for="itemDate">{{DateLabel}}</label>
+    <input id="itemDate" name="itemDate" type="date">
+
+    <label for="itemLocation">Location</label>
+    <input id="itemLocation" name="itemLocation" type="text">
+
+    <label for="itemImage">Item Image (optional)</label>
+    <input id="itemImage" name="itemImage" type="file" accept="image/png,image/jpeg">
+    <div id="preview"></div>
+
+    <button type="submit">Create Report</button>
+</form>
+<p style="margin-top:10px;"><a href="/dashboard">Back to Dashboard</a></p>
+<script>
+    const input = document.getElementById('itemImage');
+    const preview = document.getElementById('preview');
+    input.addEventListener('change', () => {
+        preview.innerHTML = '';
+        const file = input.files[0];
+        if (!file) return;
+        const allowed = ['image/jpeg','image/png'];
+        if (!allowed.includes(file.type)) {
+            preview.innerText = 'Unsupported image format. Allowed: JPG, JPEG, PNG.';
+            return;
+        }
+        if (file.size > 5 * 1024 * 1024) {
+            preview.innerText = 'Image exceeds maximum allowed size of 5 MB.';
+            return;
+        }
+        const img = document.createElement('img');
+        img.style.maxWidth = '300px';
+        img.style.maxHeight = '300px';
+        const reader = new FileReader();
+        reader.onload = (e) => { img.src = e.target.result; };
+        reader.readAsDataURL(file);
+        preview.appendChild(img);
+    });
+</script>
