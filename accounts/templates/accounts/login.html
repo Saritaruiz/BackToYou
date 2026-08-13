@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Login | BackToYou{% endblock %}
+
+{% block content %}
+    <section class="form-card">
+        <h1 class="page-title">Login</h1>
+        <p class="lead">Access BackToYou with your institutional email.</p>
+
+        <form method="post">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+
+            {% for field in form %}
+                <div class="form-field">
+                    {{ field.label_tag }}
+                    {{ field }}
+                    {{ field.errors }}
+                </div>
+            {% endfor %}
+
+            <button type="submit">Login</button>
+        </form>
+
+        <p>
+            Don't have an account?
+            <a href="{% url 'accounts:register' %}">Register</a>
+        </p>
+    </section>
+{% endblock %}

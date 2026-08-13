@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}Administration | BackToYou{% endblock %}
+
+{% block content %}
+    <section class="hero">
+        <span class="role-pill">Administrator</span>
+        <h1>BackToYou Administration</h1>
+        <p>Review application operations and access administrative workflows.</p>
+    </section>
+
+    <section class="admin-sections" aria-label="Administration sections">
+        <article class="card admin-card">
+            <h2>Pending Reports / Report Moderation</h2>
+            <p class="description">Review submitted reports before they become public.</p>
+            <a class="button" href="{% url 'administration_pending_reports' %}">
+                Pending Reports
+            </a>
+        </article>
+
+        <article class="card admin-card">
+            <h2>Categories</h2>
+            <p class="description">Category management tools will be available here.</p>
+        </article>
+
+        <article class="card admin-card">
+            <h2>User Management</h2>
+            <p class="description">User management tools will be available here.</p>
+        </article>
+    </section>
+{% endblock %}

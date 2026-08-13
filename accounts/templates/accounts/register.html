@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Register | BackToYou{% endblock %}
+
+{% block content %}
+    <section class="form-card">
+        <h1 class="page-title">Register</h1>
+        <p class="lead">Create your BackToYou account with an institutional EAFIT email.</p>
+
+        <form method="post">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+
+            {% for field in form %}
+                <div class="form-field">
+                    {{ field.label_tag }}
+                    {{ field }}
+                    {{ field.errors }}
+                </div>
+            {% endfor %}
+
+            <button type="submit">Register</button>
+        </form>
+
+        <p>
+            Already registered?
+            <a href="{% url 'accounts:login' %}">Login</a>
+        </p>
+    </section>
+{% endblock %}

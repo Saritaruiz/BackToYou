@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}Home | BackToYou{% endblock %}
+
+{% block content %}
+    <section class="hero">
+        {% if user.is_authenticated %}
+            <span class="role-pill">{{ user.get_role_display }}</span>
+            <h1>Welcome, {{ user.first_name|default:user.username }}</h1>
+            <p>
+                Manage your lost and found reports, browse active posts, and help items
+                make their way back through the EAFIT community.
+            </p>
+            <div class="actions">
+                <a class="button" href="{% url 'reports:create_lost_report' %}">
+                    Create Lost Report
+                </a>
+                <a class="button secondary" href="{% url 'reports:create_found_report' %}">
+                    Create Found Report
+                </a>
+                <a class="button ghost" href="{% url 'reports:report_list' %}">
+                    Browse Reports
+                </a>
+            </div>
+        {% else %}
+            <span class="role-pill">EAFIT Lost and Found</span>
+            <h1>BackToYou</h1>
+            <p class="lead">
+                University Lost and Found Web Application
+            </p>
+            <p>
+                Lost. Found. Back to You.
+            </p>
+            <div class="actions">
+                <a class="button" href="{% url 'accounts:register' %}">
+                    Register
+                </a>
+                <a class="button secondary" href="{% url 'accounts:login' %}">
+                    Login
+                </a>
+                <a class="button ghost" href="{% url 'reports:report_list' %}">
+                    Browse Reports
+                </a>
+            </div>
+        {% endif %}
+    </section>
+{% endblock %}

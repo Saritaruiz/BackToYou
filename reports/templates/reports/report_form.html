@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Create {{ report_type_label }} Report | BackToYou{% endblock %}
+
+{% block content %}
+    <section class="form-card">
+        <h1 class="page-title">Create {{ report_type_label }} Item Report</h1>
+        <p class="lead">Submit the item details for administrator review.</p>
+
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+
+            {% for field in form %}
+                <div class="form-field">
+                    {{ field.label_tag }}
+                    {{ field }}
+                    {{ field.errors }}
+                </div>
+            {% endfor %}
+
+            <button type="submit">Submit Report</button>
+        </form>
+
+        <p>
+            <a href="{% url 'reports:report_list' %}">Back to reports</a>
+        </p>
+    </section>
+{% endblock %}

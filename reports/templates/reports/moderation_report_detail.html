@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}Review Report | BackToYou{% endblock %}
+
+{% block content %}
+    <article class="detail-card panel">
+        <span class="role-pill">Moderation Review</span>
+        <h1 class="page-title">Review Report</h1>
+
+        {% if report.image %}
+            <img
+                class="report-image detail"
+                src="{{ report.image.url }}"
+                alt="{{ report.title }}"
+            >
+        {% endif %}
+
+        <div class="meta-grid">
+            <div class="meta-item">
+                <span class="meta-label">Title</span>
+                {{ report.title }}
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Category</span>
+                {{ report.category.name }}
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Type</span>
+                {{ report.get_report_type_display }}
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Date</span>
+                {{ report.event_date }}
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Location</span>
+                {{ report.location }}
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Creator</span>
+                User #{{ report.creator.id }}
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Status</span>
+                {{ report.get_status_display }}
+            </div>
+        </div>
+
+        <h2>Description</h2>
+        <p class="description">{{ report.description }}</p>
+
+        <form class="moderation-actions" method="post">
+            {% csrf_token %}
+            <button class="success" type="submit" name="action" value="approve">
+                Approve
+            </button>
+            <button class="danger" type="submit" name="action" value="reject">
+                Reject
+            </button>
+            <a class="button ghost" href="{% url 'administration_pending_reports' %}">
+                Back to pending reports
+            </a>
+        </form>
+    </article>
+{% endblock %}

@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block title %}Reports | BackToYou{% endblock %}
+
+{% block content %}
+    <section class="hero">
+        <h1>Lost and Found Reports</h1>
+        <p>Browse active reports from the EAFIT community.</p>
+    </section>
+
+    <section class="panel">
+        <form class="filter-form" method="get">
+            <div>
+                <label for="report-search">Search</label>
+                <input
+                    id="report-search"
+                    type="text"
+                    name="q"
+                    placeholder="Search reports..."
+                    value="{{ query|default:'' }}"
+                >
+            </div>
+
+            <div>
+                <label for="category-filter">Category</label>
+                <select id="category-filter" name="category">
+                    <option value="">All categories</option>
+
+                    {% for category in categories %}
+                        <option
+                            value="{{ category.id }}"
+                            {% if selected_category == category.id|stringformat:"s" %}
+                                selected
+                            {% endif %}
+                        >
+                            {{ category.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <label for="type-filter">Type</label>
+                <select id="type-filter" name="type">
+                    <option value="">All types</option>
+                    <option
+                        value="LOST"
+                        {% if selected_type == "LOST" %}
+                            selected
+                        {% endif %}
+                    >
+                        Lost
+                    </option>
+                    <option
+                        value="FOUND"
+                        {% if selected_type == "FOUND" %}
+                            selected
+                        {% endif %}
+                    >
+                        Found
+                    </option>
+                </select>
+            </div>
+
+            <button type="submit">Search</button>
+            <a class="button ghost" href="{% url 'reports:report_list' %}">
+                Clear filters
+            </a>
+        </form>
+    </section>
+
+    {% if reports %}
+        <section class="grid" aria-label="Report results">
+            {% for report in reports %}
+                <article class="card">
+                    {% if report.image %}
+                        <img
+                            class="report-image"
+                            src="{{ report.image.url }}"
+                            alt="{{ report.title }}"
+                        >
+                    {% endif %}
+
+                    <div class="card-body">
+                        <span class="status-pill">{{ report.get_status_display }}</span>
+                        <h2>{{ report.title }}</h2>
+                        <div class="meta-grid">
+                            <div class="meta-item">
+                                <span class="meta-label">Type</span>
+                                {{ report.get_report_type_display }}
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-label">Category</span>
+                                {{ report.category.name }}
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-label">Location</span>
+                                {{ report.location }}
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-label">Date</span>
+                                {{ report.event_date }}
+                            </div>
+                        </div>
+                        <p class="description">{{ report.description|truncatewords:24 }}</p>
+                        <a class="button" href="{% url 'reports:report_detail' report.id %}">
+                            View Details
+                        </a>
+                    </div>
+                </article>
+            {% endfor %}
+        </section>
+    {% else %}
+        <section class="empty-state">
+            <h2>No active reports are currently available.</h2>
+            <p>Try adjusting your filters or check again later.</p>
+        </section>
+    {% endif %}
+{% endblock %}

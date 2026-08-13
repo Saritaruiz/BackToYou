@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}Pending Reports | BackToYou{% endblock %}
+
+{% block content %}
+    <section class="hero">
+        <span class="role-pill">Moderation</span>
+        <h1>Pending Reports</h1>
+        <p>Review submitted reports before they appear publicly.</p>
+    </section>
+
+    {% if reports %}
+        <section class="grid" aria-label="Pending reports">
+            {% for report in reports %}
+                <article class="card">
+                    {% if report.image %}
+                        <img
+                            class="report-image"
+                            src="{{ report.image.url }}"
+                            alt="{{ report.title }}"
+                        >
+                    {% endif %}
+                    <div class="card-body">
+                        <span class="status-pill">{{ report.get_status_display }}</span>
+                        <h2>{{ report.title }}</h2>
+                        <div class="meta-grid">
+                            <div class="meta-item">
+                                <span class="meta-label">Type</span>
+                                {{ report.get_report_type_display }}
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-label">Category</span>
+                                {{ report.category.name }}
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-label">Date</span>
+                                {{ report.event_date }}
+                            </div>
+                        </div>
+                        <a class="button" href="{% url 'administration_moderate_report' report.id %}">
+                            Review Report
+                        </a>
+                    </div>
+                </article>
+            {% endfor %}
+        </section>
+    {% else %}
+        <section class="empty-state">
+            <h2>No pending reports are currently waiting for review.</h2>
+            <p>New submissions will appear here automatically.</p>
+        </section>
+    {% endif %}
+{% endblock %}
