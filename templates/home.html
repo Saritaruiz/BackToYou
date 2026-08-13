@@ -1,52 +1,47 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BackToYou</title>
-</head>
+{% extends "base.html" %}
 
-<body>
+{% block title %}Home | BackToYou{% endblock %}
 
-    <h1>BackToYou</h1>
-
-    <p>
-        University Lost and Found Web Application
-    </p>
-
-    <p>
-        Lost. Found. Back to You.
-    </p>
-
-    <nav>
-        <a href="{% url 'reports:report_list' %}">
-            Browse Reports
-        </a>
+{% block content %}
+    <section class="hero">
         {% if user.is_authenticated %}
-            {% if user.role == "ADMINISTRATOR" %}
-                <a href="{% url 'administration' %}">
-                    Administration
+            <span class="role-pill">{{ user.get_role_display }}</span>
+            <h1>Welcome, {{ user.first_name|default:user.username }}</h1>
+            <p>
+                Manage your lost and found reports, browse active posts, and help items
+                make their way back through the EAFIT community.
+            </p>
+            <div class="actions">
+                <a class="button" href="{% url 'reports:create_lost_report' %}">
+                    Create Lost Report
                 </a>
-            {% endif %}
-            <a href="{% url 'reports:create_lost_report' %}">
-                Report Lost Item
-            </a>
-            <a href="{% url 'reports:create_found_report' %}">
-                Report Found Item
-            </a>
-            <form action="{% url 'accounts:logout' %}" method="post" style="display:inline">
-                {% csrf_token %}
-                <button type="submit">Logout</button>
-            </form>
+                <a class="button secondary" href="{% url 'reports:create_found_report' %}">
+                    Create Found Report
+                </a>
+                <a class="button ghost" href="{% url 'reports:report_list' %}">
+                    Browse Reports
+                </a>
+            </div>
         {% else %}
-            <a href="{% url 'accounts:register' %}">
-                Register
-            </a>
-            <a href="{% url 'accounts:login' %}">
-                Login
-            </a>
+            <span class="role-pill">EAFIT Lost and Found</span>
+            <h1>BackToYou</h1>
+            <p class="lead">
+                University Lost and Found Web Application
+            </p>
+            <p>
+                Lost. Found. Back to You.
+            </p>
+            <div class="actions">
+                <a class="button" href="{% url 'accounts:register' %}">
+                    Register
+                </a>
+                <a class="button secondary" href="{% url 'accounts:login' %}">
+                    Login
+                </a>
+                <a class="button ghost" href="{% url 'reports:report_list' %}">
+                    Browse Reports
+                </a>
+            </div>
         {% endif %}
-    </nav>
-
-</body>
-</html>
+    </section>
+{% endblock %}

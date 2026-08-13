@@ -1,37 +1,34 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contact Reporter | BackToYou</title>
-</head>
-<body>
-    <h1>Contact Reporter</h1>
+{% extends "base.html" %}
 
-    <p>
-        <strong>Report:</strong>
-        {{ report.title }}
-    </p>
+{% block title %}Contact Reporter | BackToYou{% endblock %}
 
-    <form method="post">
-        {% csrf_token %}
-        {{ form.non_field_errors }}
+{% block content %}
+    <section class="form-card">
+        <h1 class="page-title">Contact Reporter</h1>
+        <p class="lead">
+            Send an internal BackToYou message about
+            <strong>{{ report.title }}</strong>.
+        </p>
 
-        {% for field in form %}
-            <p>
-                {{ field.label_tag }}
-                {{ field }}
-                {{ field.errors }}
-            </p>
-        {% endfor %}
+        <form method="post">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
 
-        <button type="submit">Send Message</button>
-    </form>
+            {% for field in form %}
+                <div class="form-field">
+                    {{ field.label_tag }}
+                    {{ field }}
+                    {{ field.errors }}
+                </div>
+            {% endfor %}
 
-    <p>
-        <a href="{% url 'reports:report_detail' report.id %}">
-            Back to report
-        </a>
-    </p>
-</body>
-</html>
+            <button type="submit">Send Message</button>
+        </form>
+
+        <p>
+            <a href="{% url 'reports:report_detail' report.id %}">
+                Back to report
+            </a>
+        </p>
+    </section>
+{% endblock %}

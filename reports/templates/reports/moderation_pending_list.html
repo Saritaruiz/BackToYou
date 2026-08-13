@@ -1,54 +1,53 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pending Reports | BackToYou</title>
-</head>
-<body>
-    <h1>Pending Reports</h1>
+{% extends "base.html" %}
 
-    {% if messages %}
-        {% for message in messages %}
-            <p>{{ message }}</p>
-        {% endfor %}
-    {% endif %}
+{% block title %}Pending Reports | BackToYou{% endblock %}
 
-    <nav>
-        <a href="{% url 'administration' %}">Administration</a>
-        <a href="{% url 'home' %}">Home</a>
-    </nav>
+{% block content %}
+    <section class="hero">
+        <span class="role-pill">Moderation</span>
+        <h1>Pending Reports</h1>
+        <p>Review submitted reports before they appear publicly.</p>
+    </section>
 
     {% if reports %}
-        {% for report in reports %}
-            <article>
-                <h2>{{ report.title }}</h2>
-                <p>
-                    <strong>Type:</strong>
-                    {{ report.get_report_type_display }}
-                </p>
-                <p>
-                    <strong>Category:</strong>
-                    {{ report.category.name }}
-                </p>
-                <p>
-                    <strong>Date:</strong>
-                    {{ report.event_date }}
-                </p>
-                <p>
-                    <strong>Status:</strong>
-                    {{ report.get_status_display }}
-                </p>
-                <p>
-                    <a href="{% url 'administration_moderate_report' report.id %}">
-                        Review Report
-                    </a>
-                </p>
-            </article>
-            <hr>
-        {% endfor %}
+        <section class="grid" aria-label="Pending reports">
+            {% for report in reports %}
+                <article class="card">
+                    {% if report.image %}
+                        <img
+                            class="report-image"
+                            src="{{ report.image.url }}"
+                            alt="{{ report.title }}"
+                        >
+                    {% endif %}
+                    <div class="card-body">
+                        <span class="status-pill">{{ report.get_status_display }}</span>
+                        <h2>{{ report.title }}</h2>
+                        <div class="meta-grid">
+                            <div class="meta-item">
+                                <span class="meta-label">Type</span>
+                                {{ report.get_report_type_display }}
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-label">Category</span>
+                                {{ report.category.name }}
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-label">Date</span>
+                                {{ report.event_date }}
+                            </div>
+                        </div>
+                        <a class="button" href="{% url 'administration_moderate_report' report.id %}">
+                            Review Report
+                        </a>
+                    </div>
+                </article>
+            {% endfor %}
+        </section>
     {% else %}
-        <p>No pending reports are currently waiting for review.</p>
+        <section class="empty-state">
+            <h2>No pending reports are currently waiting for review.</h2>
+            <p>New submissions will appear here automatically.</p>
+        </section>
     {% endif %}
-</body>
-</html>
+{% endblock %}

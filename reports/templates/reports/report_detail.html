@@ -1,77 +1,58 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ report.title }} | BackToYou</title>
-</head>
+{% extends "base.html" %}
 
-<body>
+{% block title %}{{ report.title }} | BackToYou{% endblock %}
 
-    <h1>{{ report.title }}</h1>
+{% block content %}
+    <article class="detail-card panel">
+        {% if report.image %}
+            <img
+                class="report-image detail"
+                src="{{ report.image.url }}"
+                alt="{{ report.title }}"
+            >
+        {% endif %}
 
-    {% if messages %}
-        {% for message in messages %}
-            <p>{{ message }}</p>
-        {% endfor %}
-    {% endif %}
+        <h1 class="page-title">{{ report.title }}</h1>
 
-    {% if report.image %}
-        <img
-            src="{{ report.image.url }}"
-            alt="{{ report.title }}"
-            width="400"
-        >
-    {% endif %}
+        <div class="meta-grid">
+            <div class="meta-item">
+                <span class="meta-label">Type</span>
+                {{ report.get_report_type_display }}
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Category</span>
+                {{ report.category.name }}
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Location</span>
+                {{ report.location }}
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Date</span>
+                {{ report.event_date }}
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Status</span>
+                {{ report.get_status_display }}
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Reported by</span>
+                BackToYou community member
+            </div>
+        </div>
 
-    <p>
-        <strong>Type:</strong>
-        {{ report.get_report_type_display }}
-    </p>
+        <h2>Description</h2>
+        <p class="description">{{ report.description }}</p>
 
-    <p>
-        <strong>Category:</strong>
-        {{ report.category.name }}
-    </p>
-
-    <p>
-        <strong>Location:</strong>
-        {{ report.location }}
-    </p>
-
-    <p>
-        <strong>Date:</strong>
-        {{ report.event_date }}
-    </p>
-
-    <p>
-        <strong>Status:</strong>
-        {{ report.get_status_display }}
-    </p>
-
-    <p>
-        <strong>Description:</strong>
-        {{ report.description }}
-    </p>
-
-    <p>
-        <strong>Reported by:</strong>
-        BackToYou community member
-    </p>
-
-    {% if can_contact_reporter %}
-        <p>
-            <a href="{% url 'reports:contact_reporter' report.id %}">
-                Contact Reporter
+        <div class="actions">
+            {% if can_contact_reporter %}
+                <a class="button" href="{% url 'reports:contact_reporter' report.id %}">
+                    Contact Reporter
+                </a>
+            {% endif %}
+            <a class="button ghost" href="{% url 'reports:report_list' %}">
+                Back to reports
             </a>
-        </p>
-    {% endif %}
-
-    <p>
-        <a href="{% url 'reports:report_list' %}">
-            Back to reports
-        </a>
-    </p>
-
-</body>
-</html>
+        </div>
+    </article>
+{% endblock %}

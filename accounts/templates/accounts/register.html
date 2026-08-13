@@ -1,35 +1,30 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register | BackToYou</title>
-</head>
-<body>
-    <h1>Register</h1>
+{% extends "base.html" %}
 
-    <form method="post">
-        {% csrf_token %}
-        {{ form.non_field_errors }}
+{% block title %}Register | BackToYou{% endblock %}
 
-        {% for field in form %}
-            <p>
-                {{ field.label_tag }}
-                {{ field }}
-                {{ field.errors }}
-            </p>
-        {% endfor %}
+{% block content %}
+    <section class="form-card">
+        <h1 class="page-title">Register</h1>
+        <p class="lead">Create your BackToYou account with an institutional EAFIT email.</p>
 
-        <button type="submit">Register</button>
-    </form>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
 
-    <p>
-        Already registered?
-        <a href="{% url 'accounts:login' %}">Login</a>
-    </p>
+            {% for field in form %}
+                <div class="form-field">
+                    {{ field.label_tag }}
+                    {{ field }}
+                    {{ field.errors }}
+                </div>
+            {% endfor %}
 
-    <p>
-        <a href="{% url 'home' %}">Home</a>
-    </p>
-</body>
-</html>
+            <button type="submit">Register</button>
+        </form>
+
+        <p>
+            Already registered?
+            <a href="{% url 'accounts:login' %}">Login</a>
+        </p>
+    </section>
+{% endblock %}

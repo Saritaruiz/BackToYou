@@ -1,0 +1,61 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}BackToYou{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+    <header class="site-header">
+        <div class="header-inner">
+            <a class="brand" href="{% url 'home' %}">
+                <span class="brand-mark">BTY</span>
+                <span>
+                    <span class="brand-name">BackToYou</span>
+                    <span class="brand-subtitle">Lost & Found basic system</span>
+                </span>
+            </a>
+
+            <nav class="site-nav" aria-label="Main navigation">
+                <a href="{% url 'home' %}">Home</a>
+                <a href="{% url 'reports:report_list' %}">Reports</a>
+
+                {% if user.is_authenticated %}
+                    <a href="{% url 'reports:create_lost_report' %}">Create Lost</a>
+                    <a href="{% url 'reports:create_found_report' %}">Create Found</a>
+                    {% if user.role == "ADMINISTRATOR" %}
+                        <a href="{% url 'administration' %}">Administration</a>
+                    {% endif %}
+                    <form class="nav-logout" action="{% url 'accounts:logout' %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit">Logout</button>
+                    </form>
+                {% else %}
+                    <a href="{% url 'accounts:register' %}">Register</a>
+                    <a href="{% url 'accounts:login' %}">Login</a>
+                {% endif %}
+            </nav>
+        </div>
+    </header>
+
+    <main class="page-shell">
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="message message-{{ message.tags|default:'info' }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="site-footer">
+        <p>BackToYou · University Lost and Found Web Application</p>
+    </footer>
+</body>
+</html>
