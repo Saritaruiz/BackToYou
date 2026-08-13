@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports | BackToYou</title>
+</head>
+
+<body>
+
+    <h1>Lost and Found Reports</h1>
+<form method="get">
+
+    <input
+        type="text"
+        name="q"
+        placeholder="Search reports..."
+        value="{{ query|default:'' }}"
+    >
+
+    <select name="category">
+        <option value="">All categories</option>
+
+        {% for category in categories %}
+            <option
+                value="{{ category.id }}"
+                {% if selected_category == category.id|stringformat:"s" %}
+                    selected
+                {% endif %}
+            >
+                {{ category.name }}
+            </option>
+        {% endfor %}
+    </select>
+
+    <select name="type">
+        <option value="">All types</option>
+
+        <option
+            value="LOST"
+            {% if selected_type == "LOST" %}
+                selected
+            {% endif %}
+        >
+            Lost
+        </option>
+
+        <option
+            value="FOUND"
+            {% if selected_type == "FOUND" %}
+                selected
+            {% endif %}
+        >
+            Found
+        </option>
+    </select>
+
+    <button type="submit">
+        Search
+    </button>
+
+    <a href="{% url 'reports:report_list' %}">
+        Clear filters
+    </a>
+
+</form>
+
+    <nav>
+        <a href="{% url 'home' %}">Home</a>
+        {% if user.is_authenticated %}
+            {% if user.role == "ADMINISTRATOR" %}
+                <a href="{% url 'administration' %}">Administration</a>
+            {% endif %}
+            <a href="{% url 'reports:create_lost_report' %}">Report Lost Item</a>
+            <a href="{% url 'reports:create_found_report' %}">Report Found Item</a>
+        {% endif %}
+    </nav>
+
+    {% if reports %}
+
+        {% for report in reports %}
+
+            <article>
+
+                <h2>{{ report.title }}</h2>
+
+                <p>
+                    <strong>Type:</strong>
+                    {{ report.get_report_type_display }}
+                </p>
+
+                <p>
+                    <strong>Category:</strong>
+                    {{ report.category.name }}
+                </p>
+
+                <p>
+                    <strong>Location:</strong>
+                    {{ report.location }}
+                </p>
+
+                <p>
+                    <strong>Date:</strong>
+                    {{ report.event_date }}
+                </p>
+
+                <p>
+                    <strong>Status:</strong>
+                    {{ report.get_status_display }}
+                </p>
+
+                <p>
+                    {{ report.description }}
+                </p>
+
+                {% if report.image %}
+                    <img
+                        src="{{ report.image.url }}"
+                        alt="{{ report.title }}"
+                        width="300"
+                    >
+                {% endif %}
+
+                <p>
+                    <a href="{% url 'reports:report_detail' report.id %}">
+                        View Details
+                    </a>
+                </p>
+
+                <hr>
+
+            </article>
+
+        {% endfor %}
+
+    {% else %}
+
+        <p>No active reports are currently available.</p>
+
+    {% endif %}
+
+</body>
+</html>

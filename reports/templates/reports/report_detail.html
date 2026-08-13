@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ report.title }} | BackToYou</title>
+</head>
+
+<body>
+
+    <h1>{{ report.title }}</h1>
+
+    {% if messages %}
+        {% for message in messages %}
+            <p>{{ message }}</p>
+        {% endfor %}
+    {% endif %}
+
+    {% if report.image %}
+        <img
+            src="{{ report.image.url }}"
+            alt="{{ report.title }}"
+            width="400"
+        >
+    {% endif %}
+
+    <p>
+        <strong>Type:</strong>
+        {{ report.get_report_type_display }}
+    </p>
+
+    <p>
+        <strong>Category:</strong>
+        {{ report.category.name }}
+    </p>
+
+    <p>
+        <strong>Location:</strong>
+        {{ report.location }}
+    </p>
+
+    <p>
+        <strong>Date:</strong>
+        {{ report.event_date }}
+    </p>
+
+    <p>
+        <strong>Status:</strong>
+        {{ report.get_status_display }}
+    </p>
+
+    <p>
+        <strong>Description:</strong>
+        {{ report.description }}
+    </p>
+
+    <p>
+        <strong>Reported by:</strong>
+        BackToYou community member
+    </p>
+
+    {% if can_contact_reporter %}
+        <p>
+            <a href="{% url 'reports:contact_reporter' report.id %}">
+                Contact Reporter
+            </a>
+        </p>
+    {% endif %}
+
+    <p>
+        <a href="{% url 'reports:report_list' %}">
+            Back to reports
+        </a>
+    </p>
+
+</body>
+</html>

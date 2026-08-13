@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administration | BackToYou</title>
+</head>
+<body>
+    <h1>BackToYou Administration</h1>
+
+    <nav>
+        <a href="{% url 'home' %}">Home</a>
+        <a href="{% url 'reports:report_list' %}">Browse Reports</a>
+    </nav>
+
+    <section>
+        <h2>Pending Reports / Report Moderation</h2>
+        <p>
+            <a href="{% url 'administration_pending_reports' %}">
+                Pending Reports
+            </a>
+        </p>
+    </section>
+
+    <section>
+        <h2>Categories</h2>
+        <p>Category management tools will be available here.</p>
+    </section>
+
+    <section>
+        <h2>User Management</h2>
+        <p>User management tools will be available here.</p>
+    </section>
+</body>
+</html>

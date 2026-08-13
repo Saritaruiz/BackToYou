@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Review Report | BackToYou</title>
+</head>
+<body>
+    <h1>Review Report</h1>
+
+    {% if report.image %}
+        <img
+            src="{{ report.image.url }}"
+            alt="{{ report.title }}"
+            width="400"
+        >
+    {% endif %}
+
+    <p>
+        <strong>Title:</strong>
+        {{ report.title }}
+    </p>
+    <p>
+        <strong>Description:</strong>
+        {{ report.description }}
+    </p>
+    <p>
+        <strong>Category:</strong>
+        {{ report.category.name }}
+    </p>
+    <p>
+        <strong>Type:</strong>
+        {{ report.get_report_type_display }}
+    </p>
+    <p>
+        <strong>Date:</strong>
+        {{ report.event_date }}
+    </p>
+    <p>
+        <strong>Location:</strong>
+        {{ report.location }}
+    </p>
+    <p>
+        <strong>Creator:</strong>
+        User #{{ report.creator.id }}
+    </p>
+    <p>
+        <strong>Status:</strong>
+        {{ report.get_status_display }}
+    </p>
+
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" name="action" value="approve">
+            Approve
+        </button>
+        <button type="submit" name="action" value="reject">
+            Reject
+        </button>
+    </form>
+
+    <p>
+        <a href="{% url 'administration_pending_reports' %}">
+            Back to pending reports
+        </a>
+    </p>
+</body>
+</html>

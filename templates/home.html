@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BackToYou</title>
+</head>
+
+<body>
+
+    <h1>BackToYou</h1>
+
+    <p>
+        University Lost and Found Web Application
+    </p>
+
+    <p>
+        Lost. Found. Back to You.
+    </p>
+
+    <nav>
+        <a href="{% url 'reports:report_list' %}">
+            Browse Reports
+        </a>
+        {% if user.is_authenticated %}
+            {% if user.role == "ADMINISTRATOR" %}
+                <a href="{% url 'administration' %}">
+                    Administration
+                </a>
+            {% endif %}
+            <a href="{% url 'reports:create_lost_report' %}">
+                Report Lost Item
+            </a>
+            <a href="{% url 'reports:create_found_report' %}">
+                Report Found Item
+            </a>
+            <form action="{% url 'accounts:logout' %}" method="post" style="display:inline">
+                {% csrf_token %}
+                <button type="submit">Logout</button>
+            </form>
+        {% else %}
+            <a href="{% url 'accounts:register' %}">
+                Register
+            </a>
+            <a href="{% url 'accounts:login' %}">
+                Login
+            </a>
+        {% endif %}
+    </nav>
+
+</body>
+</html>
