@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Mark {{ report.title }} as recovered | BackToYou{% endblock %}
+
+{% block content %}
+    <section class="form-card">
+        <h1 class="page-title">Mark this item as recovered?</h1>
+        <p class="lead">
+            The report will leave the public list and other users will no longer
+            be able to contact you about it. It stays in your report history.
+        </p>
+
+        <div class="meta-grid">
+            <div class="meta-item">
+                <span class="meta-label">Title</span>
+                {{ report.title }}
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Type</span>
+                {{ report.get_report_type_display }}
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Location</span>
+                {{ report.location }}
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Status</span>
+                {{ report.get_status_display }}
+            </div>
+        </div>
+
+        <div class="actions">
+            <form method="post">
+                {% csrf_token %}
+                <button class="success" type="submit">Mark as recovered</button>
+            </form>
+            <a class="button ghost" href="{% url 'reports:report_detail' report.id %}">
+                Cancel
+            </a>
+        </div>
+    </section>
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Delete {{ report.title }} | BackToYou{% endblock %}
+
+{% block content %}
+    <section class="form-card">
+        <h1 class="page-title">Delete this report?</h1>
+        <p class="lead">
+            This action cannot be undone. The report and the messages other
+            users sent about it will be removed from BackToYou.
+        </p>
+
+        <div class="meta-grid">
+            <div class="meta-item">
+                <span class="meta-label">Title</span>
+                {{ report.title }}
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Type</span>
+                {{ report.get_report_type_display }}
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Status</span>
+                {{ report.get_status_display }}
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Date</span>
+                {{ report.event_date }}
+            </div>
+        </div>
+
+        <div class="actions">
+            <form method="post">
+                {% csrf_token %}
+                <button class="danger" type="submit">Delete permanently</button>
+            </form>
+            <a class="button ghost" href="{% url 'reports:report_list' %}">
+                Cancel
+            </a>
+        </div>
+    </section>
+{% endblock %}

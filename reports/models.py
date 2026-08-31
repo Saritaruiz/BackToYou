@@ -63,6 +63,13 @@ class ItemReport(models.Model):
         null=True,
     )
 
+    # Momento en que el creador marco el objeto como recuperado (RF13).
+    # Es la fecha desde la que se cuenta la retencion definida en DR05.
+    recovered_at = models.DateTimeField(
+        blank=True,
+        null=True,
+    )
+
     image = models.ImageField(
         upload_to="reports/",
         blank=True,
@@ -74,6 +81,16 @@ class ItemReport(models.Model):
 
     def __str__(self):
         return self.title
+
+    @property
+    def is_editable(self):
+        """RF11: el creador puede editar todo menos un reporte rechazado."""
+        return self.status != self.Status.REJECTED
+
+    @property
+    def can_be_marked_recovered(self):
+        """RF13: solo un reporte publicado puede darse por recuperado."""
+        return self.status == self.Status.ACTIVE
 
 
 class ContactMessage(models.Model):

@@ -1,17 +1,26 @@
 :root {
-    --primary: #0f8f8a;
-    --primary-dark: #0a6968;
-    --primary-soft: #e7f7f5;
-    --charcoal: #253036;
-    --muted: #65737a;
-    --page: #f6faf9;
-    --card: #ffffff;
-    --border: #dce8e6;
-    --danger: #b83232;
-    --danger-soft: #fff0f0;
-    --success: #177245;
-    --success-soft: #edf8f1;
-    --shadow: 0 12px 30px rgba(22, 45, 48, 0.08);
+    /* Paleta institucional
+       Navy Blue #112250 · Sapphire #3B507D · Warm Taupe #BEB7A7
+       Champagne #E7E2CE · Ivory #F5F4F0 (color predominante) */
+    --navy: #112250;
+    --sapphire: #3B507D;
+    --taupe: #BEB7A7;
+    --champagne: #E7E2CE;
+    --ivory: #F5F4F0;
+
+    --primary: var(--navy);
+    --primary-dark: #0A1636;
+    --primary-soft: var(--champagne);
+    --charcoal: var(--navy);
+    --muted: #6B6559;
+    --page: var(--ivory);
+    --card: #FFFFFF;
+    --border: #DDD8CC;
+    --danger: #8F3A2F;
+    --danger-soft: #F7EBE7;
+    --success: #3F6B52;
+    --success-soft: #E9F0EB;
+    --shadow: 0 12px 30px rgba(17, 34, 80, 0.08);
     --radius: 10px;
 }
 
@@ -75,7 +84,7 @@ img {
     height: 42px;
     border-radius: 50%;
     background: var(--primary);
-    color: white;
+    color: #FFFFFF;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -114,7 +123,7 @@ button {
     border: 0;
     border-radius: 999px;
     background: var(--primary);
-    color: white;
+    color: #FFFFFF;
     padding: 10px 16px;
     font: inherit;
     font-weight: 750;
@@ -141,7 +150,14 @@ button {
 }
 
 .nav-logout button {
-    background: var(--charcoal);
+    background: transparent;
+    color: var(--sapphire);
+    border: 1.5px solid var(--taupe);
+}
+
+.nav-logout button:hover {
+    background: var(--champagne);
+    color: var(--navy);
 }
 
 .page-shell {
@@ -190,6 +206,7 @@ button {
 .role-pill,
 .status-pill,
 .meta-pill {
+    border: 1px solid var(--taupe);
     display: inline-flex;
     align-items: center;
     width: fit-content;
@@ -215,7 +232,14 @@ button:hover {
 }
 
 .button.secondary {
-    background: var(--charcoal);
+    background: transparent;
+    color: var(--sapphire);
+    border: 1.5px solid var(--sapphire);
+}
+
+.button.secondary:hover {
+    background: var(--sapphire);
+    color: #FFFFFF;
 }
 
 .button.ghost {
@@ -243,7 +267,7 @@ button.success {
     border-radius: var(--radius);
     padding: 12px 14px;
     border: 1px solid var(--border);
-    background: white;
+    background: var(--card);
 }
 
 .message-success {
@@ -308,7 +332,7 @@ button.success {
     border: 1px solid var(--border);
     border-radius: var(--radius);
     padding: 12px;
-    background: #fbfefd;
+    background: var(--ivory);
 }
 
 .meta-label {
@@ -344,7 +368,7 @@ textarea {
     width: 100%;
     border: 1px solid var(--border);
     border-radius: 9px;
-    background: white;
+    background: var(--card);
     color: var(--charcoal);
     padding: 12px 13px;
     font: inherit;

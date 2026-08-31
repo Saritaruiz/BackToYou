@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}My Reports | BackToYou{% endblock %}
+
+{% block content %}
+    <section class="hero">
+        <h1>My Reports</h1>
+        <p>Every report you have created, with its current status.</p>
+    </section>
+
+    {% if reports %}
+        <section class="grid" aria-label="My reports">
+            {% for report in reports %}
+                <article class="card">
+                    {% if report.image %}
+                        <img
+                            class="report-image"
+                            src="{{ report.image.url }}"
+                            alt="{{ report.title }}"
+                        >
+                    {% endif %}
+
+                    <div class="card-body">
+                        <span class="status-pill">{{ report.get_status_display }}</span>
+                        <h2>{{ report.title }}</h2>
+
+                        <div class="meta-grid">
+                            <div class="meta-item">
+                                <span class="meta-label">Type</span>
+                                {{ report.get_report_type_display }}
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-label">Category</span>
+                                {{ report.category.name }}
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-label">Location</span>
+                                {{ report.location }}
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-label">Date</span>
+                                {{ report.event_date }}
+                            </div>
+                        </div>
+
+                        <p class="description">{{ report.description|truncatewords:24 }}</p>
+
+                        <div class="actions">
+                            <a class="button" href="{% url 'reports:report_detail' report.id %}">
+                                View Details
+                            </a>
+                            {% if report.is_editable %}
+                                <a class="button secondary" href="{% url 'reports:edit_report' report.id %}">
+                                    Edit
+                                </a>
+                            {% endif %}
+                            {% if report.can_be_marked_recovered %}
+                                <a class="button success" href="{% url 'reports:mark_report_recovered' report.id %}">
+                                    Mark as Recovered
+                                </a>
+                            {% endif %}
+                            <a class="button danger" href="{% url 'reports:delete_report' report.id %}">
+                                Delete
+                            </a>
+                        </div>
+                    </div>
+                </article>
+            {% endfor %}
+        </section>
+    {% else %}
+        <section class="empty-state">
+            <h2>You have not created any reports yet.</h2>
+            <p>
+                When you report a lost or found item, it will appear here with
+                its review status.
+            </p>
+            <div class="actions">
+                <a class="button" href="{% url 'reports:create_lost_report' %}">
+                    Report a lost item
+                </a>
+                <a class="button ghost" href="{% url 'reports:create_found_report' %}">
+                    Report a found item
+                </a>
+            </div>
+        </section>
+    {% endif %}
+{% endblock %}

@@ -2,6 +2,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q
+from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
@@ -13,7 +14,7 @@ from .models import Category, ItemReport
 def report_list(request):
     reports = ItemReport.objects.filter(
         status=ItemReport.Status.ACTIVE
-    ).order_by("-created_at")
+    ).order_by("-created_at", "-id")
 
     query = request.GET.get("q")
     category_id = request.GET.get("category")
@@ -48,21 +49,32 @@ def report_list(request):
 
 
 def report_detail(request, report_id):
-    report = get_object_or_404(
-        ItemReport,
-        id=report_id,
-        status=ItemReport.Status.ACTIVE,
+    report = get_object_or_404(ItemReport, id=report_id)
+
+    is_creator = (
+        request.user.is_authenticated
+        and request.user == report.creator
     )
+
+    # Un reporte que no esta publicado solo lo puede abrir su creador. Se
+    # responde 404 y no 403 para no revelar que el reporte existe.
+    if report.status != ItemReport.Status.ACTIVE and not is_creator:
+        raise Http404("This report is not available.")
 
     return render(
         request,
         "reports/report_detail.html",
         {
             "report": report,
+            "is_creator": is_creator,
             "can_contact_reporter": (
                 request.user.is_authenticated
-                and request.user != report.creator
+                and not is_creator
+                and report.status == ItemReport.Status.ACTIVE
             ),
+            "can_edit_report": is_creator and report.is_editable,
+            "can_delete_report": is_creator,
+            "can_mark_recovered": is_creator and report.can_be_marked_recovered,
         },
     )
 
@@ -168,7 +180,7 @@ def contact_reporter(request, report_id):
 def pending_report_list(request):
     reports = ItemReport.objects.filter(
         status=ItemReport.Status.PENDING_REVIEW,
-    ).order_by("-created_at")
+    ).order_by("-created_at", "-id")
 
     return render(
         request,

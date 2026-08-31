@@ -12,6 +12,7 @@
             >
         {% endif %}
 
+        <span class="status-pill">{{ report.get_status_display }}</span>
         <h1 class="page-title">{{ report.title }}</h1>
 
         <div class="meta-grid">
@@ -45,14 +46,35 @@
         <p class="description">{{ report.description }}</p>
 
         <div class="actions">
+            {% if can_edit_report %}
+                <a class="button secondary" href="{% url 'reports:edit_report' report.id %}">
+                    Edit Report
+                </a>
+            {% endif %}
+            {% if can_mark_recovered %}
+                <a class="button success" href="{% url 'reports:mark_report_recovered' report.id %}">
+                    Mark as Recovered
+                </a>
+            {% endif %}
+            {% if can_delete_report %}
+                <a class="button danger" href="{% url 'reports:delete_report' report.id %}">
+                    Delete Report
+                </a>
+            {% endif %}
             {% if can_contact_reporter %}
                 <a class="button" href="{% url 'reports:contact_reporter' report.id %}">
                     Contact Reporter
                 </a>
             {% endif %}
-            <a class="button ghost" href="{% url 'reports:report_list' %}">
-                Back to reports
-            </a>
+            {% if is_creator %}
+                <a class="button ghost" href="{% url 'reports:my_reports' %}">
+                    Back to my reports
+                </a>
+            {% else %}
+                <a class="button ghost" href="{% url 'reports:report_list' %}">
+                    Back to reports
+                </a>
+            {% endif %}
         </div>
     </article>
 {% endblock %}
