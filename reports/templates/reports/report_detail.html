@@ -45,6 +45,20 @@
         <h2>Description</h2>
         <p class="description">{{ report.description }}</p>
 
+        {% if is_creator and contact_messages %}
+            <h2>Messages about this report</h2>
+            <div class="messages">
+                {% for contact in contact_messages %}
+                    <div class="message">
+                        <p>{{ contact.message }}</p>
+                        <p class="meta-label">
+                            {{ contact.sender.email }} &middot; {{ contact.created_at }}
+                        </p>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
         <div class="actions">
             {% if can_edit_report %}
                 <a class="button secondary" href="{% url 'reports:edit_report' report.id %}">
