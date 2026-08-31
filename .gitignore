@@ -1,0 +1,18 @@
+__pycache__/
+*.pyc
+*.pyo
+
+# Base de datos local: cada quien tiene la suya
+db.sqlite3
+
+# Archivos que suben los usuarios
+media/
+
+# Entorno y secretos
+.env
+.venv/
+venv/
+
+# Editores
+.vscode/
+.idea/

@@ -20,7 +20,7 @@ from django.contrib import admin
 from django.shortcuts import render
 from django.urls import include, path
 from accounts import views as account_views
-from reports import views as report_views
+from reports.views import moderation as report_moderation_views
 
 def home(request):
     return render(request, "home.html")
@@ -30,12 +30,12 @@ urlpatterns = [
     path("administration/", account_views.administration_panel, name="administration"),
     path(
         "administration/reports/pending/",
-        report_views.pending_report_list,
+        report_moderation_views.pending_report_list,
         name="administration_pending_reports",
     ),
     path(
         "administration/reports/<int:report_id>/",
-        report_views.moderate_report_detail,
+        report_moderation_views.moderate_report_detail,
         name="administration_moderate_report",
     ),
     path("admin/", admin.site.urls),
