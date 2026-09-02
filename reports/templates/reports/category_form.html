@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} | BackToYou{% endblock %}
+
+{% block content %}
+    <section class="form-card">
+        <h1 class="page-title">{{ title }}</h1>
+        <p class="lead">Category names are shown in report creation and edit forms.</p>
+
+        <form method="post">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+
+            {% for field in form %}
+                <div class="form-field">
+                    {{ field.label_tag }}
+                    {{ field }}
+                    {{ field.errors }}
+                </div>
+            {% endfor %}
+
+            <button type="submit">{{ submit_label }}</button>
+        </form>
+
+        <p>
+            <a href="{% url 'administration_category_list' %}">Back to categories</a>
+        </p>
+    </section>
+{% endblock %}

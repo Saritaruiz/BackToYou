@@ -38,6 +38,26 @@ urlpatterns = [
         report_views.moderate_report_detail,
         name="administration_moderate_report",
     ),
+    path(
+        "administration/categories/",
+        report_views.category_list,
+        name="administration_category_list",
+    ),
+    path(
+        "administration/categories/new/",
+        report_views.category_create,
+        name="administration_category_create",
+    ),
+    path(
+        "administration/categories/<int:category_id>/edit/",
+        report_views.category_edit,
+        name="administration_category_edit",
+    ),
+    path(
+        "administration/categories/<int:category_id>/delete/",
+        report_views.category_delete,
+        name="administration_category_delete",
+    ),
     path("admin/", admin.site.urls),
     path("accounts/", include("accounts.urls")),
     path("reports/", include("reports.urls")),

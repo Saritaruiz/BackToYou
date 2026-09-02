@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}Categories | BackToYou{% endblock %}
+
+{% block content %}
+    <section class="hero">
+        <span class="role-pill">Administrator</span>
+        <h1>Categories</h1>
+        <p>Manage the categories available for lost and found reports.</p>
+        <div class="actions">
+            <a class="button" href="{% url 'administration_category_create' %}">
+                New Category
+            </a>
+            <a class="button ghost" href="{% url 'administration' %}">
+                Back to administration
+            </a>
+        </div>
+    </section>
+
+    {% if categories %}
+        <section class="panel" aria-label="Category list">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th scope="col">Category name</th>
+                        <th scope="col">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for category in categories %}
+                        <tr>
+                            <td>{{ category.name }}</td>
+                            <td>
+                                <div class="table-actions">
+                                    <a
+                                        class="button secondary"
+                                        href="{% url 'administration_category_edit' category.id %}"
+                                    >
+                                        Edit
+                                    </a>
+                                    <a
+                                        class="button danger"
+                                        href="{% url 'administration_category_delete' category.id %}"
+                                    >
+                                        Delete
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+    {% else %}
+        <section class="empty-state">
+            <h2>No categories have been created yet.</h2>
+            <p>Create a category so users can classify their reports.</p>
+        </section>
+    {% endif %}
+{% endblock %}

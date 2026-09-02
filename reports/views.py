@@ -1,13 +1,19 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
+from django.db.models import ProtectedError
 from django.db.models import Q
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
 from accounts.decorators import administrator_required
-from .forms import ContactMessageForm, ItemReportForm
+from .email_notifications import (
+    notify_report_approved,
+    notify_report_contact,
+    notify_report_rejected,
+)
+from .forms import CategoryForm, ContactMessageForm, ItemReportForm
 from .models import Category, ItemReport
 
 
@@ -113,7 +119,7 @@ def _create_report(request, report_type):
 
             messages.success(
                 request,
-                "Report submitted for administrator review.",
+                "Report submitted successfully. It is currently Pending Review and will become publicly visible after administrator approval.",
             )
 
             return redirect(
@@ -157,6 +163,7 @@ def contact_reporter(request, report_id):
             contact_message.report = report
             contact_message.sender = request.user
             contact_message.save()
+            notify_report_contact(contact_message)
 
             messages.success(
                 request,
@@ -203,9 +210,11 @@ def moderate_report_detail(request, report_id):
         if action == "approve":
             report.status = ItemReport.Status.ACTIVE
             success_message = "Report approved successfully."
+            notify_moderation_result = notify_report_approved
         elif action == "reject":
             report.status = ItemReport.Status.REJECTED
             success_message = "Report rejected successfully."
+            notify_moderation_result = notify_report_rejected
         else:
             raise PermissionDenied("Invalid moderation action.")
 
@@ -219,6 +228,7 @@ def moderate_report_detail(request, report_id):
                 "updated_at",
             ],
         )
+        notify_moderation_result(report)
 
         messages.success(request, success_message)
         return redirect("administration_pending_reports")
@@ -227,4 +237,86 @@ def moderate_report_detail(request, report_id):
         request,
         "reports/moderation_report_detail.html",
         {"report": report},
+    )
+
+
+@administrator_required
+def category_list(request):
+    categories = Category.objects.all().order_by("name")
+
+    return render(
+        request,
+        "reports/category_list.html",
+        {"categories": categories},
+    )
+
+
+@administrator_required
+def category_create(request):
+    if request.method == "POST":
+        form = CategoryForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Category created successfully.")
+            return redirect("administration_category_list")
+    else:
+        form = CategoryForm()
+
+    return render(
+        request,
+        "reports/category_form.html",
+        {
+            "form": form,
+            "title": "Create Category",
+            "submit_label": "Create Category",
+        },
+    )
+
+
+@administrator_required
+def category_edit(request, category_id):
+    category = get_object_or_404(Category, id=category_id)
+
+    if request.method == "POST":
+        form = CategoryForm(request.POST, instance=category)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Category updated successfully.")
+            return redirect("administration_category_list")
+    else:
+        form = CategoryForm(instance=category)
+
+    return render(
+        request,
+        "reports/category_form.html",
+        {
+            "form": form,
+            "category": category,
+            "title": "Edit Category",
+            "submit_label": "Save Changes",
+        },
+    )
+
+
+@administrator_required
+def category_delete(request, category_id):
+    category = get_object_or_404(Category, id=category_id)
+
+    if request.method == "POST":
+        try:
+            category.delete()
+        except ProtectedError:
+            messages.error(
+                request,
+                "This category cannot be deleted because it is currently used by one or more reports.",
+            )
+            return redirect("administration_category_list")
+
+        messages.success(request, "Category deleted successfully.")
+        return redirect("administration_category_list")
+
+    return render(
+        request,
+        "reports/category_confirm_delete.html",
+        {"category": category},
     )
