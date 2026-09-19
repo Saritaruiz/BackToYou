@@ -27,7 +27,16 @@
                     <a href="{% url 'reports:create_found_report' %}">Create Found</a>
                     <a href="{% url 'reports:my_reports' %}">My Reports</a>
                     {% if user.role == "ADMINISTRATOR" %}
-                        <a href="{% url 'administration' %}">Administration</a>
+                        <details class="nav-dropdown">
+                            <summary>Administration</summary>
+                            <div class="nav-dropdown-menu">
+                                <a href="{% url 'administration' %}">Overview</a>
+                                <a href="{% url 'administration_pending_reports' %}">Pending Reports</a>
+                                <a href="{% url 'administration_category_list' %}">Categories</a>
+                                <a href="{% url 'administration_administrator_list' %}">Administrators</a>
+                                <a href="{% url 'administration_user_list' %}">User Accounts</a>
+                            </div>
+                        </details>
                     {% endif %}
                     <form class="nav-logout" action="{% url 'accounts:logout' %}" method="post">
                         {% csrf_token %}

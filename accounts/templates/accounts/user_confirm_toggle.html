@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Confirm account status change | BackToYou{% endblock %}
+
+{% block content %}
+    <section class="form-card">
+        {% if will_be_active %}
+            <h1 class="page-title">Activate &ldquo;{{ target.email }}&rdquo;?</h1>
+            <p class="lead">
+                This account will be able to log in again and use its
+                regular user functions.
+            </p>
+        {% else %}
+            <h1 class="page-title">Deactivate &ldquo;{{ target.email }}&rdquo;?</h1>
+            <p class="lead">
+                This account will no longer be able to log in. Its existing
+                session, if any, will be closed. Its reports keep their
+                current status and remain associated with this account.
+            </p>
+        {% endif %}
+
+        <div class="meta-grid">
+            <div class="meta-item">
+                <span class="meta-label">Name</span>
+                {{ target.first_name }}
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Email</span>
+                {{ target.email }}
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Current status</span>
+                {% if target.is_active %}Active{% else %}Inactive{% endif %}
+            </div>
+        </div>
+
+        <div class="actions">
+            <form method="post">
+                {% csrf_token %}
+                {% if will_be_active %}
+                    <button class="success" type="submit">Activate account</button>
+                {% else %}
+                    <button class="danger" type="submit">Deactivate account</button>
+                {% endif %}
+            </form>
+            <a class="button quiet" href="{% url 'administration_user_list' %}">
+                Cancel
+            </a>
+        </div>
+    </section>
+{% endblock %}

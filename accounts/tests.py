@@ -150,7 +150,8 @@ class AdministrationPanelTests(TestCase):
         self.assertContains(response, "BackToYou Administration")
         self.assertContains(response, "Pending Reports / Report Moderation")
         self.assertContains(response, "Categories")
-        self.assertContains(response, "User Management")
+        self.assertContains(response, "Administrator Accounts")
+        self.assertContains(response, "User Accounts")
 
     def test_administrator_role_does_not_require_staff_or_superuser_flags(self):
         self.admin_user.is_staff = False

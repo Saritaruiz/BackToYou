@@ -35,8 +35,11 @@
         </article>
 
         <article class="card admin-card">
-            <h2>User Management</h2>
-            <p class="description">Regular user account management tools will be available here.</p>
+            <h2>User Accounts</h2>
+            <p class="description">Activate or deactivate regular user accounts.</p>
+            <a class="button" href="{% url 'administration_user_list' %}">
+                Manage Users
+            </a>
         </article>
     </section>
 {% endblock %}

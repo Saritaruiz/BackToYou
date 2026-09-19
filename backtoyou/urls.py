@@ -69,6 +69,16 @@ urlpatterns = [
         account_admin_views.toggle_administrator,
         name="administration_administrator_toggle",
     ),
+    path(
+        "administration/users/",
+        account_admin_views.user_list,
+        name="administration_user_list",
+    ),
+    path(
+        "administration/users/<int:user_id>/toggle/",
+        account_admin_views.toggle_user_status,
+        name="administration_user_toggle",
+    ),
     path("admin/", admin.site.urls),
     path("accounts/", include("accounts.urls")),
     path("reports/", include("reports.urls")),
