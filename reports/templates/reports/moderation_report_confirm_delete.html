@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Remove {{ report.title }} | BackToYou{% endblock %}
+
+{% block content %}
+    <section class="form-card">
+        <span class="role-pill">Moderation Review</span>
+        <h1 class="page-title">Remove this report?</h1>
+        <p class="lead">
+            This action cannot be undone. The report will never become
+            publicly visible and its creator will not be notified.
+        </p>
+
+        <div class="meta-grid">
+            <div class="meta-item">
+                <span class="meta-label">Title</span>
+                {{ report.title }}
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Type</span>
+                {{ report.get_report_type_display }}
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Status</span>
+                {{ report.get_status_display }}
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Date</span>
+                {{ report.event_date }}
+            </div>
+        </div>
+
+        <div class="actions">
+            <form method="post">
+                {% csrf_token %}
+                <button class="danger" type="submit">Remove permanently</button>
+            </form>
+            <a class="button ghost" href="{% url 'administration_moderate_report' report.id %}">
+                Cancel
+            </a>
+        </div>
+    </section>
+{% endblock %}

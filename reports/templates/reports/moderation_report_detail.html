@@ -57,6 +57,12 @@
             <button class="danger" type="submit" name="action" value="reject">
                 Reject
             </button>
+            <a class="button ghost" href="{% url 'administration_report_edit' report.id %}">
+                Edit
+            </a>
+            <a class="button danger" href="{% url 'administration_report_delete' report.id %}">
+                Remove
+            </a>
             <a class="button ghost" href="{% url 'administration_pending_reports' %}">
                 Back to pending reports
             </a>

@@ -40,6 +40,16 @@ urlpatterns = [
         name="administration_moderate_report",
     ),
     path(
+        "administration/reports/<int:report_id>/edit/",
+        report_views.edit_pending_report,
+        name="administration_report_edit",
+    ),
+    path(
+        "administration/reports/<int:report_id>/delete/",
+        report_views.delete_pending_report,
+        name="administration_report_delete",
+    ),
+    path(
         "administration/categories/",
         report_views.category_list,
         name="administration_category_list",

@@ -11,7 +11,12 @@ from .categories import (
     category_list,
 )
 from .create import create_found_report, create_lost_report
-from .moderation import moderate_report_detail, pending_report_list
+from .moderation import (
+    delete_pending_report,
+    edit_pending_report,
+    moderate_report_detail,
+    pending_report_list,
+)
 from .owner import (
     delete_report,
     edit_report,
@@ -28,7 +33,9 @@ __all__ = [
     "contact_reporter",
     "create_found_report",
     "create_lost_report",
+    "delete_pending_report",
     "delete_report",
+    "edit_pending_report",
     "edit_report",
     "mark_report_recovered",
     "moderate_report_detail",

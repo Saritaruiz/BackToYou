@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}Edit {{ report.title }} | BackToYou{% endblock %}
+
+{% block content %}
+    <section class="form-card">
+        <span class="role-pill">Moderation Review</span>
+        <h1 class="page-title">Edit {{ report.get_report_type_display }} Item Report</h1>
+        <p class="lead">
+            Correct the item details before deciding whether to approve or
+            reject this report. The report keeps its current status:
+            {{ report.get_status_display }}.
+        </p>
+
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+
+            {% for field in form %}
+                <div class="form-field">
+                    {{ field.label_tag }}
+                    {{ field }}
+                    {{ field.errors }}
+                </div>
+            {% endfor %}
+
+            <button type="submit">Save Changes</button>
+        </form>
+
+        <p>
+            <a href="{% url 'administration_moderate_report' report.id %}">
+                Back to review
+            </a>
+        </p>
+    </section>
+{% endblock %}
