@@ -20,6 +20,7 @@ from django.contrib import admin
 from django.shortcuts import render
 from django.urls import include, path
 from accounts import views as account_views
+from accounts import views_admin as account_admin_views
 from reports import views as report_views
 
 def home(request):
@@ -57,6 +58,16 @@ urlpatterns = [
         "administration/categories/<int:category_id>/delete/",
         report_views.category_delete,
         name="administration_category_delete",
+    ),
+    path(
+        "administration/administrators/",
+        account_admin_views.administrator_list,
+        name="administration_administrator_list",
+    ),
+    path(
+        "administration/administrators/<int:user_id>/toggle/",
+        account_admin_views.toggle_administrator,
+        name="administration_administrator_toggle",
     ),
     path("admin/", admin.site.urls),
     path("accounts/", include("accounts.urls")),

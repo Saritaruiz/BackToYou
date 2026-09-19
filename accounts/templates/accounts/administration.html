@@ -27,8 +27,16 @@
         </article>
 
         <article class="card admin-card">
+            <h2>Administrator Accounts</h2>
+            <p class="description">Grant or revoke administrator access to a registered account.</p>
+            <a class="button" href="{% url 'administration_administrator_list' %}">
+                Manage Administrators
+            </a>
+        </article>
+
+        <article class="card admin-card">
             <h2>User Management</h2>
-            <p class="description">User management tools will be available here.</p>
+            <p class="description">Regular user account management tools will be available here.</p>
         </article>
     </section>
 {% endblock %}

@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Administrator Accounts | BackToYou{% endblock %}
+
+{% block content %}
+    <section class="hero">
+        <span class="role-pill">Administrator</span>
+        <h1>Administrator Accounts</h1>
+        <p>Grant or revoke administrator access. At least one active administrator must always remain.</p>
+        <div class="actions">
+            <a class="button ghost" href="{% url 'administration' %}">
+                Back to administration
+            </a>
+        </div>
+    </section>
+
+    <section class="panel" aria-label="Account list">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th scope="col">Email</th>
+                    <th scope="col">Role</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for account in accounts %}
+                    <tr>
+                        <td>{{ account.email }}</td>
+                        <td>{{ account.get_role_display }}</td>
+                        <td>{% if account.is_active %}Active{% else %}Inactive{% endif %}</td>
+                        <td>
+                            <div class="table-actions">
+                                {% if account.role == "ADMINISTRATOR" %}
+                                    <a
+                                        class="button danger"
+                                        href="{% url 'administration_administrator_toggle' account.id %}"
+                                    >
+                                        Revoke admin
+                                    </a>
+                                {% else %}
+                                    <a
+                                        class="button secondary"
+                                        href="{% url 'administration_administrator_toggle' account.id %}"
+                                    >
+                                        Grant admin
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+{% endblock %}
