@@ -71,3 +71,27 @@ PENDING_REVIEW
       +---- Approve ----> ACTIVE ----> RECOVERED
       |
       +---- Reject -----> REJECTED
+```
+
+## Local Setup
+
+```bash
+python -m venv .venv
+.venv\Scripts\activate
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py seed_categories
+python manage.py runserver
+```
+
+`seed_categories` creates the default item categories (Electronics, IDs & cards, Bottles, and others). It only adds the ones that are missing, so it is safe to run again after pulling changes.
+
+### AI-Based Object Description (FR22)
+
+The AI suggestion button uses Hugging Face Inference Providers. To enable it, copy `huggingface.env.example` as `huggingface.env` and add your own Hugging Face token (Settings > Access Tokens, with the "Make calls to Inference Providers" permission). `huggingface.env` is ignored by Git and must never be committed. Without a token, the rest of the application works normally and the AI button is disabled.
+
+### Tests
+
+```bash
+python manage.py test --settings=backtoyou.test_settings
+```

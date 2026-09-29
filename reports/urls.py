@@ -1,5 +1,6 @@
 from django.urls import path
 
+from .views import ai as ai_views
 from .views import create as create_views
 from .views import owner as owner_views
 from .views import public as public_views
@@ -11,6 +12,7 @@ urlpatterns = [
     path("lost/new/", create_views.create_lost_report, name="create_lost_report"),
     path("found/new/", create_views.create_found_report, name="create_found_report"),
     path("mine/", owner_views.my_reports, name="my_reports"),
+    path("ai/describe/", ai_views.describe_item, name="ai_describe_item"),
     path(
         "<int:report_id>/contact/",
         public_views.contact_reporter,

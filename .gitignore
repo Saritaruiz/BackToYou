@@ -9,3 +9,11 @@ __pycache__/
 # Archivos que suben los usuarios
 media_local/
 media/
+
+# Entorno virtual local
+.venv/
+
+# Token privado de Hugging Face (RF22). Nunca debe subirse a GitHub.
+huggingface.env
+*.env
+.env
