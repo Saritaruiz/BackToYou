@@ -13,8 +13,15 @@ https://docs.djangoproject.com/en/6.1/ref/settings/
 import os
 from pathlib import Path
 
+from dotenv import load_dotenv
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# El token de Hugging Face (RF22) vive en huggingface.env, que esta en
+# .gitignore. Si el archivo no existe no pasa nada: la sugerencia con IA
+# queda desactivada y el resto de la app funciona igual.
+load_dotenv(BASE_DIR / "huggingface.env")
 
 
 # Quick-start development settings - unsuitable for production
@@ -186,3 +193,9 @@ LOGIN_REDIRECT_URL = "home"
 LOGOUT_REDIRECT_URL = "home"
 MEDIA_URL ="/media/"
 MEDIA_ROOT = BASE_DIR / MEDIA_DIR
+
+
+# RF22 - AI-Based Object Description (Hugging Face Inference Providers)
+# Se configuran en huggingface.env (ver huggingface.env.example).
+HF_TOKEN = os.environ.get("HF_TOKEN", "")
+HF_VISION_MODEL = os.environ.get("HF_VISION_MODEL", "google/gemma-3-4b-it")

@@ -2,12 +2,14 @@
 
 RF03 Create Lost Item Report - RF04 Create Found Item Report
 RF05 Upload Item Image - RF17 Report Submission Confirmation
+RF22 AI-Based Object Description (boton de sugerencia en el formulario)
 """
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
 
+from .. import ai_description
 from ..forms import ItemReportForm
 from ..models import ItemReport
 
@@ -67,6 +69,8 @@ def _create_report(request, report_type):
         "reports/report_form.html",
         {
             "form": form,
+            "report_type": report_type,
             "report_type_label": report_type_label,
+            "ai_available": ai_description.is_available(),
         },
     )

@@ -17,6 +17,24 @@
                     {{ field }}
                     {{ field.errors }}
                 </div>
+
+                {% if field.name == "image" %}
+                    {# RF22 - AI-Based Object Description #}
+                    <div class="ai-assist">
+                        <button type="button" class="button secondary" id="ai-suggest"
+                                {% if not ai_available %}disabled{% endif %}>
+                            Suggest description with AI
+                        </button>
+                        <p class="ai-status" id="ai-status" aria-live="polite">
+                            {% if ai_available %}
+                                Upload a photo and the AI will suggest the title, description and category.
+                                You can edit everything before submitting.
+                            {% else %}
+                                AI suggestions are not available right now. Please fill in the report manually.
+                            {% endif %}
+                        </p>
+                    </div>
+                {% endif %}
             {% endfor %}
 
             <button type="submit">Submit Report</button>
@@ -26,4 +44,67 @@
             <a href="{% url 'reports:report_list' %}">Back to reports</a>
         </p>
     </section>
+
+    {% if ai_available %}
+        <script>
+            (function () {
+                const button = document.getElementById("ai-suggest");
+                const status = document.getElementById("ai-status");
+                const form = button.closest("form");
+                const imageInput = form.querySelector('input[name="image"]');
+
+                function setStatus(text, kind) {
+                    status.textContent = text;
+                    status.className = "ai-status" + (kind ? " ai-status-" + kind : "");
+                }
+
+                button.addEventListener("click", async function () {
+                    const image = imageInput.files[0];
+                    if (!image) {
+                        setStatus("Upload a photo of the item first.", "error");
+                        imageInput.focus();
+                        return;
+                    }
+
+                    const data = new FormData();
+                    data.append("image", image);
+                    data.append("report_type", "{{ report_type }}");
+                    data.append("csrfmiddlewaretoken", form.querySelector('input[name="csrfmiddlewaretoken"]').value);
+
+                    button.disabled = true;
+                    setStatus("Analyzing the photo. This can take a few seconds...", "");
+
+                    try {
+                        const response = await fetch("{% url 'reports:ai_describe_item' %}", {
+                            method: "POST",
+                            body: data,
+                        });
+                        const result = await response.json();
+
+                        if (!response.ok) {
+                            setStatus(result.error || "The AI suggestion failed. Please fill in the report manually.", "error");
+                            return;
+                        }
+
+                        form.querySelector('[name="title"]').value = result.title;
+                        form.querySelector('[name="description"]').value = result.description;
+                        if (result.category_id) {
+                            form.querySelector('[name="category"]').value = result.category_id;
+                        }
+
+                        setStatus(
+                            result.category_id
+                                ? "Fields filled automatically by AI. Review and edit them before submitting."
+                                : "Title and description filled automatically by AI. Choose a category and review everything before submitting.",
+                            "success"
+                        );
+                    } catch (error) {
+                        setStatus("The AI suggestion failed. Please fill in the report manually.", "error");
+                    } finally {
+                        button.disabled = false;
+                    }
+                });
+            })();
+        </script>
+    {% endif %}
 {% endblock %}

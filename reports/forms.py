@@ -23,6 +23,22 @@ class CategoryForm(forms.ModelForm):
         return name
 
 
+ALLOWED_IMAGE_TYPES = {"image/jpeg", "image/png"}
+MAX_IMAGE_SIZE = 5 * 1024 * 1024
+
+
+def validate_report_image(image):
+    """RF05: reglas de la imagen del reporte. Tambien las usa RF22."""
+    content_type = getattr(image, "content_type", "")
+    if content_type and content_type not in ALLOWED_IMAGE_TYPES:
+        raise forms.ValidationError(
+            "Unsupported image format. Allowed formats: JPG, JPEG, PNG."
+        )
+
+    if image.size > MAX_IMAGE_SIZE:
+        raise forms.ValidationError("Image exceeds the maximum allowed size of 5 MB.")
+
+
 class ItemReportForm(forms.ModelForm):
     class Meta:
         model = ItemReport
@@ -37,17 +53,7 @@ class ItemReportForm(forms.ModelForm):
         if not image:
             return image
 
-        allowed_types = {"image/jpeg", "image/png"}
-        content_type = getattr(image, "content_type", "")
-        if content_type and content_type not in allowed_types:
-            raise forms.ValidationError(
-                "Unsupported image format. Allowed formats: JPG, JPEG, PNG."
-            )
-
-        max_size = 5 * 1024 * 1024
-        if image.size > max_size:
-            raise forms.ValidationError("Image exceeds the maximum allowed size of 5 MB.")
-
+        validate_report_image(image)
         return image
 
 
