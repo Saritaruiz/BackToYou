@@ -18,6 +18,10 @@
                 </span>
             </a>
 
+            {# RNF27: en pantallas pequenas el menu se abre con este boton (sin JavaScript). #}
+            <input class="nav-toggle" type="checkbox" id="nav-toggle">
+            <label class="nav-toggle-label" for="nav-toggle">Menu</label>
+
             <nav class="site-nav" aria-label="Main navigation">
                 <a href="{% url 'home' %}">Home</a>
                 <a href="{% url 'reports:report_list' %}">Reports</a>
@@ -65,7 +69,9 @@
     </main>
 
     <footer class="site-footer">
-        <p>BackToYou · University Lost and Found Web Application</p>
+        <div class="footer-inner">
+            <p>BackToYou · University Lost and Found Web Application</p>
+        </div>
     </footer>
 </body>
 </html>

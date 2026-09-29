@@ -34,6 +34,53 @@ body {
     color: var(--charcoal);
     font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     line-height: 1.5;
+    /* RNF27: textos largos (correos, titulos) se parten en vez de
+       empujar la pagina hacia los lados. */
+    overflow-wrap: break-word;
+}
+
+/* ===== RNF27 - Layout and Page Centering =====
+   Un solo contenedor para encabezado, contenido y pie de pagina, para que
+   los tres empiecen y terminen en el mismo borde. Espacios en multiplos
+   de 4 px. Aqui solo van medidas: los colores son de RNF28. */
+:root {
+    --container-max: 1120px;
+    --gutter: 32px;
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-6: 24px;
+    --space-8: 32px;
+    --space-12: 48px;
+    --form-max: 680px;
+    --detail-max: 880px;
+}
+
+@media (max-width: 600px) {
+    :root {
+        --gutter: 16px;
+    }
+}
+
+.header-inner,
+.page-shell,
+.footer-inner {
+    width: min(var(--container-max), calc(100% - 2 * var(--gutter)));
+    margin-inline: auto;
+}
+
+/* El contenido ocupa al menos el alto de la ventana, asi el pie de pagina
+   queda siempre al final aunque la pagina sea corta. */
+body {
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+}
+
+.page-shell {
+    flex: 1 0 auto;
 }
 
 a {
@@ -59,13 +106,11 @@ img {
 }
 
 .header-inner {
-    max-width: 1180px;
-    margin: 0 auto;
-    padding: 16px 24px;
+    padding-block: var(--space-4);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 20px;
+    gap: var(--space-4) var(--space-6);
 }
 
 .brand {
@@ -80,6 +125,7 @@ img {
 }
 
 .brand-mark {
+    flex-shrink: 0;
     width: 42px;
     height: 42px;
     border-radius: 50%;
@@ -112,8 +158,14 @@ img {
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    gap: 10px;
+    gap: var(--space-1);
     flex-wrap: wrap;
+}
+
+/* Boton "Menu": solo existe en pantallas pequenas (ver @media 1080px). */
+.nav-toggle,
+.nav-toggle-label {
+    display: none;
 }
 
 .site-nav a,
@@ -219,18 +271,91 @@ button {
     text-decoration: none;
 }
 
-@media (max-width: 760px) {
-    /* Al quedar en flujo normal el detalle se vuelve alto quando esta
-       abierto; sin esto, flex-wrap metia "My Reports" y "Logout" a su
-       lado en la misma fila. flex-basis:100% lo obliga a su propia fila. */
-    .nav-dropdown {
+/* RNF27: por debajo de 1080 px el menu completo no cabe en una fila junto
+   al logo, asi que se oculta detras del boton "Menu" y se abre como lista
+   vertical. Funciona sin JavaScript: el boton es un checkbox con su label. */
+@media (max-width: 1080px) {
+    .header-inner {
+        flex-wrap: wrap;
+    }
+
+    /* El logo cede espacio para que "Menu" quede en la misma fila. */
+    .brand {
+        flex: 1 1 0;
+        min-width: 0;
+    }
+
+    .nav-toggle {
+        display: block;
+        position: absolute;
+        opacity: 0;
+        width: 1px;
+        height: 1px;
+        pointer-events: none;
+    }
+
+    .nav-toggle-label {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-2);
+        min-height: 42px;
+        padding: 10px 16px;
+        border: 1.5px solid var(--taupe);
+        border-radius: 999px;
+        color: var(--charcoal);
+        font-weight: 750;
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .nav-toggle-label::after {
+        content: "▾";
+        font-size: 0.75em;
+    }
+
+    .nav-toggle:checked + .nav-toggle-label::after {
+        content: "▴";
+    }
+
+    .nav-toggle:focus-visible + .nav-toggle-label {
+        outline: 3px solid var(--primary);
+        outline-offset: 2px;
+    }
+
+    .site-nav {
+        display: none;
         flex-basis: 100%;
+        flex-direction: column;
+        align-items: stretch;
+        gap: var(--space-1);
+        padding-top: var(--space-2);
+        border-top: 1px solid var(--border);
+    }
+
+    .nav-toggle:checked ~ .site-nav {
+        display: flex;
+    }
+
+    /* Con el menu abierto el encabezado deja de estar fijo, para que la
+       lista no tape el contenido al hacer scroll. */
+    .site-header:has(.nav-toggle:checked) {
+        position: static;
+    }
+
+    .site-nav a,
+    .nav-dropdown > summary {
+        justify-content: flex-start;
+        width: 100%;
+    }
+
+    .nav-logout button {
+        width: 100%;
     }
 
     .nav-dropdown-menu {
         position: static;
         box-shadow: none;
-        margin-top: 4px;
+        margin-top: var(--space-1);
         width: 100%;
     }
 }
@@ -247,16 +372,42 @@ button {
 }
 
 .page-shell {
-    width: min(1120px, calc(100% - 32px));
-    margin: 0 auto;
-    padding: 36px 0 56px;
+    padding-block: var(--space-8) var(--space-12);
+    display: grid;
+    align-content: start;
+    gap: var(--space-6);
+}
+
+/* Si la pagina es un formulario o un detalle centrado, los mensajes de
+   exito o error toman ese mismo ancho para quedar alineados con el. */
+.page-shell:has(> .form-card) > .messages {
+    width: 100%;
+    max-width: var(--form-max);
+    margin-inline: auto;
+}
+
+.page-shell:has(> .detail-card) > .messages {
+    width: 100%;
+    max-width: var(--detail-max);
+    margin-inline: auto;
+}
+
+/* El espacio entre secciones lo pone el gap; sin esto los margenes
+   propios (p. ej. .panel) se sumarian o dejarian secciones pegadas. */
+.page-shell > * {
+    margin-block: 0;
+    min-width: 0;
 }
 
 .site-footer {
     border-top: 1px solid var(--border);
     color: var(--muted);
     text-align: center;
-    padding: 24px;
+    padding-block: var(--space-6);
+}
+
+.footer-inner p {
+    margin: 0;
 }
 
 .hero,
@@ -290,8 +441,7 @@ button {
 }
 
 .role-pill,
-.status-pill,
-.meta-pill {
+.status-pill {
     border: 1px solid var(--taupe);
     display: inline-flex;
     align-items: center;
@@ -346,7 +496,6 @@ button.success {
 .messages {
     display: grid;
     gap: 10px;
-    margin-bottom: 20px;
 }
 
 .message {
@@ -368,20 +517,46 @@ button.success {
 
 .panel {
     padding: 22px;
-    margin-bottom: 24px;
 }
 
+/* RNF27: los campos se reparten el ancho y los botones conservan su
+   tamano; si no caben en una fila, pasan a la siguiente sin partirse. */
 .filter-form {
-    display: grid;
-    grid-template-columns: minmax(180px, 1fr) repeat(2, minmax(150px, 220px)) auto auto;
-    gap: 12px;
-    align-items: end;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    align-items: flex-end;
 }
 
+.filter-form > div {
+    flex: 1 1 200px;
+    min-width: 0;
+}
+
+.filter-form > .button,
+.filter-form > button {
+    flex: 0 0 auto;
+    white-space: nowrap;
+}
+
+/* RNF27: 4 columnas en computador, 2 en tablet y 1 en celular. Columnas
+   fijas para que un solo reporte no se estire a todo el ancho. */
 .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 18px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--space-4);
+}
+
+@media (max-width: 1023px) {
+    .grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 599px) {
+    .grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 .card {
@@ -390,20 +565,34 @@ button.success {
     flex-direction: column;
 }
 
+/* RNF27: la ultima parte de la tarjeta (boton o acciones) se va al fondo,
+   asi queda a la misma altura en todas las tarjetas de una fila. */
 .card-body {
+    flex: 1 1 auto;
     padding: 20px;
-    display: grid;
+    display: flex;
+    flex-direction: column;
     gap: 10px;
 }
 
+.card-body > * {
+    margin-block: 0;
+}
+
+.card-body > :last-child {
+    margin-top: auto;
+}
+
 .report-image {
+    display: block;
     width: 100%;
-    height: 210px;
+    aspect-ratio: 4 / 3;
     object-fit: cover;
     background: var(--primary-soft);
 }
 
 .report-image.detail {
+    aspect-ratio: auto;
     height: min(420px, 60vw);
     border-radius: var(--radius);
 }
@@ -433,9 +622,43 @@ button.success {
     color: var(--muted);
 }
 
+/* RNF27: formularios y detalles centrados con un ancho de lectura comodo. */
 .form-card {
-    max-width: 680px;
+    width: 100%;
+    max-width: var(--form-max);
+    margin-inline: auto;
     padding: 28px;
+}
+
+.page-shell > .form-card,
+.page-shell > .detail-card {
+    margin-inline: auto;
+}
+
+.detail-card {
+    width: 100%;
+    max-width: var(--detail-max);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+/* Separacion uniforme entre foto, estado, titulo, datos y acciones. */
+.detail-card > * {
+    margin-block: 0;
+}
+
+.detail-card > .actions {
+    margin-top: var(--space-2);
+}
+
+/* RNF27: la tabla se desliza dentro de su panel; la pagina nunca. */
+.table-wrap {
+    overflow-x: auto;
+}
+
+.table-wrap .data-table {
+    min-width: 520px;
 }
 
 .form-field {
@@ -526,28 +749,20 @@ textarea:focus {
     color: var(--muted);
 }
 
-@media (max-width: 760px) {
-    .header-inner {
-        align-items: flex-start;
-        flex-direction: column;
-    }
-
-    .site-nav {
-        justify-content: flex-start;
-    }
-
-    .site-nav a,
-    .nav-logout button {
-        padding: 8px 12px;
-        min-height: 38px;
-    }
-
-    .filter-form {
-        grid-template-columns: 1fr;
+@media (max-width: 600px) {
+    .filter-form > div,
+    .filter-form > .button,
+    .filter-form > button {
+        flex: 1 1 100%;
     }
 
     .form-card {
         padding: 22px;
+    }
+
+    .panel,
+    .hero {
+        padding: 18px;
     }
 }
 
