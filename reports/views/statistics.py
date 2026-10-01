@@ -1,4 +1,4 @@
-﻿from accounts.decorators import administrator_required
+from accounts.decorators import administrator_required
 from django.shortcuts import render
 
 from ..statistics import lost_statistics

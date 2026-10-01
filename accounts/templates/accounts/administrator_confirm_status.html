@@ -13,9 +13,9 @@
         {% else %}
             <h1 class="page-title">Deactivate &ldquo;{{ target.email }}&rdquo;?</h1>
             <p class="lead">
-                This administrator will no longer be able to log in. Its
-                existing session, if any, will be closed. The account keeps its
-                role and history, and can be activated again later.
+                This administrator will no longer be able to log in. Their
+                open session, if any, will be closed. The account keeps its
+                role and history and can be activated again later.
                 {% if target == request.user %}
                     You are deactivating your own account: you will be logged out.
                 {% endif %}
@@ -41,9 +41,9 @@
             <form method="post">
                 {% csrf_token %}
                 {% if will_be_active %}
-                    <button class="success" type="submit">Activate administrator</button>
+                    <button class="success" type="submit">Activate Administrator</button>
                 {% else %}
-                    <button class="danger" type="submit">Deactivate administrator</button>
+                    <button class="danger" type="submit">Deactivate Administrator</button>
                 {% endif %}
             </form>
             <a class="button quiet" href="{% url 'administration_administrator_list' %}">

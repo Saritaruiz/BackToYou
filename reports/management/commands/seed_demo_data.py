@@ -1,4 +1,4 @@
-﻿"""Explicit, additive local demo data for the future RF25 dashboard."""
+"""Explicit, additive local demo data for the future RF25 dashboard."""
 import secrets
 from datetime import timedelta
 

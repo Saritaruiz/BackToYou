@@ -9,10 +9,10 @@
         <p>Create, edit, activate, or deactivate administrators, and grant or revoke administrator access. At least one active administrator must always remain.</p>
         <div class="actions">
             <a class="button" href="{% url 'administration_administrator_create' %}">
-                New administrator
+                New Administrator
             </a>
             <a class="button ghost" href="{% url 'administration' %}">
-                Back to administration
+                Back to Administration
             </a>
         </div>
     </section>
@@ -54,14 +54,14 @@
                                         class="button danger"
                                         href="{% url 'administration_administrator_toggle' account.id %}"
                                     >
-                                        Revoke admin
+                                        Revoke Admin
                                     </a>
                                 {% else %}
                                     <a
                                         class="button secondary"
                                         href="{% url 'administration_administrator_toggle' account.id %}"
                                     >
-                                        Grant admin
+                                        Grant Admin
                                     </a>
                                 {% endif %}
                             </div>

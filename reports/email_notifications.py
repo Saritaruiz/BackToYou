@@ -35,7 +35,7 @@ def notify_report_contact(contact_message):
             "Someone contacted you about your BackToYou report.\n\n"
             f"Report: {report.title}\n\n"
             f"Message:\n{contact_message.message}\n\n"
-            "Log into BackToYou to view the report context."
+            "Log in to BackToYou to view the report context."
         ),
     )
 

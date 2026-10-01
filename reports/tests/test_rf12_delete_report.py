@@ -143,7 +143,7 @@ class DeleteReportTests(TestCase):
         self.assertEqual(response.status_code, 404)
         self.assertContains(
             response,
-            "This report is not available",
+            "This page is not available",
             status_code=404,
         )
 

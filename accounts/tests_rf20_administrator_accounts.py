@@ -160,7 +160,7 @@ class AdministratorAccountsTests(TestCase):
     def test_opening_the_confirmation_does_not_change_the_status(self):
         response = self.client.get(self.status_url(self.other_admin))
 
-        self.assertContains(response, "Deactivate administrator")
+        self.assertContains(response, "Deactivate Administrator")
         self.other_admin.refresh_from_db()
         self.assertTrue(self.other_admin.is_active)
 

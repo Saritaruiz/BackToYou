@@ -1,4 +1,4 @@
-﻿{% extends "base.html" %}
+{% extends "base.html" %}
 {% block title %}Lost Item Statistics | BackToYou{% endblock %}
 {% block content %}
 <div class="lost-statistics">
@@ -6,7 +6,7 @@
         <span class="role-pill">Administrator</span>
         <h1>Lost Item Statistics</h1>
         <p>All currently stored Lost submissions, including recovered, pending, and rejected reports. Deleted reports are not included.</p>
-        <a class="button ghost" href="{% url 'administration' %}">Back to administration</a>
+        <a class="button ghost" href="{% url 'administration' %}">Back to Administration</a>
     </section>
     <section class="stats-summary" aria-label="Lifetime totals of stored Lost reports">
         <article class="card"><h2>Total Lost reports</h2><p>{{ summary.total }}</p></article>
@@ -37,7 +37,7 @@
     </section>
     <section class="panel" aria-labelledby="month-heading">
         <h2 id="month-heading">Lost submissions over the last 12 calendar months</h2>
-        <p>Grouped by submission date (created_at), in {{ statistics_timezone }}. The current month is partial. These counts cover a shorter period than the lifetime totals above.</p>
+        <p>Grouped by submission date, in {{ statistics_timezone }}. The current month is partial. These counts cover a shorter period than the lifetime totals above.</p>
         <div class="stats-chart-scroll" aria-hidden="true"><div class="stats-columns">
             {% for row in months %}<div class="stats-column"><span>{{ row.total }}</span><div class="stats-column-track"><div class="stats-column-bar" style="height: {{ row.percent|stringformat:'.2f' }}%"></div></div><span>{{ row.month|date:"M y" }}</span></div>{% endfor %}
         </div></div>

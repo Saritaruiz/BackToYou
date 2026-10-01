@@ -1,4 +1,4 @@
-﻿"""RF23 creation-only description preparation choices."""
+"""RF23 creation-only description preparation choices."""
 from django.contrib.auth import get_user_model
 from django.core.exceptions import FieldDoesNotExist
 from django.test import TestCase, override_settings

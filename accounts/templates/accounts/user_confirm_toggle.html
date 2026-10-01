@@ -13,9 +13,9 @@
         {% else %}
             <h1 class="page-title">Deactivate &ldquo;{{ target.email }}&rdquo;?</h1>
             <p class="lead">
-                This account will no longer be able to log in. Its existing
-                session, if any, will be closed. Its reports keep their
-                current status and remain associated with this account.
+                This user will no longer be able to log in. Their open
+                session, if any, will be closed. Their reports keep their current
+                status and stay linked to this account.
             </p>
         {% endif %}
 
@@ -38,9 +38,9 @@
             <form method="post">
                 {% csrf_token %}
                 {% if will_be_active %}
-                    <button class="success" type="submit">Activate account</button>
+                    <button class="success" type="submit">Activate Account</button>
                 {% else %}
-                    <button class="danger" type="submit">Deactivate account</button>
+                    <button class="danger" type="submit">Deactivate Account</button>
                 {% endif %}
             </form>
             <a class="button quiet" href="{% url 'administration_user_list' %}">

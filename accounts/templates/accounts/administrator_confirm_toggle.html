@@ -33,9 +33,9 @@
             <form method="post">
                 {% csrf_token %}
                 {% if will_be_admin %}
-                    <button class="success" type="submit">Grant admin access</button>
+                    <button class="success" type="submit">Grant Admin Access</button>
                 {% else %}
-                    <button class="danger" type="submit">Revoke admin access</button>
+                    <button class="danger" type="submit">Revoke Admin Access</button>
                 {% endif %}
             </form>
             <a class="button quiet" href="{% url 'administration_administrator_list' %}">

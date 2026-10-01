@@ -1,4 +1,4 @@
-﻿"""RF24 homepage feed and public browsing regression coverage."""
+"""RF24 homepage feed and public browsing regression coverage."""
 from datetime import timedelta
 from unittest.mock import patch
 
@@ -40,7 +40,7 @@ class RecentReportsFeedTests(TestCase):
             self.assertContains(response, 'Lost calculator')
             self.assertContains(response, 'Found calculator')
             self.assertContains(response, 'Recently Published Reports')
-            self.assertContains(response, 'Browse all reports')
+            self.assertContains(response, 'Browse All Reports')
             self.assertContains(response, 'href="' + reverse('reports:report_list') + '"')
 
     def test_private_statuses_excluded_for_every_viewer(self):
@@ -109,7 +109,7 @@ class RecentReportsFeedTests(TestCase):
     def test_empty_state(self):
         response = self.client.get(reverse('home'))
         self.assertContains(response, 'No active reports are currently available.')
-        self.assertContains(response, 'Browse all reports')
+        self.assertContains(response, 'Browse All Reports')
 
     @patch('reports.views.moderation.notify_report_approved')
     def test_approval_adds_report(self, notify):

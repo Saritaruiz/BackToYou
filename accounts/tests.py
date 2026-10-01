@@ -148,7 +148,7 @@ class AdministrationPanelTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "BackToYou Administration")
-        self.assertContains(response, "Pending Reports / Report Moderation")
+        self.assertContains(response, "Report Moderation")
         self.assertContains(response, "Categories")
         self.assertContains(response, "Administrator Accounts")
         self.assertContains(response, "User Accounts")

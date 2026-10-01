@@ -1,18 +1,18 @@
 {% extends "base.html" %}
 
-{% block title %}{% if is_new %}New administrator{% else %}Edit administrator{% endif %} | BackToYou{% endblock %}
+{% block title %}{% if is_new %}New Administrator{% else %}Edit Administrator{% endif %} | BackToYou{% endblock %}
 
 {% block content %}
     <section class="form-card">
         {% if is_new %}
-            <h1 class="page-title">New administrator</h1>
+            <h1 class="page-title">New Administrator</h1>
             <p class="lead">
                 Create an administrator account with an institutional EAFIT
-                email. It will be able to moderate reports, manage categories,
-                and manage other accounts.
+                email. This account will be able to moderate reports, manage
+                categories, and manage other accounts.
             </p>
         {% else %}
-            <h1 class="page-title">Edit administrator</h1>
+            <h1 class="page-title">Edit Administrator</h1>
             <p class="lead">Update the name and institutional email of {{ target.email }}.</p>
         {% endif %}
 

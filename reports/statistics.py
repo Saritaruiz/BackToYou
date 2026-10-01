@@ -1,4 +1,4 @@
-﻿"""RF25: read-only statistics for currently stored Lost submissions."""
+"""RF25: read-only statistics for currently stored Lost submissions."""
 from datetime import datetime
 
 from django.db.models import Count, Q

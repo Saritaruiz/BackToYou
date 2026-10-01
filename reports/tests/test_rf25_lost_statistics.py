@@ -1,4 +1,4 @@
-﻿from datetime import datetime, timezone as dt_timezone
+from datetime import datetime, timezone as dt_timezone
 from unittest.mock import patch
 
 from django.contrib.auth import get_user_model

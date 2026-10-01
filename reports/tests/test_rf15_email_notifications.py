@@ -79,7 +79,7 @@ class EmailNotificationTests(TestCase):
         self.assertEqual(email.subject, "BackToYou - New message about your report")
         self.assertIn(report.title, email.body)
         self.assertIn("I think I found this calculator.", email.body)
-        self.assertIn("Log into BackToYou", email.body)
+        self.assertIn("Log in to BackToYou", email.body)
         self.assertNotIn(self.sender.email, email.body)
 
     def test_invalid_contact_message_sends_no_email(self):

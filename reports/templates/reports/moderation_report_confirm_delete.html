@@ -33,7 +33,7 @@
         <div class="actions">
             <form method="post">
                 {% csrf_token %}
-                <button class="danger" type="submit">Remove permanently</button>
+                <button class="danger" type="submit">Remove Permanently</button>
             </form>
             <a class="button ghost" href="{% url 'administration_moderate_report' report.id %}">
                 Cancel

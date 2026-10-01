@@ -51,7 +51,7 @@ class ErrorPagesTests(TestCase):
         )
 
         self.assertEqual(response.status_code, 404)
-        self.assertContains(response, "This report is not available", status_code=404)
+        self.assertContains(response, "This page is not available", status_code=404)
         self.assertNotContains(response, "permission", status_code=404)
 
     def test_an_unpublished_report_shows_the_same_neutral_page_to_non_owners(self):
@@ -63,7 +63,7 @@ class ErrorPagesTests(TestCase):
         )
 
         self.assertEqual(response.status_code, 404)
-        self.assertContains(response, "This report is not available", status_code=404)
+        self.assertContains(response, "This page is not available", status_code=404)
         self.assertNotContains(response, "permission", status_code=404)
 
     def test_anonymous_visitor_gets_the_same_neutral_page(self):
@@ -74,7 +74,7 @@ class ErrorPagesTests(TestCase):
         )
 
         self.assertEqual(response.status_code, 404)
-        self.assertContains(response, "This report is not available", status_code=404)
+        self.assertContains(response, "This page is not available", status_code=404)
 
     # --- Acciones de dueno: 403 explicito, el recurso ya se sabe que existe
 
