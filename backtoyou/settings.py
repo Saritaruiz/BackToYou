@@ -70,6 +70,8 @@ MIDDLEWARE = [
     'accounts.middleware.enforce_active_account',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # Debe ir despues de MessageMiddleware: convierte 403/404 en un aviso.
+    'backtoyou.middleware.FriendlyAccessErrorsMiddleware',
 ]
 
 ROOT_URLCONF = 'backtoyou.urls'

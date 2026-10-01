@@ -70,6 +70,21 @@ urlpatterns = [
         name="administration_category_delete",
     ),
     path(
+        "administration/administrators/new/",
+        account_admin_views.administrator_create,
+        name="administration_administrator_create",
+    ),
+    path(
+        "administration/administrators/<int:user_id>/edit/",
+        account_admin_views.administrator_edit,
+        name="administration_administrator_edit",
+    ),
+    path(
+        "administration/administrators/<int:user_id>/status/",
+        account_admin_views.toggle_administrator_status,
+        name="administration_administrator_status",
+    ),
+    path(
         "administration/administrators/",
         account_admin_views.administrator_list,
         name="administration_administrator_list",

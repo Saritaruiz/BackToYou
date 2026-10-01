@@ -73,6 +73,36 @@ class ManageAdministratorAccountsTests(TestCase):
         self.admin.refresh_from_db()
         self.assertEqual(self.admin.role, User.Role.ADMINISTRATOR)
 
+    # Un administrador que se quita el rol a si mismo ya no puede ver la
+    # lista de administradores: debe volver al inicio, no ver un 403.
+    def test_admin_who_revokes_their_own_role_is_sent_home_without_403(self):
+        self.login_as(self.admin)
+
+        response = self.client.post(self.toggle_url(self.admin), follow=True)
+
+        self.assertRedirects(response, reverse("home"))
+        self.admin.refresh_from_db()
+        self.assertEqual(self.admin.role, User.Role.REGULAR_USER)
+        self.assertEqual(self.admin.role_changed_by, self.admin)
+        self.assertContains(response, "You are no longer an administrator.")
+
+    def test_admin_who_revokes_their_own_role_loses_access_right_away(self):
+        self.login_as(self.admin)
+        self.client.post(self.toggle_url(self.admin))
+
+        response = self.client.get(self.list_url)
+
+        self.assertEqual(response.status_code, 403)
+
+    def test_last_admin_trying_to_revoke_themselves_stays_on_the_list(self):
+        self.other_admin.delete()
+        self.login_as(self.admin)
+
+        response = self.client.post(self.toggle_url(self.admin), follow=True)
+
+        self.assertRedirects(response, self.list_url)
+        self.assertContains(response, "You cannot revoke the last active administrator account.")
+
     def test_an_inactive_administrator_can_still_be_revoked_even_if_alone(self):
         # Revocar una cuenta YA inactiva no reduce el numero de
         # administradores activos, asi que no cuenta como "el ultimo".

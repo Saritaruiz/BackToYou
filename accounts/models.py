@@ -1,9 +1,22 @@
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.db.models.functions import Lower
 
 
 class User(AbstractUser):
+    class Meta(AbstractUser.Meta):
+        constraints = [
+            # Un correo no se puede repetir, aunque cambien las mayusculas.
+            # Protege tambien lo que no pasa por formularios (consola, scripts).
+            # Las cuentas sin correo quedan fuera de la regla.
+            models.UniqueConstraint(
+                Lower("email"),
+                condition=~models.Q(email=""),
+                name="unique_user_email_case_insensitive",
+            ),
+        ]
+
     class Role(models.TextChoices):
         REGULAR_USER = "REGULAR_USER", "Regular User"
         ADMINISTRATOR = "ADMINISTRATOR", "Administrator"

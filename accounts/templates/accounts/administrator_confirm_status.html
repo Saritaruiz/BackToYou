@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Confirm administrator status change | BackToYou{% endblock %}
+
+{% block content %}
+    <section class="form-card">
+        {% if will_be_active %}
+            <h1 class="page-title">Activate &ldquo;{{ target.email }}&rdquo;?</h1>
+            <p class="lead">
+                This administrator will be able to log in again and use the
+                administration panel.
+            </p>
+        {% else %}
+            <h1 class="page-title">Deactivate &ldquo;{{ target.email }}&rdquo;?</h1>
+            <p class="lead">
+                This administrator will no longer be able to log in. Its
+                existing session, if any, will be closed. The account keeps its
+                role and history, and can be activated again later.
+                {% if target == request.user %}
+                    You are deactivating your own account: you will be logged out.
+                {% endif %}
+            </p>
+        {% endif %}
+
+        <div class="meta-grid">
+            <div class="meta-item">
+                <span class="meta-label">Name</span>
+                {{ target.first_name|default:"—" }}
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Email</span>
+                {{ target.email }}
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Current status</span>
+                {% if target.is_active %}Active{% else %}Inactive{% endif %}
+            </div>
+        </div>
+
+        <div class="actions">
+            <form method="post">
+                {% csrf_token %}
+                {% if will_be_active %}
+                    <button class="success" type="submit">Activate administrator</button>
+                {% else %}
+                    <button class="danger" type="submit">Deactivate administrator</button>
+                {% endif %}
+            </form>
+            <a class="button quiet" href="{% url 'administration_administrator_list' %}">
+                Cancel
+            </a>
+        </div>
+    </section>
+{% endblock %}
