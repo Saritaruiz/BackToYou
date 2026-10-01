@@ -1,0 +1,51 @@
+﻿{% extends "base.html" %}
+{% block title %}Lost Item Statistics | BackToYou{% endblock %}
+{% block content %}
+<div class="lost-statistics">
+    <section class="hero">
+        <span class="role-pill">Administrator</span>
+        <h1>Lost Item Statistics</h1>
+        <p>All currently stored Lost submissions, including recovered, pending, and rejected reports. Deleted reports are not included.</p>
+        <a class="button ghost" href="{% url 'administration' %}">Back to administration</a>
+    </section>
+    <section class="stats-summary" aria-label="Lifetime totals of stored Lost reports">
+        <article class="card"><h2>Total Lost reports</h2><p>{{ summary.total }}</p></article>
+        <article class="card"><h2>Active Lost reports</h2><p>{{ summary.active }}</p></article>
+        <article class="card"><h2>Recovered Lost reports</h2><p>{{ summary.recovered }}</p></article>
+        <article class="card"><h2>Pending Review Lost reports</h2><p>{{ summary.pending }}</p></article>
+        <article class="card"><h2>Rejected Lost reports</h2><p>{{ summary.rejected }}</p></article>
+        <article class="card"><h2>Recovery rate among approved Lost reports</h2>
+            <p>{% if summary.recovery_rate == None %}N/A{% else %}{{ summary.recovery_rate|floatformat:1 }}%{% endif %}</p>
+            <small>Recovered / (Active + Recovered). Pending and rejected reports are excluded.</small>
+        </article>
+    </section>
+    <section class="panel" aria-labelledby="category-heading">
+        <h2 id="category-heading">Lost submissions by category</h2>
+        <p>Lifetime totals of currently stored submissions across all statuses.</p>
+        {% if categories %}
+            <div class="stats-bars" aria-hidden="true">
+                {% for row in categories %}
+                <div><span>{{ row.category__name }}: {{ row.total }}</span><div class="stats-track"><div class="stats-bar" style="width: {{ row.percent|stringformat:'.2f' }}%"></div></div></div>
+                {% endfor %}
+            </div>
+            <div class="table-wrap"><table class="data-table">
+                <caption>Lost submissions by category — all statuses</caption>
+                <thead><tr><th scope="col">Category</th><th scope="col">Reports</th></tr></thead>
+                <tbody>{% for row in categories %}<tr><th scope="row">{{ row.category__name }}</th><td>{{ row.total }}</td></tr>{% endfor %}</tbody>
+            </table></div>
+        {% else %}<p class="empty-state">No Lost submissions are currently stored.</p>{% endif %}
+    </section>
+    <section class="panel" aria-labelledby="month-heading">
+        <h2 id="month-heading">Lost submissions over the last 12 calendar months</h2>
+        <p>Grouped by submission date (created_at), in {{ statistics_timezone }}. The current month is partial. These counts cover a shorter period than the lifetime totals above.</p>
+        <div class="stats-chart-scroll" aria-hidden="true"><div class="stats-columns">
+            {% for row in months %}<div class="stats-column"><span>{{ row.total }}</span><div class="stats-column-track"><div class="stats-column-bar" style="height: {{ row.percent|stringformat:'.2f' }}%"></div></div><span>{{ row.month|date:"M y" }}</span></div>{% endfor %}
+        </div></div>
+        <div class="table-wrap"><table class="data-table">
+            <caption>Monthly Lost submissions — all statuses</caption>
+            <thead><tr><th scope="col">Submission month</th><th scope="col">Reports</th></tr></thead>
+            <tbody>{% for row in months %}<tr><th scope="row">{{ row.month|date:"F Y" }}{% if forloop.last %} (partial){% endif %}</th><td>{{ row.total }}</td></tr>{% endfor %}</tbody>
+        </table></div>
+    </section>
+</div>
+{% endblock %}

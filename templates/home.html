@@ -44,4 +44,22 @@
             </div>
         {% endif %}
     </section>
+    <section aria-labelledby="recent-reports-heading">
+        <div class="panel">
+            <h2 id="recent-reports-heading">Recently Published Reports</h2>
+            <a class="button ghost" href="{% url 'reports:report_list' %}">Browse all reports</a>
+        </div>
+        {% if recent_reports %}
+            <div class="grid" aria-label="Recently published reports">
+                {% for report in recent_reports %}
+                    {% include "reports/_report_card.html" with report=report only %}
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <h3>No active reports are currently available.</h3>
+                <p>Check again later for recently published Lost and Found reports.</p>
+            </div>
+        {% endif %}
+    </section>
 {% endblock %}

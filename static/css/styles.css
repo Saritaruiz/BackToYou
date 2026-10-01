@@ -767,6 +767,32 @@ textarea:focus {
 }
 
 /* RF22 - AI-Based Object Description */
+.description-method {
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    padding: 12px 16px;
+}
+
+.description-method legend {
+    font-weight: 750;
+}
+
+.description-method label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.description-method input[type="radio"] {
+    width: auto;
+    padding: 0;
+    accent-color: var(--primary);
+}
+
+.ai-assist[hidden] {
+    display: none;
+}
+
 .ai-assist {
     display: grid;
     gap: 8px;
@@ -799,3 +825,20 @@ textarea:focus {
 .ai-status-success {
     color: var(--success);
 }
+
+/* RF25: statistics styles are scoped to this dashboard. */
+.lost-statistics { display: grid; gap: 24px; min-width: 0; }
+.lost-statistics .stats-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+.lost-statistics .stats-summary .card { padding: 20px; }
+.lost-statistics .stats-summary h2 { font-size: 1rem; }
+.lost-statistics .stats-summary p { font-size: 2rem; font-weight: 750; margin: 8px 0; }
+.lost-statistics .stats-bars { display: grid; gap: 12px; margin: 20px 0; }
+.lost-statistics .stats-track { background: var(--page); border-radius: 4px; overflow: hidden; }
+.lost-statistics .stats-bar { height: 16px; background: var(--primary); }
+.lost-statistics .stats-chart-scroll { overflow-x: auto; margin: 20px 0; }
+.lost-statistics .stats-columns { display: grid; grid-template-columns: repeat(12, 1fr); gap: 12px; min-width: 650px; }
+.lost-statistics .stats-column { text-align: center; font-size: .85rem; }
+.lost-statistics .stats-column-track { height: 160px; display: flex; align-items: flex-end; background: var(--page); }
+.lost-statistics .stats-column-bar { width: 100%; background: var(--primary); }
+.lost-statistics caption { text-align: left; font-weight: 750; padding: 12px 0; }
+.lost-statistics .panel { min-width: 0; }

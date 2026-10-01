@@ -12,15 +12,23 @@
             {{ form.non_field_errors }}
 
             {% for field in form %}
+                {% if field.name == "description_method" %}
+                <fieldset class="description-method form-field">
+                    <legend>{{ field.label }}</legend>
+                    {{ field }}
+                    {{ field.errors }}
+                </fieldset>
+                {% else %}
                 <div class="form-field">
                     {{ field.label_tag }}
                     {{ field }}
                     {{ field.errors }}
                 </div>
+                {% endif %}
 
                 {% if field.name == "image" %}
                     {# RF22 - AI-Based Object Description #}
-                    <div class="ai-assist">
+                    <div class="ai-assist" id="ai-controls" {% if form.description_method.value != "ai" %}hidden{% endif %}>
                         <button type="button" class="button secondary" id="ai-suggest"
                                 {% if not ai_available %}disabled{% endif %}>
                             Suggest description with AI
@@ -45,13 +53,42 @@
         </p>
     </section>
 
-    {% if ai_available %}
         <script>
             (function () {
                 const button = document.getElementById("ai-suggest");
                 const status = document.getElementById("ai-status");
                 const form = button.closest("form");
                 const imageInput = form.querySelector('input[name="image"]');
+                const controls = document.getElementById("ai-controls");
+                const methods = form.querySelectorAll('[name="description_method"]');
+                const available = {{ ai_available|yesno:"true,false" }};
+                const initialStatus = status.textContent;
+                let revision = 0;
+                let controller = null;
+
+                function isAIMode() {
+                    return form.querySelector('[name="description_method"]:checked')?.value === "ai";
+                }
+
+                function invalidateSuggestion() {
+                    revision++;
+                    if (controller) controller.abort();
+                    controller = null;
+                    button.disabled = !available;
+                    setStatus(initialStatus, "");
+                }
+
+                methods.forEach(function (method) {
+                    method.addEventListener("change", function () {
+                        invalidateSuggestion();
+                        controls.hidden = !isAIMode();
+                    });
+                });
+                imageInput.addEventListener("change", invalidateSuggestion);
+                ["title", "description", "category"].forEach(function (name) {
+                    form.querySelector('[name="' + name + '"]').addEventListener("input", invalidateSuggestion);
+                });
+                controls.hidden = !isAIMode();
 
                 function setStatus(text, kind) {
                     status.textContent = text;
@@ -59,6 +96,7 @@
                 }
 
                 button.addEventListener("click", async function () {
+                    if (!available || !isAIMode()) return;
                     const image = imageInput.files[0];
                     if (!image) {
                         setStatus("Upload a photo of the item first.", "error");
@@ -72,14 +110,19 @@
                     data.append("csrfmiddlewaretoken", form.querySelector('input[name="csrfmiddlewaretoken"]').value);
 
                     button.disabled = true;
+                    const requestRevision = ++revision;
+                    controller = new AbortController();
                     setStatus("Analyzing the photo. This can take a few seconds...", "");
 
                     try {
+                        {% if ai_available %}
                         const response = await fetch("{% url 'reports:ai_describe_item' %}", {
                             method: "POST",
                             body: data,
+                            signal: controller.signal,
                         });
                         const result = await response.json();
+                        if (requestRevision !== revision || !isAIMode()) return;
 
                         if (!response.ok) {
                             setStatus(result.error || "The AI suggestion failed. Please fill in the report manually.", "error");
@@ -98,13 +141,17 @@
                                 : "Title and description filled automatically by AI. Choose a category and review everything before submitting.",
                             "success"
                         );
+                        {% endif %}
                     } catch (error) {
+                        if (requestRevision !== revision || error.name === "AbortError") return;
                         setStatus("The AI suggestion failed. Please fill in the report manually.", "error");
                     } finally {
-                        button.disabled = false;
+                        if (requestRevision === revision) {
+                            controller = null;
+                            button.disabled = !available;
+                        }
                     }
                 });
             })();
         </script>
-    {% endif %}
 {% endblock %}

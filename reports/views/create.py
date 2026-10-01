@@ -10,7 +10,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
 
 from .. import ai_description
-from ..forms import ItemReportForm
+from ..forms import ItemReportCreationForm
 from ..models import ItemReport
 
 
@@ -32,7 +32,7 @@ def create_found_report(request):
 
 def _create_report(request, report_type):
     if request.method == "POST":
-        form = ItemReportForm(
+        form = ItemReportCreationForm(
             request.POST,
             request.FILES,
         )
@@ -56,7 +56,7 @@ def _create_report(request, report_type):
             )
 
     else:
-        form = ItemReportForm()
+        form = ItemReportCreationForm()
 
     report_type_label = (
         "Lost"

@@ -11,6 +11,11 @@
 
     <section class="admin-sections" aria-label="Administration sections">
         <article class="card admin-card">
+            <h2>Lost Item Statistics</h2>
+            <p class="description">Review Lost submissions, recovery rate, categories, and monthly trends.</p>
+            <a class="button" href="{% url 'administration_lost_statistics' %}">View Statistics</a>
+        </article>
+        <article class="card admin-card">
             <h2>Pending Reports / Report Moderation</h2>
             <p class="description">Review, edit, approve, reject, or remove submitted reports before they become public.</p>
             <a class="button" href="{% url 'administration_pending_reports' %}">

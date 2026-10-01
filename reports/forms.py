@@ -57,6 +57,24 @@ class ItemReportForm(forms.ModelForm):
         return image
 
 
+class ItemReportCreationForm(ItemReportForm):
+    """RF23: a preparation choice, never persisted on the report."""
+
+    description_method = forms.ChoiceField(
+        label="Description method",
+        choices=(("manual", "Manual"), ("ai", "AI-assisted")),
+        initial="manual",
+        widget=forms.RadioSelect,
+    )
+
+    def __init__(self, data=None, *args, **kwargs):
+        if data is not None and "description_method" not in data:
+            data = data.copy()
+            data["description_method"] = "manual"
+        super().__init__(data, *args, **kwargs)
+        self.order_fields(["description_method", *ItemReportForm.Meta.fields])
+
+
 class ContactMessageForm(forms.ModelForm):
     message = forms.CharField(
         required=False,

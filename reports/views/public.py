@@ -14,12 +14,15 @@ from django.shortcuts import get_object_or_404, redirect, render
 from ..email_notifications import notify_report_contact
 from ..forms import ContactMessageForm
 from ..models import Category, ItemReport
+from ..querysets import public_reports, recent_public_reports
+
+
+def home(request):
+    return render(request, "home.html", {"recent_reports": recent_public_reports()})
 
 
 def report_list(request):
-    reports = ItemReport.objects.filter(
-        status=ItemReport.Status.ACTIVE
-    ).order_by("-created_at", "-id")
+    reports = public_reports().order_by("-created_at", "-id")
 
     query = request.GET.get("q")
     category_id = request.GET.get("category")

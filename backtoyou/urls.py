@@ -17,17 +17,16 @@ Including another URLconf
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.shortcuts import render
 from django.urls import include, path
 from accounts import views as account_views
 from accounts import views_admin as account_admin_views
 from reports import views as report_views
-
-def home(request):
-    return render(request, "home.html")
+from reports.views import public as public_views
+from reports.views.statistics import lost_statistics_dashboard
 
 urlpatterns = [
-    path("", home, name="home"),
+    path("administration/statistics/lost/", lost_statistics_dashboard, name="administration_lost_statistics"),
+    path("", public_views.home, name="home"),
     path("administration/", account_views.administration_panel, name="administration"),
     path(
         "administration/reports/pending/",
