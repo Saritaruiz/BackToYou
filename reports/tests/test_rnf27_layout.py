@@ -82,7 +82,7 @@ class LayoutStylesheetTests(TestCase):
         self.assertRegex(self.css, r"\.grid \{[^}]*repeat\(4, minmax\(0, 1fr\)\)")
         self.assertRegex(
             self.css,
-            r"@media \(max-width: 1023px\) \{\s*\.grid \{\s*grid-template-columns: repeat\(2, minmax\(0, 1fr\)\);",
+            r"@media \(max-width: 1080px\) \{\s*\.grid \{\s*grid-template-columns: repeat\(2, minmax\(0, 1fr\)\);",
         )
         self.assertRegex(
             self.css,
