@@ -1,4 +1,15 @@
+/* RF29 - Shared typography tokens; mobile overrides reuse the same scale. */
 :root {
+    --font-heading: "DM Serif Display", Georgia, "Times New Roman", serif;
+    --font-body: "DM Sans", Arial, Helvetica, sans-serif;
+    --fs-h1: 48px;
+    --fs-h2: 36px;
+    --fs-h3: 28px;
+    --fs-h4: 22px;
+    --fs-body: 16px;
+    --fs-small: 14px;
+    --fw-regular: 400;
+    --fw-semibold: 600;
     /* RNF28 - Paleta de marca Salvia + Ciruela (manual de marca, seccion 4).
        Salvia es la base en 8 tonos; Ciruela es solo acento. */
     --salvia-900: #1C2621;
@@ -48,12 +59,35 @@ body {
     margin: 0;
     background: var(--page);
     color: var(--charcoal);
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-family: var(--font-body);
+    font-size: var(--fs-body);
+    font-weight: var(--fw-regular);
     line-height: 1.5;
     /* RNF27: textos largos (correos, titulos) se parten en vez de
        empujar la pagina hacia los lados. */
-    overflow-wrap: break-word;
+    overflow-wrap: anywhere;
 }
+
+/* Heading hierarchy uses size, spacing and line-height as well as color. */
+h1, h2, h3, h4, h5, h6, .page-title {
+    font-family: var(--font-heading);
+    font-weight: var(--fw-regular);
+    line-height: 1.25;
+    margin-block: 0 12px;
+    overflow-wrap: anywhere;
+}
+
+h1, .page-title { font-size: var(--fs-h1); }
+h2 { font-size: var(--fs-h2); }
+h3 { font-size: var(--fs-h3); }
+h4, h5, h6 { font-size: var(--fs-h4); }
+
+/* Controls inherit the body typeface even inside a heading. */
+button, input, select, textarea, .button {
+    font-family: var(--font-body);
+}
+
+small { font-size: var(--fs-small); }
 
 /* ===== RNF27 - Layout and Page Centering =====
    Un solo contenedor para encabezado, contenido y pie de pagina, para que
@@ -76,6 +110,10 @@ body {
 @media (max-width: 600px) {
     :root {
         --gutter: 16px;
+        --fs-h1: 36px;
+        --fs-h2: 30px;
+        --fs-h3: 24px;
+        --fs-h4: 20px;
     }
 }
 
@@ -102,7 +140,7 @@ body {
 a {
     color: var(--accent);
     text-decoration: none;
-    font-weight: 650;
+    font-weight: var(--fw-semibold);
 }
 
 a:hover {
@@ -152,7 +190,7 @@ img {
     align-items: center;
     justify-content: center;
     font-weight: 800;
-    font-size: 0.9rem;
+    font-size: var(--fs-small);
 }
 
 .brand-name,
@@ -167,7 +205,7 @@ img {
 
 .brand-subtitle {
     color: var(--muted);
-    font-size: 0.85rem;
+    font-size: var(--fs-small);
     font-weight: 500;
 }
 
@@ -182,6 +220,8 @@ img {
 /* Boton "Menu": solo existe en pantallas pequenas (ver @media 1080px). */
 .nav-toggle,
 .nav-toggle-label {
+    font-family: var(--font-body);
+    font-size: var(--fs-small);
     display: none;
 }
 
@@ -195,12 +235,16 @@ button {
     color: var(--on-dark);
     padding: 10px 16px;
     font: inherit;
-    font-weight: 750;
+    font-family: var(--font-body);
+    font-size: var(--fs-small);
+    font-weight: var(--fw-semibold);
     cursor: pointer;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     min-height: 42px;
+    max-width: 100%;
+    white-space: normal;
 }
 
 .site-nav a {
@@ -230,7 +274,9 @@ button {
     color: var(--charcoal);
     padding: 10px 16px;
     font: inherit;
-    font-weight: 750;
+    font-family: var(--font-body);
+    font-size: var(--fs-small);
+    font-weight: var(--fw-semibold);
     cursor: pointer;
     display: inline-flex;
     align-items: center;
@@ -278,8 +324,8 @@ button {
     padding: 9px 12px;
     border-radius: 6px;
     color: var(--charcoal);
-    font-weight: 650;
-    white-space: nowrap;
+    font-weight: var(--fw-semibold);
+    white-space: normal;
 }
 
 .nav-dropdown-menu a:hover {
@@ -320,7 +366,7 @@ button {
         border: 1.5px solid var(--border-strong);
         border-radius: 999px;
         color: var(--charcoal);
-        font-weight: 750;
+        font-weight: var(--fw-semibold);
         cursor: pointer;
         user-select: none;
     }
@@ -446,15 +492,12 @@ button {
 .hero h1,
 .page-title {
     margin: 0 0 12px;
-    font-size: clamp(2rem, 5vw, 4rem);
-    line-height: 1.05;
 }
 
 .hero p,
 .lead {
     color: var(--muted);
-    font-size: 1.08rem;
-    max-width: 680px;
+    font-size: var(--fs-body);
 }
 
 /* Nivel 1 de ciruela: las etiquetas de rol y de estado van en ciruela. */
@@ -468,8 +511,8 @@ button {
     background: var(--accent-soft);
     color: var(--accent);
     padding: 6px 12px;
-    font-size: 0.9rem;
-    font-weight: 750;
+    font-size: var(--fs-small);
+    font-weight: var(--fw-semibold);
 }
 
 .actions {
@@ -554,7 +597,7 @@ button.success {
 .filter-form > .button,
 .filter-form > button {
     flex: 0 0 auto;
-    white-space: nowrap;
+    white-space: normal;
 }
 
 /* RNF27: 4 columnas en computador, 2 en tablet y 1 en celular. Columnas
@@ -631,13 +674,20 @@ button.success {
 .meta-label {
     display: block;
     color: var(--muted);
-    font-size: 0.82rem;
-    font-weight: 750;
+    font-size: var(--fs-small);
+    font-weight: var(--fw-semibold);
     text-transform: uppercase;
 }
 
 .description {
     color: var(--muted);
+}
+
+/* Readable prose only: do not constrain cards, forms, tables or grids. */
+.hero p,
+p.lead,
+.detail-card > p.description {
+    max-width: 75ch;
 }
 
 /* RNF27: formularios y detalles centrados con un ancho de lectura comodo. */
@@ -684,9 +734,11 @@ button.success {
 }
 
 label {
+    font-family: var(--font-body);
+    font-size: var(--fs-small);
     display: block;
     margin-bottom: 7px;
-    font-weight: 750;
+    font-weight: var(--fw-semibold);
 }
 
 input,
@@ -699,6 +751,8 @@ textarea {
     color: var(--charcoal);
     padding: 12px 13px;
     font: inherit;
+    font-family: var(--font-body);
+    min-width: 0;
 }
 
 input:focus,
@@ -741,7 +795,7 @@ textarea:focus {
 
 .data-table th {
     color: var(--muted);
-    font-size: 0.82rem;
+    font-size: var(--fs-small);
     text-transform: uppercase;
 }
 
@@ -792,7 +846,8 @@ textarea:focus {
 }
 
 .description-method legend {
-    font-weight: 750;
+    font-size: var(--fs-small);
+    font-weight: var(--fw-semibold);
 }
 
 .description-method label {
@@ -833,7 +888,7 @@ textarea:focus {
 .ai-status {
     margin: 0;
     color: var(--muted);
-    font-size: 0.95rem;
+    font-size: var(--fs-small);
 }
 
 .ai-status-error {
@@ -848,15 +903,14 @@ textarea:focus {
 .lost-statistics { display: grid; gap: 24px; min-width: 0; }
 .lost-statistics .stats-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
 .lost-statistics .stats-summary .card { padding: 20px; }
-.lost-statistics .stats-summary h2 { font-size: 1rem; }
-.lost-statistics .stats-summary p { font-size: 2rem; font-weight: 750; margin: 8px 0; }
+.lost-statistics .stats-summary p { font-size: 2rem; font-weight: var(--fw-semibold); margin: 8px 0; }
 .lost-statistics .stats-bars { display: grid; gap: 12px; margin: 20px 0; }
 .lost-statistics .stats-track { background: var(--page); border-radius: 4px; overflow: hidden; }
 .lost-statistics .stats-bar { height: 16px; background: var(--primary); }
 .lost-statistics .stats-chart-scroll { overflow-x: auto; margin: 20px 0; }
 .lost-statistics .stats-columns { display: grid; grid-template-columns: repeat(12, 1fr); gap: 12px; min-width: 650px; }
-.lost-statistics .stats-column { text-align: center; font-size: .85rem; }
+.lost-statistics .stats-column { text-align: center; font-size: var(--fs-small); }
 .lost-statistics .stats-column-track { height: 160px; display: flex; align-items: flex-end; background: var(--page); }
 .lost-statistics .stats-column-bar { width: 100%; background: var(--primary); }
-.lost-statistics caption { text-align: left; font-weight: 750; padding: 12px 0; }
+.lost-statistics caption { text-align: left; font-weight: var(--fw-semibold); padding: 12px 0; }
 .lost-statistics .panel { min-width: 0; }
