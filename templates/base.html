@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}BackToYou{% endblock %}</title>
+    <link rel="icon" type="image/png" href="{% static 'images/favicon-bty.png' %}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&amp;family=DM+Serif+Display&amp;display=swap" rel="stylesheet">
@@ -13,12 +14,13 @@
 <body>
     <header class="site-header">
         <div class="header-inner">
-            <a class="brand" href="{% url 'home' %}">
-                <span class="brand-mark">BTY</span>
-                <span>
-                    <span class="brand-name">BackToYou</span>
-                    <span class="brand-subtitle">EAFIT Lost &amp; Found</span>
-                </span>
+            <a class="brand" href="{% url 'home' %}" aria-label="BackToYou">
+                <img class="brand-logo brand-logo-full"
+                     src="{% static 'images/logo-backtoyou-horizontal.png' %}"
+                     width="1292" height="475" alt="BackToYou">
+                <img class="brand-logo brand-logo-compact"
+                     src="{% static 'images/logo-bty.png' %}"
+                     width="417" height="323" alt="" aria-hidden="true">
             </a>
 
             {# RNF27: en pantallas pequenas el menu se abre con este boton (sin JavaScript). #}

@@ -170,7 +170,9 @@ img {
 .brand {
     display: flex;
     align-items: center;
-    gap: 12px;
+    flex: 0 0 auto;
+    min-width: 0;
+    height: 48px;
     color: var(--charcoal);
 }
 
@@ -178,35 +180,33 @@ img {
     text-decoration: none;
 }
 
-.brand-mark {
-    flex-shrink: 0;
-    width: 42px;
-    height: 42px;
-    border-radius: 50%;
-    /* Nivel 1 de ciruela: el logo lleva el acento de la marca. */
-    background: var(--accent);
-    color: var(--on-dark);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 800;
-    font-size: var(--fs-small);
+.brand:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 4px;
+    border-radius: 4px;
 }
 
-.brand-name,
-.brand-subtitle {
+.brand-logo {
     display: block;
+    height: 48px;
+    width: auto;
+    max-width: 100%;
+    object-fit: contain;
+    object-position: left center;
 }
 
-.brand-name {
-    font-size: 1.2rem;
-    font-weight: 800;
+.brand-logo-compact {
+    display: none;
 }
 
-.brand-subtitle {
-    color: var(--muted);
-    font-size: var(--fs-small);
-    font-weight: 500;
+@media (max-width: 600px) {
+    .brand-logo-full {
+        display: none;
+    }
+
+    .brand-logo-compact {
+        display: block;
+    }
 }
 
 .site-nav {
