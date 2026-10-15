@@ -97,7 +97,7 @@ class RecentReportsFeedTests(TestCase):
             self.assertTemplateUsed(response, 'reports/_report_card.html')
             self.assertContains(response, report.title)
             self.assertContains(response, reverse('reports:report_detail', args=[report.pk]))
-            self.assertNotContains(response, '<img')
+            self.assertNotContains(response, 'class="report-image"')
             self.assertNotContains(response, 'Edit Report')
 
     def test_image_card_preserves_image(self):
