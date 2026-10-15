@@ -13,7 +13,7 @@ media/
 # Entorno virtual local
 .venv/
 
-# Token privado de Hugging Face (RF22). Nunca debe subirse a GitHub.
-huggingface.env
+# Configuracion local de Ollama (RF22).
+ollama.env
 *.env
 .env

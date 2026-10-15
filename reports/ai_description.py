@@ -1,9 +1,9 @@
 """RF22 - AI-Based Object Description.
 
-Envia la foto del objeto a un modelo de vision de Hugging Face (Inference
-Providers) y devuelve una sugerencia de titulo, descripcion y categoria.
-Sigue el taller de IA del curso: el token se lee de huggingface.env con
-python-dotenv (ver settings.py).
+Envia la foto del objeto a un modelo de vision que corre en Ollama, en el
+mismo computador, y devuelve una sugerencia de titulo, descripcion y
+categoria. El modelo y la direccion de Ollama se pueden cambiar en ollama.env
+(ver ollama.env.example y settings.py).
 
 La sugerencia nunca crea el reporte: solo llena el formulario para que el
 usuario la revise, la corrija y la envie.
@@ -13,10 +13,9 @@ import base64
 import json
 import logging
 import re
+from urllib.request import Request, urlopen
 
-import httpx2
 from django.conf import settings
-from huggingface_hub import InferenceClient
 
 
 logger = logging.getLogger(__name__)
@@ -44,13 +43,41 @@ INSTRUCTION = (
 # Algunos modelos envuelven el JSON en ```json ... ``` o agregan texto.
 JSON_OBJECT = re.compile(r"\{.*\}", re.DOTALL)
 
+# Segundos que espera el formulario para saber si Ollama esta corriendo.
+# Encendido responde en milisegundos; apagado, Windows tarda en rechazar la
+# conexion, asi que es mejor desactivar el boton que frenar el formulario.
+AVAILABILITY_TIMEOUT = 1
+
 
 class AIDescriptionError(Exception):
     """Error que se le puede mostrar al usuario tal cual."""
 
 
+def _ollama(path, payload=None, timeout=AVAILABILITY_TIMEOUT):
+    """Llama a la API de Ollama y devuelve la respuesta como diccionario."""
+    data = json.dumps(payload).encode("utf-8") if payload is not None else None
+    request = Request(
+        settings.OLLAMA_HOST.rstrip("/") + path,
+        data=data,
+        headers={"Content-Type": "application/json"},
+    )
+    with urlopen(request, timeout=timeout) as response:
+        return json.loads(response.read().decode("utf-8"))
+
+
 def is_available():
-    return bool(settings.HF_TOKEN)
+    """True si Ollama esta corriendo y ya tiene descargado el modelo."""
+    model = settings.OLLAMA_VISION_MODEL
+    if not model:
+        return False
+    try:
+        installed = _ollama("/api/tags").get("models", [])
+    except (OSError, ValueError, AttributeError):
+        # OSError cubre Ollama apagado, sin red y tiempo agotado.
+        return False
+    names = {entry.get("name") for entry in installed if isinstance(entry, dict)}
+    # "ollama pull gemma3" queda guardado como "gemma3:latest".
+    return model in names or f"{model}:latest" in names
 
 
 def _parse_suggestion(text):
@@ -76,7 +103,6 @@ def describe_item_image(image_file, report_type_label, category_names):
 
     image_file.seek(0)
     encoded = base64.b64encode(image_file.read()).decode("ascii")
-    content_type = getattr(image_file, "content_type", "") or "image/jpeg"
 
     prompt = (
         f"{INSTRUCTION}\n\n"
@@ -84,33 +110,37 @@ def describe_item_image(image_file, report_type_label, category_names):
         f"Available categories: {', '.join(category_names) or 'none'}."
     )
 
-    # El usuario espera con el formulario abierto: mejor fallar rapido y que
-    # llene el reporte a mano que dejarlo minutos esperando.
-    client = InferenceClient(provider="auto", api_key=settings.HF_TOKEN, timeout=45)
+    # Ollama obliga al modelo a responder con este JSON (structured outputs).
+    answer_format = {
+        "type": "object",
+        "properties": {
+            "item_visible": {"type": "boolean"},
+            "title": {"type": "string"},
+            "description": {"type": "string"},
+            "category": {"type": "string", "enum": [*category_names, ""]},
+        },
+        "required": ["item_visible", "title", "description", "category"],
+    }
+
     try:
-        response = client.chat.completions.create(
-            model=settings.HF_VISION_MODEL,
-            messages=[
-                {
-                    "role": "user",
-                    "content": [
-                        {"type": "text", "text": prompt},
-                        {
-                            "type": "image_url",
-                            "image_url": {"url": f"data:{content_type};base64,{encoded}"},
-                        },
-                    ],
-                }
-            ],
-            max_tokens=400,
-            temperature=0,
+        # El usuario espera con el formulario abierto: si el modelo tarda
+        # demasiado, mejor que llene el reporte a mano.
+        response = _ollama(
+            "/api/chat",
+            {
+                "model": settings.OLLAMA_VISION_MODEL,
+                "messages": [{"role": "user", "content": prompt, "images": [encoded]}],
+                "format": answer_format,
+                "stream": False,
+                "options": {"temperature": 0, "num_predict": 400},
+            },
+            timeout=settings.OLLAMA_TIMEOUT,
         )
-        suggestion = _parse_suggestion(response.choices[0].message.content)
-    except (httpx2.HTTPError, ValueError, TypeError, IndexError, AttributeError):
-        # httpx2.HTTPError cubre los errores de huggingface_hub (token
-        # invalido, sin creditos, modelo no disponible, tiempo agotado) y los
-        # de red. ValueError cubre JSON invalido (json.JSONDecodeError).
-        logger.exception("RF22: Hugging Face description request failed.")
+        suggestion = _parse_suggestion(response["message"]["content"])
+    except (OSError, ValueError, TypeError, KeyError, AttributeError):
+        # OSError cubre Ollama apagado, modelo no descargado (HTTP 404) y
+        # tiempo agotado. ValueError cubre JSON invalido (json.JSONDecodeError).
+        logger.exception("RF22: Ollama description request failed.")
         raise AIDescriptionError(
             "The AI service could not describe the image right now. "
             "Please fill in the report manually."

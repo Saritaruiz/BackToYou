@@ -41,6 +41,10 @@
                                 AI suggestions are not available right now. Please fill in the report manually.
                             {% endif %}
                         </p>
+                        <div class="ai-progress" id="ai-progress" hidden>
+                            <progress id="ai-progress-bar" max="100" value="0" aria-label="AI suggestion progress"></progress>
+                            <span class="ai-progress-value" id="ai-progress-value">0%</span>
+                        </div>
                     </div>
                 {% endif %}
             {% endfor %}
@@ -63,8 +67,68 @@
                 const methods = form.querySelectorAll('[name="description_method"]');
                 const available = {{ ai_available|yesno:"true,false" }};
                 const initialStatus = status.textContent;
+                const progress = document.getElementById("ai-progress");
+                const progressBar = document.getElementById("ai-progress-bar");
+                const progressValue = document.getElementById("ai-progress-value");
+                // Ollama no informa cuanto lleva analizando la foto, asi que la
+                // barra es una estimacion por tiempo. Se calibra con lo que
+                // tardo la ultima sugerencia en este navegador.
+                const DURATION_KEY = "backtoyou-ai-seconds";
+                const DEFAULT_SECONDS = 90;
                 let revision = 0;
                 let controller = null;
+                let progressTimer = null;
+
+                function expectedSeconds() {
+                    try {
+                        const seconds = Number(localStorage.getItem(DURATION_KEY));
+                        if (seconds > 0) return seconds;
+                    } catch (error) {}
+                    return DEFAULT_SECONDS;
+                }
+
+                function rememberSeconds(seconds) {
+                    // Promedio con la estimacion anterior: una foto que Ollama
+                    // ya habia analizado responde mucho mas rapido.
+                    try {
+                        localStorage.setItem(DURATION_KEY, String(Math.round((expectedSeconds() + seconds) / 2)));
+                    } catch (error) {}
+                }
+
+                function showProgress(percent) {
+                    progressBar.value = percent;
+                    progressValue.textContent = Math.floor(percent) + "%";
+                }
+
+                function startProgress() {
+                    stopProgress();
+                    const started = Date.now();
+                    const expected = expectedSeconds();
+                    progress.hidden = false;
+                    showProgress(0);
+                    progressTimer = setInterval(function () {
+                        const elapsed = (Date.now() - started) / 1000;
+                        // Llega a 95 % en el tiempo esperado; si tarda mas,
+                        // sigue subiendo despacio sin pasar de 99 %.
+                        showProgress(elapsed < expected
+                            ? 95 * elapsed / expected
+                            : 95 + 4 * (1 - Math.exp((expected - elapsed) / expected)));
+                    }, 250);
+                    return started;
+                }
+
+                function finishProgress(started) {
+                    clearInterval(progressTimer);
+                    progressTimer = null;
+                    showProgress(100);
+                    rememberSeconds((Date.now() - started) / 1000);
+                }
+
+                function stopProgress() {
+                    clearInterval(progressTimer);
+                    progressTimer = null;
+                    progress.hidden = true;
+                }
 
                 function isAIMode() {
                     return form.querySelector('[name="description_method"]:checked')?.value === "ai";
@@ -74,6 +138,7 @@
                     revision++;
                     if (controller) controller.abort();
                     controller = null;
+                    stopProgress();
                     button.disabled = !available;
                     setStatus(initialStatus, "");
                 }
@@ -112,7 +177,8 @@
                     button.disabled = true;
                     const requestRevision = ++revision;
                     controller = new AbortController();
-                    setStatus("Analyzing the photo. This can take a few seconds...", "");
+                    setStatus("Analyzing the photo. This can take up to two minutes...", "");
+                    const started = startProgress();
 
                     try {
                         {% if ai_available %}
@@ -125,10 +191,12 @@
                         if (requestRevision !== revision || !isAIMode()) return;
 
                         if (!response.ok) {
+                            stopProgress();
                             setStatus(result.error || "The AI suggestion failed. Please fill in the report manually.", "error");
                             return;
                         }
 
+                        finishProgress(started);
                         form.querySelector('[name="title"]').value = result.title;
                         form.querySelector('[name="description"]').value = result.description;
                         if (result.category_id) {
@@ -144,6 +212,7 @@
                         {% endif %}
                     } catch (error) {
                         if (requestRevision !== revision || error.name === "AbortError") return;
+                        stopProgress();
                         setStatus("The AI suggestion failed. Please fill in the report manually.", "error");
                     } finally {
                         if (requestRevision === revision) {

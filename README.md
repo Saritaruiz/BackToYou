@@ -88,7 +88,18 @@ python manage.py runserver
 
 ### AI-Based Object Description (FR22)
 
-The AI suggestion button uses Hugging Face Inference Providers. To enable it, copy `huggingface.env.example` as `huggingface.env` and add your own Hugging Face token (Settings > Access Tokens, with the "Make calls to Inference Providers" permission). `huggingface.env` is ignored by Git and must never be committed. Without a token, the rest of the application works normally and the AI button is disabled.
+The AI suggestion button uses a vision model that runs locally with [Ollama](https://ollama.com). No token or internet connection is needed once the model is downloaded.
+
+1. Install Ollama from https://ollama.com/download and leave it running.
+2. Download the vision model (about 3 GB):
+
+   ```bash
+   ollama pull gemma3:4b
+   ```
+
+3. Start the app. The AI button is enabled when Ollama is running and has the model.
+
+To use another vision model or another Ollama address, copy `ollama.env.example` as `ollama.env` and change the values. If Ollama is not running or the model is missing, the rest of the application works normally and the AI button is disabled.
 
 ### Tests
 

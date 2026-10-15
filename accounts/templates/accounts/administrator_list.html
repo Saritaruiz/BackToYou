@@ -6,7 +6,7 @@
     <section class="hero">
         <span class="role-pill">Administrator</span>
         <h1>Administrator Accounts</h1>
-        <p>Create, edit, activate, or deactivate administrators, and grant or revoke administrator access. At least one active administrator must always remain.</p>
+        <p>Create, activate, or deactivate administrators, and grant or revoke administrator access. At least one active administrator must always remain.</p>
         <div class="actions">
             <a class="button" href="{% url 'administration_administrator_create' %}">
                 New Administrator
@@ -38,12 +38,6 @@
                         <td>
                             <div class="table-actions">
                                 {% if account.role == "ADMINISTRATOR" %}
-                                    <a
-                                        class="button ghost"
-                                        href="{% url 'administration_administrator_edit' account.id %}"
-                                    >
-                                        Edit
-                                    </a>
                                     <a
                                         class="button secondary"
                                         href="{% url 'administration_administrator_status' account.id %}"

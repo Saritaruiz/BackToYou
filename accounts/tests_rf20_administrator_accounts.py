@@ -179,10 +179,10 @@ class AdministratorAccountsTests(TestCase):
                 self.assertEqual(self.client.get(url).status_code, 403)
                 self.assertEqual(self.client.post(url).status_code, 403)
 
-    def test_list_offers_create_edit_and_status_actions(self):
+    def test_list_offers_create_and_status_actions(self):
         response = self.client.get(reverse("administration_administrator_list"))
 
         self.assertContains(response, reverse("administration_administrator_create"))
-        self.assertContains(response, reverse("administration_administrator_edit", args=[self.other_admin.pk]))
+        self.assertNotContains(response, reverse("administration_administrator_edit", args=[self.other_admin.pk]))
         self.assertContains(response, self.status_url(self.other_admin))
         self.assertNotContains(response, reverse("administration_administrator_edit", args=[self.regular.pk]))

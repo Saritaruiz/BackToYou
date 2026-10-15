@@ -88,7 +88,7 @@ class DescriptionMethodSelectionTests(TestCase):
                     self.assertNotContains(response, 'id="ai-controls" hidden')
         self.assertFalse(ItemReport.objects.exists())
 
-    @override_settings(HF_TOKEN='')
+    @override_settings(OLLAMA_VISION_MODEL='')
     def test_unavailable_ai_allows_selection_and_manual_fallback(self):
         response = self.client.get(self.url())
         self.assertContains(response, 'AI suggestions are not available right now')

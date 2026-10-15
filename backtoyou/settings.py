@@ -18,10 +18,9 @@ from dotenv import load_dotenv
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# El token de Hugging Face (RF22) vive en huggingface.env, que esta en
-# .gitignore. Si el archivo no existe no pasa nada: la sugerencia con IA
-# queda desactivada y el resto de la app funciona igual.
-load_dotenv(BASE_DIR / "huggingface.env")
+# La configuracion de Ollama (RF22) se puede cambiar en ollama.env, que esta
+# en .gitignore. Si el archivo no existe se usan los valores por defecto.
+load_dotenv(BASE_DIR / "ollama.env")
 
 
 # Quick-start development settings - unsuitable for production
@@ -197,7 +196,11 @@ MEDIA_URL ="/media/"
 MEDIA_ROOT = BASE_DIR / MEDIA_DIR
 
 
-# RF22 - AI-Based Object Description (Hugging Face Inference Providers)
-# Se configuran en huggingface.env (ver huggingface.env.example).
-HF_TOKEN = os.environ.get("HF_TOKEN", "")
-HF_VISION_MODEL = os.environ.get("HF_VISION_MODEL", "google/gemma-3-4b-it")
+# RF22 - AI-Based Object Description (Ollama, corre en el mismo computador)
+# Se pueden cambiar en ollama.env (ver ollama.env.example). Si Ollama no esta
+# corriendo o no tiene el modelo, el boton de IA queda desactivado.
+OLLAMA_HOST = os.environ.get("OLLAMA_HOST", "http://127.0.0.1:11434")
+OLLAMA_VISION_MODEL = os.environ.get("OLLAMA_VISION_MODEL", "gemma3:4b")
+# Segundos que espera la respuesta. En un computador sin tarjeta grafica el
+# modelo tarda cerca de minuto y medio en analizar la foto.
+OLLAMA_TIMEOUT = int(os.environ.get("OLLAMA_TIMEOUT", "180"))
