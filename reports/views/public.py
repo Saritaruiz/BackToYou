@@ -69,12 +69,21 @@ def report_detail(request, report_id):
     if report.status != ItemReport.Status.ACTIVE and not is_creator:
         raise Http404("This report is not available.")
 
+    # Los mensajes recibidos solo los ve el creador del reporte: sin esto,
+    # RF08 guarda el mensaje pero el destinatario no tiene donde leerlo.
+    contact_messages = (
+        report.contact_messages.select_related("sender").order_by("-created_at", "-id")
+        if is_creator
+        else []
+    )
+
     return render(
         request,
         "reports/report_detail.html",
         {
             "report": report,
             "is_creator": is_creator,
+            "contact_messages": contact_messages,
             "can_contact_reporter": (
                 request.user.is_authenticated
                 and not is_creator
