@@ -73,7 +73,12 @@ class ReportHistoryTests(TestCase):
         self.assertEqual(len(response.context["reports"]), 4)
         for status, label in statuses.items():
             self.assertContains(response, f"Report {status}")
-            self.assertContains(response, f'<span class="status-pill">{label}</span>', html=False)
+            # NFR32: cada estado tiene su propia clase, ademas del texto.
+            self.assertContains(
+                response,
+                f'<span class="status-pill status-{status.lower()}">{label}</span>',
+                html=False,
+            )
 
     # Given an authenticated user, when the report history is displayed, then
     # the system does not include reports created by other users.

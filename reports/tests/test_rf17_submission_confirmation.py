@@ -3,10 +3,11 @@
 from django.contrib.auth import get_user_model
 from django.contrib.messages import get_messages
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 
 from ..models import Category, ItemReport
+from .test_rf22_ai_description import png_upload
 
 
 CONFIRMATION_MESSAGE = (
@@ -15,6 +16,11 @@ CONFIRMATION_MESSAGE = (
 )
 
 
+# Los reportes Found exigen foto; se guarda en memoria, no en media_local.
+@override_settings(STORAGES={
+    "default": {"BACKEND": "django.core.files.storage.InMemoryStorage"},
+    "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
+})
 class ReportSubmissionConfirmationTests(TestCase):
     def setUp(self):
         User = get_user_model()
@@ -57,7 +63,7 @@ class ReportSubmissionConfirmationTests(TestCase):
     def test_successful_found_report_creation_shows_submission_confirmation(self):
         response = self.client.post(
             reverse("reports:create_found_report"),
-            self.valid_payload(title="Found wallet", location="Block 38"),
+            self.valid_payload(title="Found wallet", location="Block 38", image=png_upload()),
             follow=True,
         )
 
@@ -76,7 +82,7 @@ class ReportSubmissionConfirmationTests(TestCase):
     def test_found_report_is_saved_as_pending_review_with_creator_and_type(self):
         self.client.post(
             reverse("reports:create_found_report"),
-            self.valid_payload(title="Found wallet"),
+            self.valid_payload(title="Found wallet", image=png_upload()),
         )
 
         report = ItemReport.objects.get(title="Found wallet")

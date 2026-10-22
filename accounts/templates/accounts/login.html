@@ -3,28 +3,38 @@
 {% block title %}Login | BackToYou{% endblock %}
 
 {% block content %}
-    <section class="form-card">
-        <h1 class="page-title">Login</h1>
-        <p class="lead">Access BackToYou with your institutional email.</p>
+    <div class="auth-layout">
+        {# NFR38: mitad decorativa de la pantalla dividida. #}
+        <aside class="auth-art" aria-hidden="true">
+            <span class="kicker">Nº 001 · BackToYou</span>
+            <p class="auth-quote">Everything lost has a <em>way back.</em></p>
+            <p class="auth-note">Only for @eafit.edu.co accounts</p>
+        </aside>
 
-        <form method="post">
-            {% csrf_token %}
-            {{ form.non_field_errors }}
+        <section class="form-card">
+            <span class="kicker">Login</span>
+            <h1 class="page-title">Welcome back.</h1>
+            <p class="lead">Access BackToYou with your institutional email.</p>
 
-            {% for field in form %}
-                <div class="form-field">
-                    {{ field.label_tag }}
-                    {{ field }}
-                    {{ field.errors }}
-                </div>
-            {% endfor %}
+            <form method="post">
+                {% csrf_token %}
+                {{ form.non_field_errors }}
 
-            <button type="submit">Login</button>
-        </form>
+                {% for field in form %}
+                    <div class="form-field">
+                        {{ field.label_tag }}
+                        {{ field }}
+                        {{ field.errors }}
+                    </div>
+                {% endfor %}
 
-        <p>
-            Don't have an account?
-            <a href="{% url 'accounts:register' %}">Register</a>
-        </p>
-    </section>
+                <button type="submit">Login</button>
+            </form>
+
+            <p>
+                Don't have an account?
+                <a href="{% url 'accounts:register' %}">Register</a>
+            </p>
+        </section>
+    </div>
 {% endblock %}

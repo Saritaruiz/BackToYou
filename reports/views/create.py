@@ -35,6 +35,7 @@ def _create_report(request, report_type):
         form = ItemReportCreationForm(
             request.POST,
             request.FILES,
+            report_type=report_type,
         )
 
         if form.is_valid():
@@ -56,7 +57,7 @@ def _create_report(request, report_type):
             )
 
     else:
-        form = ItemReportCreationForm()
+        form = ItemReportCreationForm(report_type=report_type)
 
     report_type_label = (
         "Lost"

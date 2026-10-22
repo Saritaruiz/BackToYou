@@ -6,6 +6,10 @@
     <article class="detail-card panel">
         <span class="role-pill">Moderation Review</span>
         <h1 class="page-title">Review Report</h1>
+        <div class="pill-row">
+            <span class="type-pill type-{{ report.report_type|lower }}">{{ report.get_report_type_display }}</span>
+            <span class="status-pill status-{{ report.status|lower }}">{{ report.get_status_display }}</span>
+        </div>
 
         {% if report.image %}
             <img
@@ -49,23 +53,29 @@
         <h2>Description</h2>
         <p class="description">{{ report.description }}</p>
 
+        {# Una accion principal; rechazar es secundaria y eliminar va aparte. #}
         <form class="moderation-actions" method="post">
             {% csrf_token %}
-            <button class="success" type="submit" name="action" value="approve">
+            <button type="submit" name="action" value="approve">
                 Approve
             </button>
-            <button class="danger" type="submit" name="action" value="reject">
+            <button class="secondary" type="submit" name="action" value="reject">
                 Reject
             </button>
-            <a class="button ghost" href="{% url 'administration_report_edit' report.id %}">
+            <a class="text-link" href="{% url 'administration_report_edit' report.id %}">
                 Edit
-            </a>
-            <a class="button danger" href="{% url 'administration_report_delete' report.id %}">
-                Remove
             </a>
             <a class="button ghost" href="{% url 'administration_pending_reports' %}">
                 Back to Pending Reports
             </a>
         </form>
+
+        <div class="danger-zone">
+            <div>
+                <p class="danger-title">Danger zone</p>
+                <p class="danger-text">Remove a report that should never become public. It cannot be undone.</p>
+            </div>
+            <a class="danger-link" href="{% url 'administration_report_delete' report.id %}">Remove</a>
+        </div>
     </article>
 {% endblock %}

@@ -1,4 +1,4 @@
-{% load static %}
+{% load static tz %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,42 +9,62 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&amp;family=DM+Serif+Display&amp;display=swap" rel="stylesheet">
+    {# NFR38: la cursiva de DM Serif Display para la palabra destacada de los titulares. #}
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@1&amp;display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 </head>
 <body>
-    <header class="site-header">
+    {% with current=request.resolver_match.url_name %}
+    {# NFR38: la cabecera de periodico solo va en el inicio; las demas paginas usan una sola fila. #}
+    <header class="site-header{% if current != 'home' %} is-compact{% endif %}">
         <div class="header-inner">
+            {# NFR38: franja superior tipo periodico, con la fecha del dia. #}
+            <div class="masthead-top">
+                <p>Universidad EAFIT · Lost &amp; Found</p>
+                {# La app guarda las horas en UTC; la fecha visible es la de Medellin. #}
+                <p class="masthead-date">{% timezone "America/Bogota" %}{% now "l, F j, Y" %}{% endtimezone %}</p>
+                {# Solo el nombre: el correo nunca se muestra en la cabecera. #}
+                <p class="masthead-greeting">
+                    {% if user.is_authenticated and user.first_name %}
+                        Hello, {{ user.first_name }}
+                    {% else %}
+                        For the EAFIT community
+                    {% endif %}
+                </p>
+            </div>
+
             <a class="brand" href="{% url 'home' %}" aria-label="BackToYou">
                 <img class="brand-logo brand-logo-full"
                      src="{% static 'images/logo-backtoyou-horizontal.png' %}"
-                     width="1292" height="475" alt="BackToYou">
+                     width="1154" height="241" alt="BackToYou">
                 <img class="brand-logo brand-logo-compact"
                      src="{% static 'images/logo-bty.png' %}"
-                     width="417" height="323" alt="" aria-hidden="true">
+                     width="355" height="182" alt="" aria-hidden="true">
             </a>
 
             {# RNF27: en pantallas pequenas el menu se abre con este boton (sin JavaScript). #}
             <input class="nav-toggle" type="checkbox" id="nav-toggle">
             <label class="nav-toggle-label" for="nav-toggle">Menu</label>
 
+            {# NFR31: aria-current marca la seccion en la que esta la persona. #}
             <nav class="site-nav" aria-label="Main navigation">
-                <a href="{% url 'home' %}">Home</a>
-                <a href="{% url 'reports:report_list' %}">Reports</a>
+                <a href="{% url 'home' %}"{% if current == "home" %} aria-current="page"{% endif %}>Home</a>
+                <a href="{% url 'reports:report_list' %}"{% if current == "report_list" or current == "report_detail" or current == "contact_reporter" %} aria-current="page"{% endif %}>Reports</a>
 
                 {% if user.is_authenticated %}
-                    <a href="{% url 'reports:create_lost_report' %}">Create Lost</a>
-                    <a href="{% url 'reports:create_found_report' %}">Create Found</a>
-                    <a href="{% url 'reports:my_reports' %}">My Reports</a>
+                    <a href="{% url 'reports:create_lost_report' %}"{% if current == "create_lost_report" %} aria-current="page"{% endif %}>Create Lost</a>
+                    <a href="{% url 'reports:create_found_report' %}"{% if current == "create_found_report" %} aria-current="page"{% endif %}>Create Found</a>
+                    <a href="{% url 'reports:my_reports' %}"{% if current == "my_reports" or current == "edit_report" or current == "delete_report" or current == "mark_report_recovered" %} aria-current="page"{% endif %}>My Reports</a>
                     {% if user.role == "ADMINISTRATOR" %}
-                        <details class="nav-dropdown">
+                        <details class="nav-dropdown{% if 'administration' in current %} is-current{% endif %}">
                             <summary>Administration</summary>
                             <div class="nav-dropdown-menu">
-                                <a href="{% url 'administration' %}">Overview</a>
-                                <a href="{% url 'administration_lost_statistics' %}">Lost Item Statistics</a>
-                                <a href="{% url 'administration_pending_reports' %}">Pending Reports</a>
-                                <a href="{% url 'administration_category_list' %}">Categories</a>
-                                <a href="{% url 'administration_administrator_list' %}">Administrators</a>
-                                <a href="{% url 'administration_user_list' %}">User Accounts</a>
+                                <a href="{% url 'administration' %}"{% if current == "administration" %} aria-current="page"{% endif %}>Overview</a>
+                                <a href="{% url 'administration_lost_statistics' %}"{% if current == "administration_lost_statistics" %} aria-current="page"{% endif %}>Lost Item Statistics</a>
+                                <a href="{% url 'administration_pending_reports' %}"{% if current == "administration_pending_reports" %} aria-current="page"{% endif %}>Pending Reports</a>
+                                <a href="{% url 'administration_category_list' %}"{% if current == "administration_category_list" %} aria-current="page"{% endif %}>Categories</a>
+                                <a href="{% url 'administration_administrator_list' %}"{% if current == "administration_administrator_list" %} aria-current="page"{% endif %}>Administrators</a>
+                                <a href="{% url 'administration_user_list' %}"{% if current == "administration_user_list" %} aria-current="page"{% endif %}>User Accounts</a>
                             </div>
                         </details>
                     {% endif %}
@@ -53,12 +73,15 @@
                         <button type="submit">Logout</button>
                     </form>
                 {% else %}
-                    <a href="{% url 'accounts:register' %}">Register</a>
-                    <a href="{% url 'accounts:login' %}">Login</a>
+                    <a href="{% url 'accounts:register' %}"{% if current == "register" %} aria-current="page"{% endif %}>Register</a>
+                    <a href="{% url 'accounts:login' %}"{% if current == "login" %} aria-current="page"{% endif %}>Login</a>
                 {% endif %}
             </nav>
         </div>
     </header>
+    {% endwith %}
+
+    {% block after_header %}{% endblock %}
 
     <main class="page-shell">
         {% if messages %}
@@ -76,7 +99,46 @@
 
     <footer class="site-footer">
         <div class="footer-inner">
-            <p>BackToYou · University Lost and Found Web Application</p>
+            <p class="footer-slogan">Lost. Found. <em>Back to You.</em></p>
+
+            <div class="footer-columns">
+                <div>
+                    <p class="footer-heading">BackToYou</p>
+                    <p>The lost and found of the EAFIT community. Report it, find it, return it.</p>
+                </div>
+                <div>
+                    <p class="footer-heading">Explore</p>
+                    <ul class="footer-links">
+                        <li><a href="{% url 'home' %}">Home</a></li>
+                        <li><a href="{% url 'reports:report_list' %}">All reports</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <p class="footer-heading">Account</p>
+                    <ul class="footer-links">
+                        {% if user.is_authenticated %}
+                            <li><a href="{% url 'reports:create_lost_report' %}">Report a lost item</a></li>
+                            <li><a href="{% url 'reports:create_found_report' %}">Report a found item</a></li>
+                            <li><a href="{% url 'reports:my_reports' %}">My reports</a></li>
+                        {% else %}
+                            <li><a href="{% url 'accounts:register' %}">Register</a></li>
+                            <li><a href="{% url 'accounts:login' %}">Login</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+                <div>
+                    <p class="footer-heading">Made by</p>
+                    <ul class="footer-links">
+                        <li>Sara Ruiz</li>
+                        <li>Isabel Acevedo Acosta</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-base">
+                <p>© {% now "Y" %} BackToYou</p>
+                <p>University Lost and Found Web Application</p>
+            </div>
         </div>
     </footer>
 </body>

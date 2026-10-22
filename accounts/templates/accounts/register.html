@@ -3,28 +3,38 @@
 {% block title %}Register | BackToYou{% endblock %}
 
 {% block content %}
-    <section class="form-card">
-        <h1 class="page-title">Register</h1>
-        <p class="lead">Create your BackToYou account with an institutional EAFIT email.</p>
+    <div class="auth-layout">
+        {# NFR38: mitad decorativa de la pantalla dividida. #}
+        <aside class="auth-art" aria-hidden="true">
+            <span class="kicker">Nº 002 · BackToYou</span>
+            <p class="auth-quote">Report it. Find it. <em>Return it.</em></p>
+            <p class="auth-note">Only for @eafit.edu.co accounts</p>
+        </aside>
 
-        <form method="post">
-            {% csrf_token %}
-            {{ form.non_field_errors }}
+        <section class="form-card">
+            <span class="kicker">Register</span>
+            <h1 class="page-title">Join the community.</h1>
+            <p class="lead">Create your BackToYou account with an institutional EAFIT email.</p>
 
-            {% for field in form %}
-                <div class="form-field">
-                    {{ field.label_tag }}
-                    {{ field }}
-                    {{ field.errors }}
-                </div>
-            {% endfor %}
+            <form method="post">
+                {% csrf_token %}
+                {{ form.non_field_errors }}
 
-            <button type="submit">Register</button>
-        </form>
+                {% for field in form %}
+                    <div class="form-field">
+                        {{ field.label_tag }}
+                        {{ field }}
+                        {{ field.errors }}
+                    </div>
+                {% endfor %}
 
-        <p>
-            Already registered?
-            <a href="{% url 'accounts:login' %}">Login</a>
-        </p>
-    </section>
+                <button type="submit">Register</button>
+            </form>
+
+            <p>
+                Already registered?
+                <a href="{% url 'accounts:login' %}">Login</a>
+            </p>
+        </section>
+    </div>
 {% endblock %}

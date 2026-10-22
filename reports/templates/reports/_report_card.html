@@ -1,36 +1,50 @@
-<article class="card">
-    {% if report.image %}
-        <img
-            class="report-image"
-            src="{{ report.image.url }}"
-            alt="{{ report.title }}"
-        >
-    {% endif %}
-
-    <div class="card-body">
-        <span class="status-pill">{{ report.get_status_display }}</span>
-        <h2>{{ report.title }}</h2>
-        <div class="meta-grid">
-            <div class="meta-item">
-                <span class="meta-label">Type</span>
-                {{ report.get_report_type_display }}
-            </div>
-            <div class="meta-item">
-                <span class="meta-label">Category</span>
-                {{ report.category.name }}
-            </div>
-            <div class="meta-item">
-                <span class="meta-label">Location</span>
-                {{ report.location }}
-            </div>
-            <div class="meta-item">
-                <span class="meta-label">Date</span>
-                {{ report.event_date }}
-            </div>
+{% load icons %}
+{% if layout == "row" %}
+    {# Reporte sin foto en el indice: una fila compacta con el icono de su categoria. #}
+    <article class="report-row">
+        <div class="report-row-icon">{% category_icon report.category.name %}</div>
+        <p class="report-row-number">Nº {{ report.id|stringformat:"04d" }}</p>
+        <div class="report-row-main">
+            <h3 class="ledger-title">{{ report.title }}</h3>
+            <p class="card-meta">{{ report.category.name }} · {{ report.location }} · {{ report.event_date|date:"M j, Y" }}</p>
         </div>
-        <p class="description">{{ report.description|truncatewords:24 }}</p>
-        <a class="button" href="{% url 'reports:report_detail' report.id %}">
-            View Details
-        </a>
-    </div>
-</article>
+        <div class="pill-row">
+            <span class="type-pill type-{{ report.report_type|lower }}">{{ report.get_report_type_display }}</span>
+            <span class="status-pill status-{{ report.status|lower }}">{{ report.get_status_display }}</span>
+        </div>
+        <a class="text-link" href="{% url 'reports:report_detail' report.id %}">View Details</a>
+    </article>
+{% else %}
+    <article class="card">
+        {% if report.image %}
+            <img
+                class="report-image"
+                src="{{ report.image.url }}"
+                alt="{{ report.title }}"
+            >
+        {% else %}
+            {# NFR37: sin foto, el icono de la categoria en vez de una caja vacia. #}
+            <div class="report-placeholder">
+                {% category_icon report.category.name %}
+                <span class="placeholder-note">No photo</span>
+            </div>
+        {% endif %}
+
+        <div class="card-body">
+            <p class="card-kicker">
+                <span>Nº {{ report.id|stringformat:"04d" }}</span>
+                <span>{{ report.event_date|date:"M j, Y" }}</span>
+            </p>
+            <div class="pill-row">
+                <span class="type-pill type-{{ report.report_type|lower }}">{{ report.get_report_type_display }}</span>
+                <span class="status-pill status-{{ report.status|lower }}">{{ report.get_status_display }}</span>
+            </div>
+            <h3 class="card-title">{{ report.title }}</h3>
+            <p class="card-meta">{{ report.category.name }} · {{ report.location }}</p>
+            <p class="description">{{ report.description|truncatewords:18 }}</p>
+            <a class="text-link" href="{% url 'reports:report_detail' report.id %}">
+                View Details
+            </a>
+        </div>
+    </article>
+{% endif %}

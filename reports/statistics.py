@@ -1,5 +1,5 @@
 """RF25: read-only statistics for currently stored Lost submissions."""
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from django.db.models import Count, Q
 from django.db.models.functions import TruncMonth
@@ -49,3 +49,31 @@ def lost_statistics():
         row['percent'] = round(100 * row['total'] / maximum, 2)
     return {'summary': summary, 'categories': categories, 'months': months,
             'statistics_timezone': str(tz)}
+
+
+def community_numbers():
+    """Inicio: numeros reales que muestran que BackToYou funciona.
+
+    La tasa de recuperacion es la misma de RF25: Recovered / (Active +
+    Recovered) entre los reportes Lost.
+    """
+    now = timezone.now()
+    last_day = now - timedelta(days=1)
+    active = Q(status=ItemReport.Status.ACTIVE)
+    recovered = Q(status=ItemReport.Status.RECOVERED)
+    lost = Q(report_type=ItemReport.ReportType.LOST)
+    # Un reporte se publica cuando lo aprueban; sin fecha de moderacion
+    # cuenta su fecha de creacion, como en el feed de RF24.
+    published_last_day = Q(moderated_at__gte=last_day) | Q(moderated_at__isnull=True, created_at__gte=last_day)
+
+    numbers = ItemReport.objects.aggregate(
+        active=Count('pk', filter=active),
+        recovered=Count('pk', filter=recovered),
+        returned_this_week=Count('pk', filter=recovered & Q(recovered_at__gte=now - timedelta(days=7))),
+        new_last_day=Count('pk', filter=active & published_last_day),
+        lost_active=Count('pk', filter=lost & active),
+        lost_recovered=Count('pk', filter=lost & recovered),
+    )
+    approved = numbers.pop('lost_active') + numbers['lost_recovered']
+    numbers['recovery_rate'] = round(100 * numbers.pop('lost_recovered') / approved, 1) if approved else None
+    return numbers

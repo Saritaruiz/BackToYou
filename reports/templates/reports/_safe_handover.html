@@ -1,0 +1,16 @@
+{% load icons %}
+{# Guia de entrega segura: va en el inicio y en el detalle de cada reporte. #}
+<aside class="handover" aria-labelledby="handover-heading">
+    <div class="handover-head">
+        {% ui_icon "shield" %}
+        <div>
+            <span class="kicker">Before you meet</span>
+            <h2 id="handover-heading">Return it <em>safely</em></h2>
+        </div>
+    </div>
+    <ul class="handover-tips">
+        <li>{% ui_icon "check" %}<span>Meet at a <strong>campus security point</strong> or another busy place, never somewhere empty.</span></li>
+        <li>{% ui_icon "chat" %}<span>Ask for <strong>a detail only the owner knows</strong>: a sticker, a scratch, what was inside.</span></li>
+        <li>{% ui_icon "check" %}<span>Never share your <strong>password or personal documents</strong> in the messages.</span></li>
+    </ul>
+</aside>

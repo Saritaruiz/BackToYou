@@ -15,14 +15,24 @@ from ..email_notifications import notify_report_contact
 from ..forms import ContactMessageForm
 from ..models import Category, ItemReport
 from ..querysets import public_reports, recent_public_reports
+from ..statistics import community_numbers
 
 
 def home(request):
-    return render(request, "home.html", {"recent_reports": recent_public_reports()})
+    return render(
+        request,
+        "home.html",
+        {
+            "recent_reports": recent_public_reports(),
+            # Buscador del inicio: numeros reales y atajos por categoria.
+            "numbers": community_numbers(),
+            "categories": Category.objects.order_by("name"),
+        },
+    )
 
 
 def report_list(request):
-    reports = public_reports().order_by("-created_at", "-id")
+    reports = public_reports().select_related("category").order_by("-created_at", "-id")
 
     query = request.GET.get("q")
     category_id = request.GET.get("category")
@@ -42,12 +52,17 @@ def report_list(request):
     if report_type:
         reports = reports.filter(report_type=report_type)
 
-    categories = Category.objects.all().order_by("name") 
+    categories = Category.objects.all().order_by("name")
+    reports = list(reports)
     return render(
         request,
         "reports/report_list.html",
         {
             "reports": reports,
+            # Los reportes con foto se ven como tarjetas; los demas, como
+            # filas compactas con el icono de su categoria.
+            "reports_with_photo": [report for report in reports if report.image],
+            "reports_without_photo": [report for report in reports if not report.image],
             "categories": categories,
             "query": query,
             "selected_category": category_id,

@@ -1,94 +1,126 @@
 {% extends "base.html" %}
+{% load icons %}
 
 {% block title %}{{ report.title }} | BackToYou{% endblock %}
 
 {% block content %}
-    <article class="detail-card panel">
-        {% if report.image %}
-            <img
-                class="report-image detail"
-                src="{{ report.image.url }}"
-                alt="{{ report.title }}"
-            >
-        {% endif %}
+    <article class="report-detail">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="{% url 'reports:report_list' %}">Reports</a>
+            <span aria-hidden="true">/</span>
+            <span>{{ report.category.name }}</span>
+            <span aria-hidden="true">/</span>
+            <span aria-current="page">Nº {{ report.id|stringformat:"04d" }}</span>
+        </nav>
 
-        <span class="status-pill">{{ report.get_status_display }}</span>
-        <h1 class="page-title">{{ report.title }}</h1>
+        <div class="report-detail-grid">
+            <figure class="report-figure">
+                {% if report.image %}
+                    <img
+                        class="report-image detail"
+                        src="{{ report.image.url }}"
+                        alt="{{ report.title }}"
+                    >
+                    <figcaption>Fig. 1 — Photo uploaded by the reporter.</figcaption>
+                {% else %}
+                    <div class="report-placeholder">
+                        {% category_icon report.category.name %}
+                    </div>
+                    <figcaption>No photo was uploaded for this report.</figcaption>
+                {% endif %}
+            </figure>
 
-        <div class="meta-grid">
-            <div class="meta-item">
-                <span class="meta-label">Type</span>
-                {{ report.get_report_type_display }}
-            </div>
-            <div class="meta-item">
-                <span class="meta-label">Category</span>
-                {{ report.category.name }}
-            </div>
-            <div class="meta-item">
-                <span class="meta-label">Location</span>
-                {{ report.location }}
-            </div>
-            <div class="meta-item">
-                <span class="meta-label">Date</span>
-                {{ report.event_date }}
-            </div>
-            <div class="meta-item">
-                <span class="meta-label">Status</span>
-                {{ report.get_status_display }}
-            </div>
-            <div class="meta-item">
-                <span class="meta-label">Reported by</span>
-                BackToYou community member
+            <div class="report-detail-body">
+                <div class="pill-row">
+                    <span class="type-pill type-{{ report.report_type|lower }}">{{ report.get_report_type_display }}</span>
+                    <span class="status-pill status-{{ report.status|lower }}">{{ report.get_status_display }}</span>
+                </div>
+                <h1 class="page-title">{{ report.title }}</h1>
+
+                <div class="meta-grid facts">
+                    <div class="meta-item">
+                        <span class="meta-label">Type</span>
+                        {{ report.get_report_type_display }}
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Category</span>
+                        <span class="category-name">{% category_icon report.category.name %}{{ report.category.name }}</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Location</span>
+                        {{ report.location }}
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Date</span>
+                        {{ report.event_date }}
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Status</span>
+                        {{ report.get_status_display }}
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Reported by</span>
+                        BackToYou community member
+                    </div>
+                </div>
+
+                <h2 class="section-label">Description</h2>
+                <p class="description drop-cap">{{ report.description }}</p>
+
+                {# Una sola accion principal; editar es un enlace y borrar va aparte. #}
+                <div class="actions">
+                    {% if can_contact_reporter %}
+                        <a class="button" href="{% url 'reports:contact_reporter' report.id %}">
+                            Contact Reporter
+                        </a>
+                    {% endif %}
+                    {% if can_mark_recovered %}
+                        <a class="button" href="{% url 'reports:mark_report_recovered' report.id %}">
+                            Mark as Recovered
+                        </a>
+                    {% endif %}
+                    {% if can_edit_report %}
+                        <a class="text-link" href="{% url 'reports:edit_report' report.id %}">
+                            Edit Report
+                        </a>
+                    {% endif %}
+                    {% if is_creator %}
+                        <a class="button ghost" href="{% url 'reports:my_reports' %}">
+                            Back to My Reports
+                        </a>
+                    {% else %}
+                        <a class="button ghost" href="{% url 'reports:report_list' %}">
+                            Back to Reports
+                        </a>
+                    {% endif %}
+                </div>
+
+                {% if report.status == "ACTIVE" %}
+                    {% include "reports/_safe_handover.html" %}
+                {% endif %}
+
+                {% if can_delete_report %}
+                    <div class="danger-zone">
+                        <div>
+                            <p class="danger-title">Danger zone</p>
+                            <p class="danger-text">Deleting removes the report and the messages about it. It cannot be undone.</p>
+                        </div>
+                        <a class="danger-link" href="{% url 'reports:delete_report' report.id %}">Delete Report</a>
+                    </div>
+                {% endif %}
             </div>
         </div>
-
-        <h2>Description</h2>
-        <p class="description">{{ report.description }}</p>
 
         {% if is_creator and contact_messages %}
-            <h2>Messages about this report</h2>
-            <div class="messages">
+            <section class="letters" aria-labelledby="messages-heading">
+                <h2 id="messages-heading">Messages about this report</h2>
                 {% for contact in contact_messages %}
-                    <div class="message">
-                        <p>{{ contact.message }}</p>
-                        <p class="meta-label">
-                            {{ contact.sender.email }} &middot; {{ contact.created_at }}
-                        </p>
-                    </div>
+                    <article class="letter">
+                        <p class="letter-from">{{ contact.sender.email }} &middot; {{ contact.created_at }}</p>
+                        <p class="letter-body">{{ contact.message }}</p>
+                    </article>
                 {% endfor %}
-            </div>
+            </section>
         {% endif %}
-
-        <div class="actions">
-            {% if can_edit_report %}
-                <a class="button secondary" href="{% url 'reports:edit_report' report.id %}">
-                    Edit Report
-                </a>
-            {% endif %}
-            {% if can_mark_recovered %}
-                <a class="button success" href="{% url 'reports:mark_report_recovered' report.id %}">
-                    Mark as Recovered
-                </a>
-            {% endif %}
-            {% if can_delete_report %}
-                <a class="button danger" href="{% url 'reports:delete_report' report.id %}">
-                    Delete Report
-                </a>
-            {% endif %}
-            {% if can_contact_reporter %}
-                <a class="button" href="{% url 'reports:contact_reporter' report.id %}">
-                    Contact Reporter
-                </a>
-            {% endif %}
-            {% if is_creator %}
-                <a class="button ghost" href="{% url 'reports:my_reports' %}">
-                    Back to My Reports
-                </a>
-            {% else %}
-                <a class="button ghost" href="{% url 'reports:report_list' %}">
-                    Back to Reports
-                </a>
-            {% endif %}
-        </div>
     </article>
 {% endblock %}

@@ -3,7 +3,38 @@
 {% block title %}Create {{ report_type_label }} Report | BackToYou{% endblock %}
 
 {% block content %}
+    <div class="form-layout">
+    {# NFR38: los pasos del reporte a la izquierda del formulario. #}
+    <aside class="form-steps" aria-labelledby="form-steps-heading">
+        <h2 class="kicker" id="form-steps-heading">How reporting works</h2>
+        <ol class="steps-list">
+            <li>
+                <span class="step-number" aria-hidden="true">I.</span>
+                <div>
+                    <h3>Describe it</h3>
+                    <p>Photo, title, category and description.</p>
+                </div>
+            </li>
+            <li>
+                <span class="step-number" aria-hidden="true">II.</span>
+                <div>
+                    <h3>Place it</h3>
+                    <p>Where and when it happened.</p>
+                </div>
+            </li>
+            <li>
+                <span class="step-number" aria-hidden="true">III.</span>
+                <div>
+                    <h3>Send it</h3>
+                    <p>An administrator reviews it and you get an email with the result.</p>
+                </div>
+            </li>
+        </ol>
+        <p class="form-note">Your name and email are never shown on the report. Other members contact you through BackToYou.</p>
+    </aside>
+
     <section class="form-card">
+        <span class="kicker">File a report · {{ report_type_label }} item</span>
         <h1 class="page-title">Create {{ report_type_label }} Item Report</h1>
         <p class="lead">Submit the item details for administrator review.</p>
 
@@ -22,6 +53,9 @@
                 <div class="form-field">
                     {{ field.label_tag }}
                     {{ field }}
+                    {% if field.help_text %}
+                        <p class="field-help">{{ field.help_text }}</p>
+                    {% endif %}
                     {{ field.errors }}
                 </div>
                 {% endif %}
@@ -56,6 +90,7 @@
             <a href="{% url 'reports:report_list' %}">Back to Reports</a>
         </p>
     </section>
+    </div>
 
         <script>
             (function () {

@@ -3,12 +3,19 @@
 {% block title %}Reports | BackToYou{% endblock %}
 
 {% block content %}
-    <section class="hero">
-        <h1>Lost and Found Reports</h1>
-        <p>Browse active reports from the EAFIT community.</p>
+    <section class="hero page-head">
+        <div>
+            <span class="kicker">The index</span>
+            <h1>Lost and found <em>reports.</em></h1>
+            <p class="lead">Browse active reports from the EAFIT community.</p>
+        </div>
+        <p class="page-count">
+            <strong>{{ reports|length }}</strong>
+            report{{ reports|length|pluralize }} found
+        </p>
     </section>
 
-    <section class="panel">
+    <section class="filter-bar" aria-label="Search and filters">
         <form class="filter-form" method="get">
             <div>
                 <label for="report-search">Search</label>
@@ -16,7 +23,7 @@
                     id="report-search"
                     type="text"
                     name="q"
-                    placeholder="Search reports..."
+                    placeholder="Umbrella, keys, Block 38..."
                     value="{{ query|default:'' }}"
                 >
             </div>
@@ -62,6 +69,9 @@
                 </select>
             </div>
 
+            {% if request.GET.view == "list" %}
+                <input type="hidden" name="view" value="list">
+            {% endif %}
             <button type="submit">Search</button>
             <a class="button ghost" href="{% url 'reports:report_list' %}">
                 Clear Filters
@@ -70,11 +80,44 @@
     </section>
 
     {% if reports %}
-        <section class="grid" aria-label="Report results">
-            {% for report in reports %}
-                {% include "reports/_report_card.html" with report=report only %}
-            {% endfor %}
-        </section>
+        {# Con foto, tarjetas; sin foto, filas. "All as list" muestra todo en filas. #}
+        <nav class="view-toggle" aria-label="Display">
+            <a href="{% querystring view=None %}"{% if request.GET.view != "list" %} aria-current="true"{% endif %}>Photos first</a>
+            <a href="{% querystring view='list' %}"{% if request.GET.view == "list" %} aria-current="true"{% endif %}>All as list</a>
+        </nav>
+
+        {% if request.GET.view == "list" %}
+            <section class="report-rows" aria-label="Report results">
+                {% for report in reports %}
+                    {% include "reports/_report_card.html" with report=report layout="row" only %}
+                {% endfor %}
+            </section>
+        {% else %}
+            {% if reports_with_photo %}
+                <section aria-labelledby="with-photo-heading">
+                    <div class="section-head">
+                        <h2 id="with-photo-heading">With photo</h2>
+                    </div>
+                    <div class="grid" aria-label="Reports with photo">
+                        {% for report in reports_with_photo %}
+                            {% include "reports/_report_card.html" with report=report only %}
+                        {% endfor %}
+                    </div>
+                </section>
+            {% endif %}
+            {% if reports_without_photo %}
+                <section aria-labelledby="without-photo-heading">
+                    <div class="section-head">
+                        <h2 id="without-photo-heading">Without photo</h2>
+                    </div>
+                    <div class="report-rows">
+                        {% for report in reports_without_photo %}
+                            {% include "reports/_report_card.html" with report=report layout="row" only %}
+                        {% endfor %}
+                    </div>
+                </section>
+            {% endif %}
+        {% endif %}
     {% else %}
         <section class="empty-state">
             <h2>No active reports are currently available.</h2>

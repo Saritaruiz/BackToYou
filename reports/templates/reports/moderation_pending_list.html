@@ -1,42 +1,54 @@
 {% extends "base.html" %}
+{% load icons %}
 
 {% block title %}Pending Reports | BackToYou{% endblock %}
 
 {% block content %}
-    <section class="hero">
-        <span class="role-pill">Moderation</span>
-        <h1>Pending Reports</h1>
-        <p>Review submitted reports before they appear publicly.</p>
+    <section class="hero page-head">
+        <div>
+            <span class="role-pill">Moderation</span>
+            <h1>Pending <em>reports.</em></h1>
+            <p class="lead">Review submitted reports before they appear publicly.</p>
+        </div>
+        {% if reports %}
+            <p class="page-count">
+                <strong>{{ reports|length }}</strong>
+                waiting for review
+            </p>
+        {% endif %}
     </section>
 
     {% if reports %}
-        <section class="grid" aria-label="Pending reports">
+        <section class="ledger" aria-label="Pending reports">
             {% for report in reports %}
-                <article class="card">
-                    {% if report.image %}
-                        <img
-                            class="report-image"
-                            src="{{ report.image.url }}"
-                            alt="{{ report.title }}"
-                        >
-                    {% endif %}
-                    <div class="card-body">
-                        <span class="status-pill">{{ report.get_status_display }}</span>
-                        <h2>{{ report.title }}</h2>
-                        <div class="meta-grid">
-                            <div class="meta-item">
-                                <span class="meta-label">Type</span>
-                                {{ report.get_report_type_display }}
+                <article class="ledger-row">
+                    <div class="ledger-thumb">
+                        {% if report.image %}
+                            <img
+                                class="report-image"
+                                src="{{ report.image.url }}"
+                                alt="{{ report.title }}"
+                            >
+                        {% else %}
+                            <div class="report-placeholder">
+                                {% category_icon report.category.name %}
                             </div>
-                            <div class="meta-item">
-                                <span class="meta-label">Category</span>
-                                {{ report.category.name }}
-                            </div>
-                            <div class="meta-item">
-                                <span class="meta-label">Date</span>
-                                {{ report.event_date }}
-                            </div>
-                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="ledger-main">
+                        <h2 class="ledger-title">{{ report.title }}</h2>
+                        <p class="card-meta">
+                            {{ report.category.name }} · {{ report.event_date }}
+                        </p>
+                    </div>
+
+                    <div class="pill-row">
+                        <span class="type-pill type-{{ report.report_type|lower }}">{{ report.get_report_type_display }}</span>
+                        <span class="status-pill status-{{ report.status|lower }}">{{ report.get_status_display }}</span>
+                    </div>
+
+                    <div class="ledger-actions">
                         <a class="button" href="{% url 'administration_moderate_report' report.id %}">
                             Review Report
                         </a>

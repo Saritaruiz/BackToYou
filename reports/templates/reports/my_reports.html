@@ -1,68 +1,63 @@
 {% extends "base.html" %}
+{% load icons %}
 
 {% block title %}My Reports | BackToYou{% endblock %}
 
 {% block content %}
-    <section class="hero">
-        <h1>My Reports</h1>
-        <p>Every report you have created, with its current status.</p>
+    <section class="hero page-head">
+        <div>
+            <span class="kicker">Your archive</span>
+            <h1>My <em>reports.</em></h1>
+            <p class="lead">Every report you have created, with its current status.</p>
+        </div>
+        {% if reports %}
+            <p class="page-count">
+                <strong>{{ reports|length }}</strong>
+                report{{ reports|length|pluralize }}
+            </p>
+        {% endif %}
     </section>
 
     {% if reports %}
-        <section class="grid" aria-label="My reports">
+        {# NFR38: libro de registro, una fila por reporte. #}
+        <section class="ledger" aria-label="My reports">
             {% for report in reports %}
-                <article class="card">
-                    {% if report.image %}
-                        <img
-                            class="report-image"
-                            src="{{ report.image.url }}"
-                            alt="{{ report.title }}"
-                        >
-                    {% endif %}
-
-                    <div class="card-body">
-                        <span class="status-pill">{{ report.get_status_display }}</span>
-                        <h2>{{ report.title }}</h2>
-
-                        <div class="meta-grid">
-                            <div class="meta-item">
-                                <span class="meta-label">Type</span>
-                                {{ report.get_report_type_display }}
+                <article class="ledger-row">
+                    <div class="ledger-thumb">
+                        {% if report.image %}
+                            <img
+                                class="report-image"
+                                src="{{ report.image.url }}"
+                                alt="{{ report.title }}"
+                            >
+                        {% else %}
+                            <div class="report-placeholder">
+                                {% category_icon report.category.name %}
                             </div>
-                            <div class="meta-item">
-                                <span class="meta-label">Category</span>
-                                {{ report.category.name }}
-                            </div>
-                            <div class="meta-item">
-                                <span class="meta-label">Location</span>
-                                {{ report.location }}
-                            </div>
-                            <div class="meta-item">
-                                <span class="meta-label">Date</span>
-                                {{ report.event_date }}
-                            </div>
-                        </div>
+                        {% endif %}
+                    </div>
 
-                        <p class="description">{{ report.description|truncatewords:24 }}</p>
+                    <div class="ledger-main">
+                        <h2 class="ledger-title">{{ report.title }}</h2>
+                        <p class="card-meta">
+                            {{ report.category.name }} · {{ report.location }} · {{ report.event_date }}
+                        </p>
+                    </div>
 
-                        <div class="actions">
-                            <a class="button" href="{% url 'reports:report_detail' report.id %}">
-                                View Details
-                            </a>
-                            {% if report.is_editable %}
-                                <a class="button secondary" href="{% url 'reports:edit_report' report.id %}">
-                                    Edit
-                                </a>
-                            {% endif %}
-                            {% if report.can_be_marked_recovered %}
-                                <a class="button success" href="{% url 'reports:mark_report_recovered' report.id %}">
-                                    Mark as Recovered
-                                </a>
-                            {% endif %}
-                            <a class="button danger" href="{% url 'reports:delete_report' report.id %}">
-                                Delete
-                            </a>
-                        </div>
+                    <div class="pill-row">
+                        <span class="type-pill type-{{ report.report_type|lower }}">{{ report.get_report_type_display }}</span>
+                        <span class="status-pill status-{{ report.status|lower }}">{{ report.get_status_display }}</span>
+                    </div>
+
+                    <div class="ledger-actions">
+                        <a href="{% url 'reports:report_detail' report.id %}">View Details</a>
+                        {% if report.is_editable %}
+                            <a href="{% url 'reports:edit_report' report.id %}">Edit</a>
+                        {% endif %}
+                        {% if report.can_be_marked_recovered %}
+                            <a href="{% url 'reports:mark_report_recovered' report.id %}">Mark as Recovered</a>
+                        {% endif %}
+                        <a class="danger-link" href="{% url 'reports:delete_report' report.id %}">Delete</a>
                     </div>
                 </article>
             {% endfor %}

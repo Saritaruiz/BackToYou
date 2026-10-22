@@ -1,10 +1,11 @@
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 
 from accounts.models import User
 from ..models import Category, ContactMessage, ItemReport
+from .test_rf22_ai_description import png_upload
 
 
 class ReportCreationTests(TestCase):
@@ -42,6 +43,11 @@ class ReportCreationTests(TestCase):
         self.assertEqual(report.status, ItemReport.Status.PENDING_REVIEW)
         self.assertEqual(report.creator, self.user)
 
+    # Los reportes Found exigen foto; se guarda en memoria, no en media_local.
+    @override_settings(STORAGES={
+        "default": {"BACKEND": "django.core.files.storage.InMemoryStorage"},
+        "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
+    })
     def test_found_report_creation_sets_found_type(self):
         self.client.login(username=self.user.email, password="StrongPass123")
 
@@ -53,6 +59,7 @@ class ReportCreationTests(TestCase):
                 "category": self.category.id,
                 "event_date": "2026-08-10",
                 "location": "Block 38",
+                "image": png_upload("keys.png"),
             },
         )
 

@@ -67,12 +67,22 @@ class ItemReportCreationForm(ItemReportForm):
         widget=forms.RadioSelect,
     )
 
-    def __init__(self, data=None, *args, **kwargs):
+    def __init__(self, data=None, *args, report_type=ItemReport.ReportType.LOST, **kwargs):
         if data is not None and "description_method" not in data:
             data = data.copy()
             data["description_method"] = "manual"
         super().__init__(data, *args, **kwargs)
         self.order_fields(["description_method", *ItemReportForm.Meta.fields])
+
+        # Quien encontro el objeto lo tiene en la mano: la foto es obligatoria
+        # y ayuda al dueno a reconocerlo. Para Lost sigue siendo opcional.
+        image = self.fields["image"]
+        if report_type == ItemReport.ReportType.FOUND:
+            image.required = True
+            image.error_messages["required"] = "Add a photo of the item you found so its owner can recognize it."
+            image.help_text = "Required: you have the item with you, so a photo helps its owner recognize it."
+        else:
+            image.help_text = "Optional: add one if you have a photo of the item."
 
 
 class ContactMessageForm(forms.ModelForm):

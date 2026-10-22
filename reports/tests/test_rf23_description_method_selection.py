@@ -44,14 +44,16 @@ class DescriptionMethodSelectionTests(TestCase):
         for kind in ('lost', 'found'):
             for method in ('manual', 'ai'):
                 with self.subTest(kind=kind, method=method):
-                    response = self.client.post(self.url(kind), self.payload(description_method=method), follow=True)
+                    # Found exige foto; en Lost sigue siendo opcional.
+                    photo = {'image': png_upload()} if kind == 'found' else {}
+                    response = self.client.post(self.url(kind), self.payload(description_method=method, **photo), follow=True)
                     self.assertContains(response, 'Report submitted successfully.')
                     report = ItemReport.objects.latest('pk')
                     self.assertEqual(report.description, 'My reviewed and edited description.')
                     self.assertEqual(report.report_type, kind.upper())
                     self.assertEqual(report.creator, self.user)
                     self.assertEqual(report.status, ItemReport.Status.PENDING_REVIEW)
-                    self.assertFalse(report.image)
+                    self.assertEqual(bool(report.image), kind == 'found')
         self.assertEqual(ItemReport.objects.count(), 4)
 
     def test_manual_submission_with_image(self):
