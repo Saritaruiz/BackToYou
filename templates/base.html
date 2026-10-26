@@ -87,7 +87,8 @@
         {% if messages %}
             <div class="messages">
                 {% for message in messages %}
-                    <div class="message message-{{ message.tags|default:'info' }}">
+                    {# extra_tags agrega clases propias, p. ej. "recovered" para la celebracion de NFR36. #}
+                    <div class="message message-{{ message.level_tag|default:'info' }}{% if message.extra_tags %} {{ message.extra_tags }}{% endif %}">
                         {{ message }}
                     </div>
                 {% endfor %}

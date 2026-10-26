@@ -64,7 +64,13 @@
     --tracking-caps: 0.12em;
     --rule: 1px solid var(--charcoal);
     --rule-double: 3px double var(--charcoal);
-    --ease-fast: 150ms ease-in-out;
+    /* NFR36: tres duraciones y tres curvas para todo el movimiento. */
+    --dur-fast: 150ms;
+    --dur-medium: 250ms;
+    --dur-slow: 400ms;
+    --ease-enter: cubic-bezier(0.2, 0, 0, 1);
+    --ease-exit: cubic-bezier(0.4, 0, 1, 1);
+    --ease-change: ease-in-out;
 }
 
 * {
@@ -330,7 +336,9 @@ button {
     min-height: 44px;
     max-width: 100%;
     white-space: normal;
-    transition: background-color var(--ease-fast), color var(--ease-fast), border-color var(--ease-fast);
+    transition: background-color var(--dur-fast) var(--ease-change), color var(--dur-fast) var(--ease-change),
+        border-color var(--dur-fast) var(--ease-change), box-shadow var(--dur-fast) var(--ease-change),
+        transform var(--dur-fast) var(--ease-change);
 }
 
 .site-nav a {
@@ -446,6 +454,8 @@ button {
 .nav-logout button:hover {
     background: transparent;
     color: var(--accent);
+    transform: none;
+    box-shadow: none;
 }
 
 /* RNF27: por debajo de 1080 px el menu completo no cabe en una fila junto
@@ -531,9 +541,22 @@ button {
         border-bottom: 0;
     }
 
+    /* NFR36: el menu se despliega y sus opciones aparecen una tras otra. */
     .nav-toggle:checked ~ .site-nav {
         display: flex;
+        animation: menu-open var(--dur-medium) var(--ease-enter) both;
     }
+
+    .nav-toggle:checked ~ .site-nav > * {
+        animation: rise-in var(--dur-medium) var(--ease-enter) both;
+    }
+
+    .nav-toggle:checked ~ .site-nav > :nth-child(2) { animation-delay: 30ms; }
+    .nav-toggle:checked ~ .site-nav > :nth-child(3) { animation-delay: 60ms; }
+    .nav-toggle:checked ~ .site-nav > :nth-child(4) { animation-delay: 90ms; }
+    .nav-toggle:checked ~ .site-nav > :nth-child(5) { animation-delay: 120ms; }
+    .nav-toggle:checked ~ .site-nav > :nth-child(6) { animation-delay: 150ms; }
+    .nav-toggle:checked ~ .site-nav > :nth-child(n + 7) { animation-delay: 180ms; }
 
     /* Con el menu abierto el encabezado deja de estar fijo, para que la
        lista no tape el contenido al hacer scroll. */
@@ -1023,16 +1046,27 @@ button {
     margin: 0;
 }
 
-.text-link {
+/* NFR36: el enlace siempre tiene una linea suave; al pasar el mouse la
+   linea Ciruela se dibuja de izquierda a derecha. */
+.text-link,
+.ledger-actions a:not(.button),
+.danger-link {
+    padding-bottom: 2px;
     color: var(--accent);
     font-weight: var(--fw-semibold);
-    text-decoration: underline;
-    text-decoration-thickness: 1px;
-    text-underline-offset: 4px;
+    text-decoration: none;
+    background-image: linear-gradient(currentColor, currentColor), linear-gradient(var(--ciruela-300), var(--ciruela-300));
+    background-position: 0 100%, 0 100%;
+    background-repeat: no-repeat;
+    background-size: 0 2px, 100% 1px;
+    transition: background-size var(--dur-fast) var(--ease-enter);
 }
 
-.text-link:hover {
-    text-decoration-thickness: 2px;
+.text-link:hover,
+.ledger-actions a:not(.button):hover,
+.danger-link:hover {
+    text-decoration: none;
+    background-size: 100% 2px, 100% 1px;
 }
 
 /* ===== Confianza: numeros reales y entrega segura ===== */
@@ -1214,16 +1248,21 @@ button {
     margin-top: var(--space-6);
 }
 
+/* NFR36: al pasar el mouse el boton cambia un tono y sube 1 px; al hacer
+   clic vuelve a su lugar y se ve hundido. */
 .button:hover,
 button:hover {
     background: var(--salvia-700);
     text-decoration: none;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 14px rgba(28, 38, 33, 0.18);
 }
 
 .button:active,
 button:active {
     background: var(--primary-dark);
     box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+    transform: translateY(0);
 }
 
 .button.secondary,
@@ -1254,6 +1293,8 @@ button.secondary:hover {
     background: transparent;
     color: var(--accent);
     border-bottom-color: var(--accent);
+    transform: none;
+    box-shadow: none;
 }
 
 .button.danger,
@@ -1265,7 +1306,7 @@ button.danger {
 .button.danger:hover,
 button.danger:hover {
     background: var(--danger);
-    box-shadow: inset 0 0 0 999px rgba(0, 0, 0, 0.18);
+    box-shadow: inset 0 0 0 999px rgba(0, 0, 0, 0.18), 0 6px 14px rgba(28, 38, 33, 0.18);
 }
 
 .button.success,
@@ -1284,6 +1325,7 @@ button:disabled:hover {
     color: var(--salvia-700);
     border-color: transparent;
     box-shadow: none;
+    transform: none;
     cursor: not-allowed;
 }
 
@@ -1298,6 +1340,52 @@ button:disabled:hover {
     border-left: 3px solid var(--charcoal);
     border-radius: 0;
     background: var(--card);
+    /* NFR36: los avisos bajan 8 px mientras aparecen. No se esconden solos. */
+    animation: message-in var(--dur-medium) var(--ease-enter) both;
+}
+
+@keyframes message-in {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+}
+
+/* NFR36: al marcar un objeto como recuperado, el aviso se llena de Salvia
+   de izquierda a derecha y aparece un check. Una celebracion discreta. */
+.message.recovered {
+    position: relative;
+    padding-left: 48px;
+    background-image: linear-gradient(var(--salvia-200), var(--salvia-200));
+    background-repeat: no-repeat;
+    background-size: 0 100%;
+    animation: message-in var(--dur-medium) var(--ease-enter) both,
+        recovered-fill var(--dur-slow) var(--ease-enter) 100ms both;
+}
+
+.message.recovered::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 20px;
+    width: 7px;
+    height: 13px;
+    border: solid var(--success);
+    border-width: 0 2px 2px 0;
+    transform: translateY(-65%) rotate(45deg) scale(0);
+    animation: check-in var(--dur-slow) var(--ease-enter) 100ms both;
+}
+
+@keyframes recovered-fill {
+    to {
+        background-size: 100% 100%;
+    }
+}
+
+@keyframes check-in {
+    to {
+        transform: translateY(-65%) rotate(45deg) scale(1);
+    }
 }
 
 .message-success {
@@ -1426,6 +1514,44 @@ button:disabled:hover {
 
 .card-body > .text-link {
     align-self: flex-start;
+}
+
+/* NFR36: la tarjeta sube 3 px, la foto se acerca y el titulo se subraya.
+   El enlace cubre toda la tarjeta, asi que cualquier parte lleva al detalle. */
+.report-card {
+    position: relative;
+    transition: transform var(--dur-medium) var(--ease-enter);
+}
+
+.report-card:hover {
+    transform: translateY(-3px);
+}
+
+.report-card .card-body > .text-link::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+}
+
+.card-media {
+    overflow: hidden;
+}
+
+.card-media > * {
+    transition: transform var(--dur-medium) var(--ease-enter);
+}
+
+.report-card:hover .card-media > * {
+    transform: scale(1.03);
+}
+
+.card-title span {
+    background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat;
+    transition: background-size var(--dur-medium) var(--ease-enter);
+}
+
+.report-card:hover .card-title span {
+    background-size: 100% 1px;
 }
 
 /* Foto 4:3 en las tarjetas, como pide el manual de marca. */
@@ -2016,8 +2142,6 @@ input[type="radio"]:focus-visible {
 
 .ledger-actions a:not(.button) {
     font-size: var(--fs-small);
-    text-decoration: underline;
-    text-underline-offset: 4px;
 }
 
 .ledger-actions .button {
@@ -2186,9 +2310,26 @@ input[type="radio"]:focus-visible {
 
 /* Las dos opciones se ven como un selector de dos partes. */
 .description-method > div {
+    position: relative;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    grid-template-columns: 1fr 1fr;
     border: var(--rule);
+}
+
+/* NFR36: el bloque oscuro se desliza a la opcion elegida. */
+.description-method > div::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 50%;
+    background: var(--primary-dark);
+    transition: transform var(--dur-medium) var(--ease-change);
+}
+
+.description-method > div:has(> div:nth-child(2) input:checked)::before {
+    transform: translateX(100%);
 }
 
 .description-method > div > div + div {
@@ -2206,12 +2347,13 @@ input[type="radio"]:focus-visible {
     font-size: var(--fs-body);
     font-variant-caps: normal;
     letter-spacing: 0;
+    position: relative;
+    z-index: 1;
     cursor: pointer;
-    transition: background-color var(--ease-fast), color var(--ease-fast);
+    transition: color var(--dur-medium) var(--ease-change);
 }
 
 .description-method label:has(input:checked) {
-    background: var(--primary-dark);
     color: var(--on-dark);
 }
 
@@ -2354,9 +2496,6 @@ input[type="radio"]:focus-visible {
 .danger-link,
 .ledger-actions .danger-link {
     color: var(--danger);
-    font-weight: var(--fw-semibold);
-    text-decoration: underline;
-    text-underline-offset: 4px;
 }
 
 /* En las tablas de administracion, desactivar o borrar es un enlace. */
@@ -2372,19 +2511,41 @@ input[type="radio"]:focus-visible {
 .table-actions .button.danger:hover {
     background: transparent;
     box-shadow: none;
+    transform: none;
     text-decoration-thickness: 2px;
 }
 
 /* ===== Indice: con foto en tarjetas, sin foto en filas ===== */
 .view-toggle {
-    display: flex;
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     justify-self: end;
     width: fit-content;
     margin-bottom: calc(-1 * var(--space-8));
     border: var(--rule);
 }
 
+/* NFR36: el bloque oscuro se desliza a la opcion elegida. Como cada opcion
+   es otra pagina, lo anima la View Transitions API del navegador. */
+.view-toggle-indicator {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 50%;
+    background: var(--primary-dark);
+    view-transition-name: view-toggle-indicator;
+}
+
+.view-toggle.is-list .view-toggle-indicator {
+    left: 50%;
+}
+
 .view-toggle a {
+    position: relative;
+    z-index: 1;
+    text-align: center;
     padding: 8px 14px;
     color: var(--charcoal);
     font-size: var(--fs-label);
@@ -2399,8 +2560,22 @@ input[type="radio"]:focus-visible {
 }
 
 .view-toggle a[aria-current="true"] {
-    background: var(--primary-dark);
     color: var(--on-dark);
+}
+
+@view-transition {
+    navigation: auto;
+}
+
+/* Solo se anima el bloque del selector; el resto de la pagina cambia como siempre. */
+::view-transition-old(root),
+::view-transition-new(root) {
+    animation: none;
+}
+
+::view-transition-group(view-toggle-indicator) {
+    animation-duration: var(--dur-medium);
+    animation-timing-function: var(--ease-change);
 }
 
 .report-rows {
@@ -2497,6 +2672,68 @@ input[type="radio"]:focus-visible {
     border: 0;
 }
 
+/* ===== NFR36 - Movimiento ===== */
+@keyframes rise-in {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+}
+
+@keyframes menu-open {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+}
+
+/* Al abrir una pagina, las secciones suben y aparecen una tras otra. */
+.page-shell > :not(.messages):not(.search-hero),
+.search-hero > * {
+    animation: rise-in var(--dur-slow) var(--ease-enter) both;
+}
+
+.page-shell > :nth-child(2),
+.search-hero > :nth-child(2) {
+    animation-delay: 60ms;
+}
+
+.page-shell > :nth-child(n + 3),
+.search-hero > :nth-child(n + 3) {
+    animation-delay: 120ms;
+}
+
+/* Mientras la IA analiza la foto, el boton muestra un indicador. Solo gira
+   mientras la persona espera algo que ella pidio. */
+button[aria-busy="true"]::before {
+    content: "";
+    flex: none;
+    width: 12px;
+    height: 12px;
+    border: 1.5px solid currentColor;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 500ms linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Los campos que lleno la IA quedan en Ciruela claro hasta que la persona
+   los revisa; al entrar en uno, el color se apaga. */
+.form-field input,
+.form-field select,
+.form-field textarea {
+    transition: background-color var(--dur-slow) var(--ease-exit);
+}
+
+.form-field .ai-filled {
+    background-color: var(--accent-soft);
+}
+
 /* NFR32: si la persona pidio reducir el movimiento, los cambios son
    instantaneos. */
 @media (prefers-reduced-motion: reduce) {
@@ -2505,7 +2742,13 @@ input[type="radio"]:focus-visible {
     *::after {
         animation-duration: 0.01ms !important;
         animation-iteration-count: 1 !important;
+        animation-delay: 0ms !important;
         transition-duration: 0.01ms !important;
+        transition-delay: 0ms !important;
         scroll-behavior: auto !important;
+    }
+
+    @view-transition {
+        navigation: none;
     }
 }

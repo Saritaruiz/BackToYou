@@ -81,7 +81,8 @@
 
     {% if reports %}
         {# Con foto, tarjetas; sin foto, filas. "All as list" muestra todo en filas. #}
-        <nav class="view-toggle" aria-label="Display">
+        <nav class="view-toggle{% if request.GET.view == 'list' %} is-list{% endif %}" aria-label="Display">
+            <span class="view-toggle-indicator" aria-hidden="true"></span>
             <a href="{% querystring view=None %}"{% if request.GET.view != "list" %} aria-current="true"{% endif %}>Photos first</a>
             <a href="{% querystring view='list' %}"{% if request.GET.view == "list" %} aria-current="true"{% endif %}>All as list</a>
         </nav>
