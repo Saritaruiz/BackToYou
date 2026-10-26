@@ -101,6 +101,19 @@ The AI suggestion button uses a vision model that runs locally with [Ollama](htt
 
 To use another vision model or another Ollama address, copy `ollama.env.example` as `ollama.env` and change the values. If Ollama is not running or the model is missing, the rest of the application works normally and the AI button is disabled.
 
+### Email (FR39, FR15)
+
+Without any setup, emails (password recovery and notifications) are printed in the terminal where `runserver` is running.
+
+To send real emails through Gmail:
+
+1. Turn on 2-Step Verification in the Gmail account that will send the emails.
+2. Create an app password at https://myaccount.google.com/apppasswords.
+3. Copy `email.env.example` as `email.env` and fill in the account and the app password.
+4. Restart the server.
+
+`email.env` is in `.gitignore`, so the password never reaches GitHub.
+
 ### Tests
 
 ```bash
