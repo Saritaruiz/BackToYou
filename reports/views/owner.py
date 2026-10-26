@@ -90,9 +90,11 @@ def mark_report_recovered(request, report):
             ],
         )
 
+        # NFR36: "recovered" activa la celebracion discreta del aviso.
         messages.success(
             request,
-            "The item was marked as recovered.",
+            "The item was marked as recovered. It is back with its owner.",
+            extra_tags="recovered",
         )
 
         return redirect("reports:report_list")

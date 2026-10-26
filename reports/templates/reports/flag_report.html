@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Flag Report | BackToYou{% endblock %}
+
+{% block content %}
+    <section class="form-card">
+        <span class="kicker">Flag report</span>
+        <h1 class="page-title">What is wrong with this <em>report?</em></h1>
+        <p class="lead">
+            An administrator will review <strong>{{ report.title }}</strong>.
+            The person who created it will not see who flagged it.
+        </p>
+
+        <form method="post">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+
+            <fieldset class="form-field flag-reasons">
+                <legend>Reason</legend>
+                {% for choice in form.reason %}
+                    <label class="flag-reason" for="{{ choice.id_for_label }}">
+                        {{ choice.tag }}
+                        <span>{{ choice.choice_label }}</span>
+                    </label>
+                {% endfor %}
+                {{ form.reason.errors }}
+            </fieldset>
+
+            <div class="form-field">
+                {{ form.details.label_tag }}
+                {{ form.details }}
+                <div class="field-help">{{ form.details.help_text }}</div>
+                {{ form.details.errors }}
+            </div>
+
+            <div class="actions">
+                <button type="submit">Send Flag</button>
+                <a class="button ghost" href="{% url 'reports:report_detail' report.id %}">
+                    Back to Report
+                </a>
+            </div>
+        </form>
+    </section>
+{% endblock %}

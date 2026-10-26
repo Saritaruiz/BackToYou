@@ -92,6 +92,14 @@ def report_detail(request, report_id):
         else []
     )
 
+    # RF43: quien ya aviso sobre el reporte lo ve, pero nadie mas sabe quien fue.
+    can_be_flagged = (
+        request.user.is_authenticated
+        and not is_creator
+        and report.status == ItemReport.Status.ACTIVE
+    )
+    has_flagged_report = can_be_flagged and report.flags.filter(flagged_by=request.user).exists()
+
     return render(
         request,
         "reports/report_detail.html",
@@ -107,6 +115,8 @@ def report_detail(request, report_id):
             "can_edit_report": is_creator and report.is_editable,
             "can_delete_report": is_creator,
             "can_mark_recovered": is_creator and report.can_be_marked_recovered,
+            "can_flag_report": can_be_flagged and not has_flagged_report,
+            "has_flagged_report": has_flagged_report,
         },
     )
 

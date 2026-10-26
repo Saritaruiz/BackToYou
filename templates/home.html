@@ -77,12 +77,16 @@
     <section class="trust-numbers" aria-labelledby="numbers-heading">
         <h2 class="kicker" id="numbers-heading">BackToYou in numbers</h2>
         <div class="numbers-row">
-            <p><strong>{{ numbers.recovered }}</strong> item{{ numbers.recovered|pluralize }} back with their owners</p>
+            <p><strong data-count-to="{{ numbers.recovered }}">{{ numbers.recovered }}</strong> item{{ numbers.recovered|pluralize }} back with their owners</p>
             <p>
-                <strong>{% if numbers.recovery_rate is None %}—{% else %}{{ numbers.recovery_rate|floatformat:0 }}%{% endif %}</strong>
+                {% if numbers.recovery_rate is None %}
+                    <strong>—</strong>
+                {% else %}
+                    <strong data-count-to="{{ numbers.recovery_rate|floatformat:0 }}" data-suffix="%">{{ numbers.recovery_rate|floatformat:0 }}%</strong>
+                {% endif %}
                 of approved lost reports recovered
             </p>
-            <p><strong>{{ numbers.active }}</strong> active report{{ numbers.active|pluralize }} right now</p>
+            <p><strong data-count-to="{{ numbers.active }}">{{ numbers.active }}</strong> active report{{ numbers.active|pluralize }} right now</p>
         </div>
     </section>
 
@@ -125,4 +129,42 @@
 
         {% include "reports/_safe_handover.html" %}
     </div>
+
+    <script>
+        // NFR36: los numeros cuentan desde 0 la primera vez que se ven. Sin
+        // JavaScript, o con "reducir movimiento", se ve el numero final.
+        (function () {
+            const numbers = document.querySelectorAll("[data-count-to]");
+            const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+            if (!numbers.length || reduceMotion || !("IntersectionObserver" in window)) return;
+
+            const DURATION = 400;
+
+            function count(number) {
+                const target = Number(number.dataset.countTo);
+                const suffix = number.dataset.suffix || "";
+                const start = performance.now();
+                function frame(now) {
+                    const progress = Math.min((now - start) / DURATION, 1);
+                    const eased = 1 - Math.pow(1 - progress, 3);
+                    number.textContent = Math.round(target * eased) + suffix;
+                    if (progress < 1) requestAnimationFrame(frame);
+                }
+                requestAnimationFrame(frame);
+            }
+
+            const observer = new IntersectionObserver(function (entries) {
+                entries.forEach(function (entry) {
+                    if (!entry.isIntersecting) return;
+                    observer.unobserve(entry.target);
+                    count(entry.target);
+                });
+            }, { threshold: 0.6 });
+
+            numbers.forEach(function (number) {
+                number.textContent = "0" + (number.dataset.suffix || "");
+                observer.observe(number);
+            });
+        })();
+    </script>
 {% endblock %}

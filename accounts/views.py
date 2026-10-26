@@ -1,6 +1,8 @@
 from django.contrib import messages
 from django.shortcuts import redirect, render
 
+from reports.querysets import flagged_reports
+
 from .decorators import administrator_required
 from .forms import EafitUserRegistrationForm
 
@@ -23,4 +25,9 @@ def register(request):
 
 @administrator_required
 def administration_panel(request):
-    return render(request, "accounts/administration.html")
+    # RF43: el panel avisa cuantos reportes publicados esperan revision.
+    return render(
+        request,
+        "accounts/administration.html",
+        {"flagged_report_count": flagged_reports().count()},
+    )

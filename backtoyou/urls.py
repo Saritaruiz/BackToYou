@@ -34,6 +34,26 @@ urlpatterns = [
         name="administration_pending_reports",
     ),
     path(
+        "administration/activity/",
+        report_views.activity_log,
+        name="administration_activity_log",
+    ),
+    path(
+        "administration/reports/flagged/",
+        report_views.flagged_report_list,
+        name="administration_flagged_reports",
+    ),
+    path(
+        "administration/reports/flagged/<int:report_id>/",
+        report_views.review_flagged_report,
+        name="administration_flagged_report",
+    ),
+    path(
+        "administration/reports/flagged/<int:report_id>/remove/",
+        report_views.remove_flagged_report,
+        name="administration_flagged_report_remove",
+    ),
+    path(
         "administration/reports/<int:report_id>/",
         report_views.moderate_report_detail,
         name="administration_moderate_report",

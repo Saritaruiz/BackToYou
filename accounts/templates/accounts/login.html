@@ -28,6 +28,11 @@
                     </div>
                 {% endfor %}
 
+                {# RF39: recuperar la contrasena por correo. #}
+                <p class="forgot-link">
+                    <a href="{% url 'accounts:password_reset' %}">Forgot your password?</a>
+                </p>
+
                 <button type="submit">Login</button>
             </form>
 

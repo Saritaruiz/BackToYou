@@ -175,6 +175,7 @@
                     controller = null;
                     stopProgress();
                     button.disabled = !available;
+                    button.removeAttribute("aria-busy");
                     setStatus(initialStatus, "");
                 }
 
@@ -195,6 +196,17 @@
                     status.className = "ai-status" + (kind ? " ai-status-" + kind : "");
                 }
 
+                // NFR36: lo que lleno la IA queda en Ciruela claro hasta que la
+                // persona entra al campo para revisarlo.
+                function fillFromAI(name, value) {
+                    const field = form.querySelector('[name="' + name + '"]');
+                    field.value = value;
+                    field.classList.add("ai-filled");
+                    field.addEventListener("focus", function () {
+                        field.classList.remove("ai-filled");
+                    }, { once: true });
+                }
+
                 button.addEventListener("click", async function () {
                     if (!available || !isAIMode()) return;
                     const image = imageInput.files[0];
@@ -210,6 +222,7 @@
                     data.append("csrfmiddlewaretoken", form.querySelector('input[name="csrfmiddlewaretoken"]').value);
 
                     button.disabled = true;
+                    button.setAttribute("aria-busy", "true");
                     const requestRevision = ++revision;
                     controller = new AbortController();
                     setStatus("Analyzing the photo. This can take up to two minutes...", "");
@@ -232,10 +245,10 @@
                         }
 
                         finishProgress(started);
-                        form.querySelector('[name="title"]').value = result.title;
-                        form.querySelector('[name="description"]').value = result.description;
+                        fillFromAI("title", result.title);
+                        fillFromAI("description", result.description);
                         if (result.category_id) {
-                            form.querySelector('[name="category"]').value = result.category_id;
+                            fillFromAI("category", result.category_id);
                         }
 
                         setStatus(
@@ -253,6 +266,7 @@
                         if (requestRevision === revision) {
                             controller = null;
                             button.disabled = !available;
+                            button.removeAttribute("aria-busy");
                         }
                     }
                 });

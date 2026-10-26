@@ -67,6 +67,11 @@ class ReportCreationTests(TestCase):
         self.assertEqual(report.report_type, ItemReport.ReportType.FOUND)
         self.assertEqual(report.status, ItemReport.Status.PENDING_REVIEW)
 
+    # La foto se guarda en memoria: la prueba no deja archivos en media_local.
+    @override_settings(STORAGES={
+        "default": {"BACKEND": "django.core.files.storage.InMemoryStorage"},
+        "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
+    })
     def test_optional_image_upload_is_saved_with_report(self):
         self.client.login(username=self.user.email, password="StrongPass123")
         image = SimpleUploadedFile(

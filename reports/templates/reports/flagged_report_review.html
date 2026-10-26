@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}Review Flags | BackToYou{% endblock %}
+
+{% block content %}
+    <article class="detail-card panel flag-review">
+        <span class="role-pill">Flagged Report</span>
+        <h1 class="page-title">{{ report.title }}</h1>
+        <div class="pill-row">
+            <span class="type-pill type-{{ report.report_type|lower }}">{{ report.get_report_type_display }}</span>
+            <span class="status-pill status-{{ report.status|lower }}">{{ report.get_status_display }}</span>
+        </div>
+
+        {% if report.image %}
+            <img
+                class="report-image detail"
+                src="{{ report.image.url }}"
+                alt="{{ report.title }}"
+            >
+        {% endif %}
+
+        <div class="meta-grid">
+            <div class="meta-item">
+                <span class="meta-label">Category</span>
+                {{ report.category.name }}
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Location</span>
+                {{ report.location }}
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Date</span>
+                {{ report.event_date }}
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Creator</span>
+                User #{{ report.creator_id }}
+            </div>
+        </div>
+
+        <h2>Description</h2>
+        <p class="description">{{ report.description }}</p>
+
+        <section class="letters" aria-labelledby="flags-heading">
+            <h2 id="flags-heading">{{ flags|length }} flag{{ flags|length|pluralize }}</h2>
+            {% for flag in flags %}
+                <article class="letter">
+                    <p class="letter-from">{{ flag.get_reason_display }} &middot; User #{{ flag.flagged_by_id }} &middot; {{ flag.created_at }}</p>
+                    {% if flag.details %}
+                        <p class="letter-body">{{ flag.details }}</p>
+                    {% endif %}
+                </article>
+            {% endfor %}
+        </section>
+
+        {# Descartar deja el reporte publicado; retirarlo va aparte, con confirmacion. #}
+        <form class="moderation-actions" method="post">
+            {% csrf_token %}
+            <button type="submit" name="action" value="dismiss">
+                Dismiss Flags
+            </button>
+            <a class="text-link" href="{% url 'reports:report_detail' report.id %}">
+                View Public Page
+            </a>
+            <a class="button ghost" href="{% url 'administration_flagged_reports' %}">
+                Back to Flagged Reports
+            </a>
+        </form>
+
+        <div class="danger-zone">
+            <div>
+                <p class="danger-title">Danger zone</p>
+                <p class="danger-text">Remove the report from public view. Its creator is notified by email, without knowing who flagged it.</p>
+            </div>
+            <a class="danger-link" href="{% url 'administration_flagged_report_remove' report.id %}">Remove from Public View</a>
+        </div>
+    </article>
+{% endblock %}

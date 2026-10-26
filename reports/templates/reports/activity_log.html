@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% load tz %}
+
+{% block title %}Activity Log | BackToYou{% endblock %}
+
+{% block content %}
+    <section class="hero page-head">
+        <div>
+            <span class="role-pill">Moderation</span>
+            <h1>Activity <em>log.</em></h1>
+            <p class="lead">Every moderation action, from the most recent. Entries cannot be changed.</p>
+        </div>
+        <p class="page-count">
+            <strong>{{ page.paginator.count }}</strong>
+            entr{{ page.paginator.count|pluralize:"y,ies" }}
+        </p>
+    </section>
+
+    <section class="filter-bar" aria-label="Filters">
+        <form class="filter-form" method="get">
+            <div>
+                <label for="log-administrator">Administrator</label>
+                <select id="log-administrator" name="administrator">
+                    <option value="">All administrators</option>
+                    {% for administrator in administrators %}
+                        <option
+                            value="{{ administrator.id }}"
+                            {% if selected_administrator == administrator.id|stringformat:"s" %}selected{% endif %}
+                        >
+                            {{ administrator.email }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <label for="log-action">Action</label>
+                <select id="log-action" name="action">
+                    <option value="">All actions</option>
+                    {% for value, label in actions %}
+                        <option value="{{ value }}"{% if selected_action == value %} selected{% endif %}>
+                            {{ label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <button type="submit">Filter</button>
+            <a class="button ghost" href="{% url 'administration_activity_log' %}">
+                Clear Filters
+            </a>
+        </form>
+    </section>
+
+    {% if page.object_list %}
+        <section class="panel table-wrap" aria-label="Moderation actions">
+            <table class="data-table activity-log">
+                <thead>
+                    <tr>
+                        <th scope="col">Date (Colombia)</th>
+                        <th scope="col">Action</th>
+                        <th scope="col">Report</th>
+                        <th scope="col">Administrator</th>
+                        <th scope="col">Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entry in page.object_list %}
+                        <tr>
+                            <td>{{ entry.created_at|timezone:"America/Bogota"|date:"M j, Y · g:i a" }}</td>
+                            <td><strong>{{ entry.get_action_display }}</strong></td>
+                            <td>
+                                {{ entry.report_title }}
+                                {% if entry.report_id %}
+                                    <span class="log-note">Nº {{ entry.report_id|stringformat:"04d" }}</span>
+                                {% else %}
+                                    <span class="log-note">Deleted</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ entry.administrator_email }}</td>
+                            <td>{{ entry.details }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+
+        {% if page.has_other_pages %}
+            <nav class="pagination" aria-label="Pages">
+                {% if page.has_previous %}
+                    <a class="text-link" href="{% querystring page=page.previous_page_number %}">Newer</a>
+                {% endif %}
+                <span>Page {{ page.number }} of {{ page.paginator.num_pages }}</span>
+                {% if page.has_next %}
+                    <a class="text-link" href="{% querystring page=page.next_page_number %}">Older</a>
+                {% endif %}
+            </nav>
+        {% endif %}
+    {% else %}
+        <section class="empty-state">
+            <h2>No moderation actions match these filters.</h2>
+            <p>Approving, rejecting, editing, or removing a report adds an entry here.</p>
+        </section>
+    {% endif %}
+{% endblock %}

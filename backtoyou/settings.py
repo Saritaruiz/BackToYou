@@ -21,6 +21,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # La configuracion de Ollama (RF22) se puede cambiar en ollama.env, que esta
 # en .gitignore. Si el archivo no existe se usan los valores por defecto.
 load_dotenv(BASE_DIR / "ollama.env")
+# Igual con el correo (RF39, RF15): email.env tiene la cuenta que envia los
+# correos y nunca se sube a GitHub. Ver email.env.example.
+load_dotenv(BASE_DIR / "email.env")
 
 
 # Quick-start development settings - unsuitable for production
@@ -183,13 +186,27 @@ STATICFILES_DIRS = [
 # El ajuste se llama EMAIL_BACKEND. Con el nombre equivocado Django caia a
 # su valor por defecto (SMTP contra localhost:25) y las notificaciones
 # fallaban en silencio, tapadas por el try/except de email_notifications.py.
+# Con una cuenta en email.env los correos salen de verdad por SMTP; sin ella
+# se muestran en la terminal, como siempre.
+EMAIL_HOST = os.environ.get("EMAIL_HOST", "smtp.gmail.com")
+EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "587"))
+EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "True").lower() != "false"
+EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
+# Si el servidor de correo no responde, la pagina no se queda esperando.
+EMAIL_TIMEOUT = 20
 EMAIL_BACKEND = os.environ.get(
     "DJANGO_EMAIL_BACKEND",
-    "django.core.mail.backends.console.EmailBackend",
+    "django.core.mail.backends.smtp.EmailBackend"
+    if EMAIL_HOST_USER
+    else "django.core.mail.backends.console.EmailBackend",
 )
-DEFAULT_FROM_EMAIL = "BackToYou noreply@backtoyou.local"
+DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "BackToYou noreply@backtoyou.local")
 AUTH_USER_MODEL = "accounts.User"
 LOGIN_URL = "accounts:login"
+# RF39: el enlace para crear una contrasena nueva vence a las 24 horas.
+# Ademas sirve una sola vez: deja de valer en cuanto la contrasena cambia.
+PASSWORD_RESET_TIMEOUT = 60 * 60 * 24
 LOGIN_REDIRECT_URL = "home"
 LOGOUT_REDIRECT_URL = "home"
 MEDIA_URL ="/media/"

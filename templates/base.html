@@ -62,6 +62,8 @@
                                 <a href="{% url 'administration' %}"{% if current == "administration" %} aria-current="page"{% endif %}>Overview</a>
                                 <a href="{% url 'administration_lost_statistics' %}"{% if current == "administration_lost_statistics" %} aria-current="page"{% endif %}>Lost Item Statistics</a>
                                 <a href="{% url 'administration_pending_reports' %}"{% if current == "administration_pending_reports" %} aria-current="page"{% endif %}>Pending Reports</a>
+                                <a href="{% url 'administration_flagged_reports' %}"{% if current == "administration_flagged_reports" %} aria-current="page"{% endif %}>Flagged Reports</a>
+                                <a href="{% url 'administration_activity_log' %}"{% if current == "administration_activity_log" %} aria-current="page"{% endif %}>Activity Log</a>
                                 <a href="{% url 'administration_category_list' %}"{% if current == "administration_category_list" %} aria-current="page"{% endif %}>Categories</a>
                                 <a href="{% url 'administration_administrator_list' %}"{% if current == "administration_administrator_list" %} aria-current="page"{% endif %}>Administrators</a>
                                 <a href="{% url 'administration_user_list' %}"{% if current == "administration_user_list" %} aria-current="page"{% endif %}>User Accounts</a>
@@ -87,7 +89,8 @@
         {% if messages %}
             <div class="messages">
                 {% for message in messages %}
-                    <div class="message message-{{ message.tags|default:'info' }}">
+                    {# extra_tags agrega clases propias, p. ej. "recovered" para la celebracion de NFR36. #}
+                    <div class="message message-{{ message.level_tag|default:'info' }}{% if message.extra_tags %} {{ message.extra_tags }}{% endif %}">
                         {{ message }}
                     </div>
                 {% endfor %}
@@ -120,6 +123,7 @@
                             <li><a href="{% url 'reports:create_lost_report' %}">Report a lost item</a></li>
                             <li><a href="{% url 'reports:create_found_report' %}">Report a found item</a></li>
                             <li><a href="{% url 'reports:my_reports' %}">My reports</a></li>
+                            <li><a href="{% url 'accounts:password_change' %}">Change password</a></li>
                         {% else %}
                             <li><a href="{% url 'accounts:register' %}">Register</a></li>
                             <li><a href="{% url 'accounts:login' %}">Login</a></li>

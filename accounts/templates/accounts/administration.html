@@ -24,6 +24,27 @@
         </article>
 
         <article class="card admin-card">
+            <h2>Flagged Reports</h2>
+            <p class="description">
+                Review published reports that the community flagged, and dismiss the flags or remove the report.
+                {% if flagged_report_count %}
+                    <strong>{{ flagged_report_count }} waiting for review.</strong>
+                {% endif %}
+            </p>
+            <a class="button" href="{% url 'administration_flagged_reports' %}">
+                Flagged Reports
+            </a>
+        </article>
+
+        <article class="card admin-card">
+            <h2>Activity Log</h2>
+            <p class="description">See who approved, rejected, edited, or removed each report, and when.</p>
+            <a class="button" href="{% url 'administration_activity_log' %}">
+                View Activity Log
+            </a>
+        </article>
+
+        <article class="card admin-card">
             <h2>Categories</h2>
             <p class="description">Create, rename, and remove report categories.</p>
             <a class="button" href="{% url 'administration_category_list' %}">

@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}Remove {{ report.title }} | BackToYou{% endblock %}
+
+{% block content %}
+    <section class="form-card">
+        <span class="role-pill">Flagged Report</span>
+        <h1 class="page-title">Remove this report from public view?</h1>
+        <p class="lead">
+            The report changes to Rejected and leaves the public list. Its
+            creator receives an email with the reasons, but not who flagged it.
+        </p>
+
+        <div class="meta-grid">
+            <div class="meta-item">
+                <span class="meta-label">Title</span>
+                {{ report.title }}
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Type</span>
+                {{ report.get_report_type_display }}
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Reasons</span>
+                {% for reason, count in reason_summary %}
+                    {{ reason }}{% if count > 1 %} ×{{ count }}{% endif %}{% if not forloop.last %} · {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="actions">
+            <form method="post">
+                {% csrf_token %}
+                <button class="danger" type="submit">Remove from Public View</button>
+            </form>
+            <a class="button ghost" href="{% url 'administration_flagged_report' report.id %}">
+                Cancel
+            </a>
+        </div>
+    </section>
+{% endblock %}
