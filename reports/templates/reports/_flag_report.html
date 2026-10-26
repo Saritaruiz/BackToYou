@@ -1,0 +1,9 @@
+{# RF43: avisar a los administradores sobre un reporte publicado. #}
+{% if has_flagged_report %}
+    <p class="flag-note">You flagged this report. An administrator will review it.</p>
+{% elif can_flag_report %}
+    <p class="flag-note">
+        Something wrong with this report?
+        <a class="text-link" href="{% url 'reports:flag_report' report.id %}">Flag report</a>
+    </p>
+{% endif %}

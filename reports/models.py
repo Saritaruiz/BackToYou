@@ -111,3 +111,55 @@ class ContactMessage(models.Model):
 
     def __str__(self):
         return f"Message about {self.report}"
+
+
+# RF43: aviso de un miembro de la comunidad sobre un reporte ya publicado.
+class ReportFlag(models.Model):
+    class Reason(models.TextChoices):
+        FALSE_INFORMATION = "FALSE_INFORMATION", "False information"
+        OFFENSIVE = "OFFENSIVE", "Offensive content"
+        PERSONAL_DATA = "PERSONAL_DATA", "Personal data"
+        OTHER = "OTHER", "Other"
+
+    report = models.ForeignKey(
+        ItemReport,
+        on_delete=models.CASCADE,
+        related_name="flags",
+    )
+
+    flagged_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="report_flags",
+    )
+
+    reason = models.CharField(max_length=20, choices=Reason.choices)
+    details = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    # Administrador que reviso el aviso, al descartarlo o al retirar el
+    # reporte. Mientras esta vacio, el aviso sigue abierto.
+    reviewed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        related_name="reviewed_report_flags",
+        blank=True,
+        null=True,
+    )
+
+    reviewed_at = models.DateTimeField(
+        blank=True,
+        null=True,
+    )
+
+    class Meta:
+        constraints = [
+            # Cada persona avisa una sola vez sobre el mismo reporte.
+            models.UniqueConstraint(
+                fields=["report", "flagged_by"],
+                name="unique_flag_per_user_and_report",
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.get_reason_display()} flag on {self.report}"

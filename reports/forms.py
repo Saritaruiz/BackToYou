@@ -1,6 +1,6 @@
 from django import forms
 
-from .models import Category, ContactMessage, ItemReport
+from .models import Category, ContactMessage, ItemReport, ReportFlag
 
 
 class CategoryForm(forms.ModelForm):
@@ -100,3 +100,27 @@ class ContactMessageForm(forms.ModelForm):
         if not message:
             raise forms.ValidationError("Message cannot be empty.")
         return message
+
+
+class ReportFlagForm(forms.ModelForm):
+    """RF43: el motivo es obligatorio; los detalles ayudan al administrador."""
+
+    reason = forms.ChoiceField(
+        choices=ReportFlag.Reason.choices,
+        widget=forms.RadioSelect,
+        error_messages={"required": "Choose a reason for flagging this report."},
+    )
+    details = forms.CharField(
+        label="Details (optional)",
+        required=False,
+        max_length=500,
+        widget=forms.Textarea(attrs={"rows": 3}),
+        help_text="What is wrong with the report? Do not include personal data.",
+    )
+
+    class Meta:
+        model = ReportFlag
+        fields = ("reason", "details")
+
+    def clean_details(self):
+        return self.cleaned_data["details"].strip()

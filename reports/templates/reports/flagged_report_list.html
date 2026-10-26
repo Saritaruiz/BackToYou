@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% load icons %}
+
+{% block title %}Flagged Reports | BackToYou{% endblock %}
+
+{% block content %}
+    <section class="hero page-head">
+        <div>
+            <span class="role-pill">Moderation</span>
+            <h1>Flagged <em>reports.</em></h1>
+            <p class="lead">Published reports that members of the community flagged as a problem.</p>
+        </div>
+        {% if reports %}
+            <p class="page-count">
+                <strong>{{ reports|length }}</strong>
+                waiting for review
+            </p>
+        {% endif %}
+    </section>
+
+    {% if reports %}
+        <section class="ledger" aria-label="Flagged reports">
+            {% for report in reports %}
+                <article class="ledger-row">
+                    <div class="ledger-thumb">
+                        {% if report.image %}
+                            <img
+                                class="report-image"
+                                src="{{ report.image.url }}"
+                                alt="{{ report.title }}"
+                            >
+                        {% else %}
+                            <div class="report-placeholder">
+                                {% category_icon report.category.name %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="ledger-main">
+                        <h2 class="ledger-title">{{ report.title }}</h2>
+                        <p class="card-meta">
+                            {{ report.category.name }} · {{ report.event_date }}
+                        </p>
+                        <p class="flag-reason-summary">
+                            {% for reason, count in report.reason_summary %}
+                                {{ reason }}{% if count > 1 %} ×{{ count }}{% endif %}{% if not forloop.last %} · {% endif %}
+                            {% endfor %}
+                        </p>
+                    </div>
+
+                    <p class="flag-count">
+                        <strong>{{ report.open_flag_count }}</strong>
+                        flag{{ report.open_flag_count|pluralize }}
+                    </p>
+
+                    <div class="ledger-actions">
+                        <a class="button" href="{% url 'administration_flagged_report' report.id %}">
+                            Review Flags
+                        </a>
+                    </div>
+                </article>
+            {% endfor %}
+        </section>
+    {% else %}
+        <section class="empty-state">
+            <h2>No reports are flagged right now.</h2>
+            <p>When someone flags a published report, it will appear here.</p>
+        </section>
+    {% endif %}
+{% endblock %}

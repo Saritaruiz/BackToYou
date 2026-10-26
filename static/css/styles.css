@@ -2163,10 +2163,90 @@ input[type="radio"]:focus-visible {
     }
 
     .ledger-row > .pill-row,
+    .ledger-row > .flag-count,
     .ledger-row > .ledger-actions {
         grid-column: 3 / -1;
         justify-content: flex-start;
     }
+}
+
+/* ===== RF43 - Avisos sobre reportes publicados ===== */
+.flag-note {
+    margin: var(--space-6) 0 0;
+    color: var(--muted);
+    font-size: var(--fs-small);
+}
+
+.flag-reasons {
+    min-width: 0;
+    margin: 0 0 var(--space-6);
+    padding: 0;
+    border: 0;
+}
+
+.flag-reasons legend {
+    margin-bottom: var(--space-2);
+    padding: 0;
+    color: var(--muted);
+    font-size: var(--fs-small);
+    font-weight: var(--fw-semibold);
+    font-variant-caps: all-small-caps;
+    letter-spacing: var(--tracking-caps);
+}
+
+.flag-reason {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin: 0;
+    padding-block: var(--space-3);
+    border-bottom: 1px solid var(--border);
+    color: var(--charcoal);
+    font-size: var(--fs-body);
+    font-variant-caps: normal;
+    font-weight: var(--fw-regular);
+    letter-spacing: 0;
+    cursor: pointer;
+}
+
+.flag-reason:first-of-type {
+    border-top: 1px solid var(--border);
+}
+
+.flag-reason input[type="radio"] {
+    margin: 0;
+}
+
+/* Al revisar avisos, la foto acompana: no debe empujar los avisos fuera
+   de la pantalla. */
+.flag-review .report-image.detail {
+    max-height: 360px;
+}
+
+.flag-reason-summary {
+    margin: var(--space-1) 0 0;
+    color: var(--accent);
+    font-size: var(--fs-small);
+    font-weight: var(--fw-semibold);
+}
+
+.flag-count {
+    margin: 0;
+    color: var(--muted);
+    font-size: var(--fs-label);
+    font-weight: 700;
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.flag-count strong {
+    margin-right: 4px;
+    color: var(--charcoal);
+    font-family: var(--font-heading);
+    font-size: 28px;
+    font-weight: var(--fw-regular);
+    letter-spacing: 0;
 }
 
 /* ===== Inicio de sesion y registro: pantalla dividida (NFR38) ===== */

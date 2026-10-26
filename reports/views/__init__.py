@@ -11,6 +11,12 @@ from .categories import (
     category_list,
 )
 from .create import create_found_report, create_lost_report
+from .flags import (
+    flag_report,
+    flagged_report_list,
+    remove_flagged_report,
+    review_flagged_report,
+)
 from .moderation import (
     delete_pending_report,
     edit_pending_report,
@@ -37,10 +43,14 @@ __all__ = [
     "delete_report",
     "edit_pending_report",
     "edit_report",
+    "flag_report",
+    "flagged_report_list",
     "mark_report_recovered",
     "moderate_report_detail",
     "my_reports",
     "pending_report_list",
+    "remove_flagged_report",
     "report_detail",
     "report_list",
+    "review_flagged_report",
 ]

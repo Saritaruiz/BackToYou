@@ -64,3 +64,20 @@ def notify_report_rejected(report):
             "This report will not appear in the public report list."
         ),
     )
+
+
+def notify_report_removed(report, reasons):
+    """RF43: el creador sabe por que se retiro su reporte, pero no quien aviso."""
+    return _send_notification(
+        report.creator.email,
+        "BackToYou - Your report was removed from public view",
+        (
+            "Members of the community flagged your BackToYou report. An "
+            "administrator reviewed it and removed it from public view.\n\n"
+            f"Report: {report.title}\n"
+            f"Reason: {', '.join(reasons)}\n"
+            "Status: REJECTED\n\n"
+            "If the item is still lost or found, you can create a new report "
+            "without the problem."
+        ),
+    )

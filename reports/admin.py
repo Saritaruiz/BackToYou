@@ -1,9 +1,10 @@
 from django.contrib import admin
-from .models import Category, ContactMessage, ItemReport
+from .models import Category, ContactMessage, ItemReport, ReportFlag
 
 # crear y revisar reportes desde /admin
 
 admin.site.register(Category)
 admin.site.register(ItemReport)
 admin.site.register(ContactMessage)
+admin.site.register(ReportFlag)
 # Register your models here.

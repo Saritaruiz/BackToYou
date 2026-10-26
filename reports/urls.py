@@ -2,6 +2,7 @@ from django.urls import path
 
 from .views import ai as ai_views
 from .views import create as create_views
+from .views import flags as flag_views
 from .views import owner as owner_views
 from .views import public as public_views
 
@@ -18,6 +19,7 @@ urlpatterns = [
         public_views.contact_reporter,
         name="contact_reporter",
     ),
+    path("<int:report_id>/flag/", flag_views.flag_report, name="flag_report"),
     path("<int:report_id>/edit/", owner_views.edit_report, name="edit_report"),
     path("<int:report_id>/delete/", owner_views.delete_report, name="delete_report"),
     path(
