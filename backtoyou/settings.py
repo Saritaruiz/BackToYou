@@ -190,6 +190,9 @@ EMAIL_BACKEND = os.environ.get(
 DEFAULT_FROM_EMAIL = "BackToYou noreply@backtoyou.local"
 AUTH_USER_MODEL = "accounts.User"
 LOGIN_URL = "accounts:login"
+# RF39: el enlace para crear una contrasena nueva vence a las 24 horas.
+# Ademas sirve una sola vez: deja de valer en cuanto la contrasena cambia.
+PASSWORD_RESET_TIMEOUT = 60 * 60 * 24
 LOGIN_REDIRECT_URL = "home"
 LOGOUT_REDIRECT_URL = "home"
 MEDIA_URL ="/media/"

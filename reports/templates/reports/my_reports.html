@@ -9,6 +9,7 @@
             <span class="kicker">Your archive</span>
             <h1>My <em>reports.</em></h1>
             <p class="lead">Every report you have created, with its current status.</p>
+            <p class="account-link"><a class="text-link" href="{% url 'accounts:password_change' %}">Change password</a></p>
         </div>
         {% if reports %}
             <p class="page-count">

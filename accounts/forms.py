@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth import authenticate
-from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+from django.contrib.auth.forms import AuthenticationForm, PasswordResetForm, UserCreationForm
 from django.core.exceptions import ValidationError
 from django.db.models import Q
 
@@ -60,6 +60,20 @@ class EafitAuthenticationForm(AuthenticationForm):
             self.confirm_login_allowed(self.user_cache)
 
         return self.cleaned_data
+
+
+class EafitPasswordResetForm(PasswordResetForm):
+    """RF39: pedir el enlace para crear una contrasena nueva.
+
+    Django responde igual exista o no la cuenta, y no envia nada a cuentas
+    inactivas; aqui solo se ajusta la etiqueta al correo institucional.
+    """
+
+    email = forms.EmailField(
+        label="Institutional email",
+        max_length=254,
+        widget=forms.EmailInput(attrs={"autocomplete": "email"}),
+    )
 
 
 class EafitUserRegistrationForm(UserCreationForm):

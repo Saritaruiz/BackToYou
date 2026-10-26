@@ -120,6 +120,7 @@
                             <li><a href="{% url 'reports:create_lost_report' %}">Report a lost item</a></li>
                             <li><a href="{% url 'reports:create_found_report' %}">Report a found item</a></li>
                             <li><a href="{% url 'reports:my_reports' %}">My reports</a></li>
+                            <li><a href="{% url 'accounts:password_change' %}">Change password</a></li>
                         {% else %}
                             <li><a href="{% url 'accounts:register' %}">Register</a></li>
                             <li><a href="{% url 'accounts:login' %}">Login</a></li>

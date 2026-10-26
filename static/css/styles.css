@@ -2468,6 +2468,23 @@ input[type="radio"]:focus-visible {
     font-size: var(--fs-small);
 }
 
+/* RF39: las reglas de contrasena que muestra Django son una lista. */
+.field-help ul {
+    margin: 0;
+    padding-left: 18px;
+}
+
+.forgot-link {
+    margin: calc(-1 * var(--space-3)) 0 var(--space-6);
+    font-size: var(--fs-small);
+    text-align: right;
+}
+
+.hero .account-link {
+    margin: var(--space-2) 0 0;
+    font-size: var(--fs-small);
+}
+
 .visually-hidden {
     position: absolute;
     width: 1px;
