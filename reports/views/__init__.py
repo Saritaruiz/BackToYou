@@ -4,6 +4,7 @@ Cada modulo agrupa los requisitos de un mismo frente para que dos personas
 puedan trabajar en paralelo sin editar el mismo archivo.
 """
 
+from .activity_log import activity_log
 from .categories import (
     category_create,
     category_delete,
@@ -32,6 +33,7 @@ from .owner import (
 from .public import contact_reporter, report_detail, report_list
 
 __all__ = [
+    "activity_log",
     "category_create",
     "category_delete",
     "category_edit",

@@ -8,6 +8,7 @@ de revision, es decir, antes de que sea visible para el publico.
 
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
+from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
@@ -15,7 +16,8 @@ from accounts.decorators import administrator_required
 
 from ..email_notifications import notify_report_approved, notify_report_rejected
 from ..forms import ItemReportForm
-from ..models import ItemReport
+from ..models import ItemReport, ModerationLogEntry
+from ..moderation_log import log_action
 
 
 @administrator_required
@@ -46,23 +48,27 @@ def moderate_report_detail(request, report_id):
             report.status = ItemReport.Status.ACTIVE
             success_message = "Report approved successfully."
             notify_moderation_result = notify_report_approved
+            log_entry_action = ModerationLogEntry.Action.APPROVED
         elif action == "reject":
             report.status = ItemReport.Status.REJECTED
             success_message = "Report rejected successfully."
             notify_moderation_result = notify_report_rejected
+            log_entry_action = ModerationLogEntry.Action.REJECTED
         else:
             raise PermissionDenied("Invalid moderation action.")
 
         report.moderated_by = request.user
         report.moderated_at = timezone.now()
-        report.save(
-            update_fields=[
-                "status",
-                "moderated_by",
-                "moderated_at",
-                "updated_at",
-            ],
-        )
+        with transaction.atomic():
+            report.save(
+                update_fields=[
+                    "status",
+                    "moderated_by",
+                    "moderated_at",
+                    "updated_at",
+                ],
+            )
+            log_action(request.user, log_entry_action, report)
         notify_moderation_result(report)
 
         messages.success(request, success_message)
@@ -87,7 +93,17 @@ def edit_pending_report(request, report_id):
         form = ItemReportForm(request.POST, request.FILES, instance=report)
 
         if form.is_valid():
-            form.save()
+            with transaction.atomic():
+                form.save()
+                # Guardar sin cambios no deja entrada en el historial.
+                if form.has_changed():
+                    changed = ", ".join(str(form.fields[name].label) for name in form.changed_data)
+                    log_action(
+                        request.user,
+                        ModerationLogEntry.Action.EDITED,
+                        report,
+                        details=f"Changed: {changed}",
+                    )
 
             messages.success(request, "Report updated successfully.")
             return redirect("administration_moderate_report", report_id=report.id)
@@ -111,7 +127,9 @@ def delete_pending_report(request, report_id):
 
     if request.method == "POST":
         deleted_title = report.title
-        report.delete()
+        with transaction.atomic():
+            log_action(request.user, ModerationLogEntry.Action.REMOVED, report)
+            report.delete()
 
         messages.success(request, f'Report "{deleted_title}" was removed.')
         return redirect("administration_pending_reports")

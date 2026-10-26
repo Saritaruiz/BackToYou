@@ -20,7 +20,8 @@ from accounts.decorators import administrator_required
 
 from ..email_notifications import notify_report_removed
 from ..forms import ReportFlagForm
-from ..models import ItemReport, ReportFlag
+from ..models import ItemReport, ModerationLogEntry, ReportFlag
+from ..moderation_log import log_action
 from ..querysets import flagged_reports, open_flags
 
 
@@ -77,6 +78,14 @@ def _reason_summary(flags):
     return counts.most_common()
 
 
+def _reason_text(flags):
+    """Los motivos en una linea para el historial (RF44): "Personal data ×2"."""
+    return " · ".join(
+        f"{reason} ×{count}" if count > 1 else reason
+        for reason, count in _reason_summary(flags)
+    )
+
+
 @administrator_required
 def flagged_report_list(request):
     reports = list(flagged_reports())
@@ -118,7 +127,14 @@ def review_flagged_report(request, report_id):
         if request.POST.get("action") != "dismiss":
             raise PermissionDenied("Invalid review action.")
 
-        _close_flags(report, request.user, timezone.now())
+        with transaction.atomic():
+            _close_flags(report, request.user, timezone.now())
+            log_action(
+                request.user,
+                ModerationLogEntry.Action.FLAGS_DISMISSED,
+                report,
+                details=_reason_text(flags),
+            )
         messages.success(request, "The flags were dismissed. The report stays public.")
         return redirect("administration_flagged_reports")
 
@@ -143,8 +159,15 @@ def remove_flagged_report(request, report_id):
         report.status = ItemReport.Status.REJECTED
         report.moderated_by = request.user
         report.moderated_at = reviewed_at
-        report.save(update_fields=["status", "moderated_by", "moderated_at", "updated_at"])
-        _close_flags(report, request.user, reviewed_at)
+        with transaction.atomic():
+            report.save(update_fields=["status", "moderated_by", "moderated_at", "updated_at"])
+            _close_flags(report, request.user, reviewed_at)
+            log_action(
+                request.user,
+                ModerationLogEntry.Action.REMOVED_FROM_PUBLIC,
+                report,
+                details=_reason_text(flags),
+            )
         notify_report_removed(report, [reason for reason, _ in _reason_summary(flags)])
 
         messages.success(request, f'Report "{report.title}" was removed from public view.')

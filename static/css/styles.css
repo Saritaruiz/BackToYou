@@ -2240,6 +2240,31 @@ input[type="radio"]:focus-visible {
     white-space: nowrap;
 }
 
+/* ===== RF44 - Historial de moderacion ===== */
+.log-note {
+    display: block;
+    color: var(--muted);
+    font-size: var(--fs-label);
+    font-weight: 700;
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+}
+
+.activity-log td {
+    vertical-align: top;
+}
+
+.pagination {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-6);
+    margin-top: var(--space-6);
+    color: var(--muted);
+    font-size: var(--fs-small);
+}
+
 .flag-count strong {
     margin-right: 4px;
     color: var(--charcoal);

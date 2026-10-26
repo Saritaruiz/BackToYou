@@ -37,6 +37,14 @@
         </article>
 
         <article class="card admin-card">
+            <h2>Activity Log</h2>
+            <p class="description">See who approved, rejected, edited, or removed each report, and when.</p>
+            <a class="button" href="{% url 'administration_activity_log' %}">
+                View Activity Log
+            </a>
+        </article>
+
+        <article class="card admin-card">
             <h2>Categories</h2>
             <p class="description">Create, rename, and remove report categories.</p>
             <a class="button" href="{% url 'administration_category_list' %}">

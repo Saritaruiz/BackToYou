@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.core.exceptions import PermissionDenied
 from django.db import models
 
 # será para categorizar que tipo de objeto se perdió
@@ -163,3 +164,56 @@ class ReportFlag(models.Model):
 
     def __str__(self):
         return f"{self.get_reason_display()} flag on {self.report}"
+
+
+# RF44: historial de moderacion. Completa DR06, que en el reporte solo
+# guarda la ultima decision.
+class ModerationLogEntry(models.Model):
+    class Action(models.TextChoices):
+        APPROVED = "APPROVED", "Approved"
+        REJECTED = "REJECTED", "Rejected"
+        EDITED = "EDITED", "Edited"
+        REMOVED = "REMOVED", "Removed"
+        FLAGS_DISMISSED = "FLAGS_DISMISSED", "Flags dismissed"
+        REMOVED_FROM_PUBLIC = "REMOVED_FROM_PUBLIC", "Removed from public view"
+
+    action = models.CharField(max_length=30, choices=Action.choices)
+
+    administrator = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        related_name="moderation_log_entries",
+        blank=True,
+        null=True,
+    )
+
+    # Copias del momento de la accion: la entrada sigue legible aunque el
+    # reporte se elimine o la cuenta del administrador cambie.
+    administrator_email = models.EmailField()
+
+    report = models.ForeignKey(
+        ItemReport,
+        on_delete=models.SET_NULL,
+        related_name="moderation_log_entries",
+        blank=True,
+        null=True,
+    )
+
+    report_title = models.CharField(max_length=150)
+    details = models.CharField(max_length=255, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ("-created_at", "-id")
+
+    def __str__(self):
+        return f"{self.get_action_display()}: {self.report_title}"
+
+    # Una entrada del historial no se cambia ni se borra desde la aplicacion.
+    def save(self, *args, **kwargs):
+        if not self._state.adding:
+            raise PermissionDenied("Moderation log entries cannot be changed.")
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        raise PermissionDenied("Moderation log entries cannot be deleted.")
