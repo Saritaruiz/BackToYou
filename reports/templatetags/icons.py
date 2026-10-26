@@ -1,7 +1,9 @@
 """NFR37 - Iconos de categoria y de la interfaz.
 
-Iconos lineales del manual de marca: trazo de 1.5 px y un detalle relleno en
-Ciruela (clase icon-accent). Van en linea para que tomen el color del texto.
+Los iconos de categoria son los del manual de marca (seccion 6,
+"Iconografia BackToYou"): lineales, trazo de 1.5 px y esquinas redondeadas
+sobre una cuadricula de 24 x 24, en Salvia, con un solo detalle relleno en
+Ciruela suave (clase icon-fill). Van en linea para que tomen el color del texto.
 """
 
 from django import template
@@ -10,35 +12,52 @@ from django.utils.safestring import mark_safe
 register = template.Library()
 
 
-def _svg(body):
+def _svg(body, kind, grid):
     return mark_safe(
-        '<svg class="icon" viewBox="0 0 64 64" fill="none" stroke="currentColor" '
+        f'<svg class="icon {kind}" viewBox="0 0 {grid} {grid}" fill="none" stroke="currentColor" '
         'stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" '
         f'aria-hidden="true" focusable="false">{body}</svg>'
     )
 
 
-ICONS = {
-    "laptop": '<rect x="14" y="16" width="36" height="24" rx="2"/><path d="M8 44h48l-4 6H12z"/>'
-              '<circle class="icon-accent" cx="32" cy="19.5" r="1.6"/>',
-    "card": '<rect x="9" y="16" width="46" height="32" rx="4"/>'
-            '<rect class="icon-accent" x="15" y="23" width="13" height="16" rx="2"/>'
-            '<path d="M33 26h16M33 32h16M33 38h10"/>',
-    "bottle": '<rect class="icon-accent" x="26" y="7" width="12" height="7" rx="1.5"/>'
-              '<path d="M27 14h10v5c4 3 6 7 6 12v21a4 4 0 0 1-4 4H25a4 4 0 0 1-4-4V31c0-5 2-9 6-12z"/>'
-              '<path d="M21 34h22M21 44h22"/>',
-    "hoodie": '<path d="M22 12l-10 6 4 10 6-3v27h20V25l6 3 4-10-10-6c-2 4-6 6-10 6s-8-2-10-6z"/>'
-              '<rect class="icon-accent" x="27" y="38" width="10" height="7" rx="2"/>',
-    "backpack": '<path d="M26 16v-3a6 6 0 0 1 12 0v3"/><rect x="16" y="16" width="32" height="40" rx="9"/>'
-                '<rect x="22" y="38" width="20" height="12" rx="3"/><path d="M22 28h20"/>'
-                '<circle class="icon-accent" cx="32" cy="44" r="2"/>',
-    "keys": '<circle cx="22" cy="22" r="11"/><circle class="icon-accent" cx="22" cy="22" r="4"/>'
-            '<path d="M30 30l22 22M44 44l5-5M48 48l5-5"/>',
-    "book": '<path d="M32 18c-6-4-14-5-22-4v32c8-1 16 0 22 4c6-4 14-5 22-4V14c-8-1-16 0-22 4z"/>'
-            '<path d="M32 18v32"/><path class="icon-accent" d="M40 19v11l3-2 3 2V18z"/>',
-    "sunglasses": '<circle cx="20" cy="34" r="9"/><circle class="icon-accent" cx="44" cy="34" r="9"/>'
-                  '<path d="M29 32q3-3 6 0M11 32l-4-9M53 32l4-9"/>',
-    "tag": '<path d="M10 12h22l24 24-20 20-26-26z"/><circle class="icon-accent" cx="21" cy="23" r="4"/>',
+# Manual de marca: cuadricula de 24 x 24.
+CATEGORY_ICONS = {
+    "electronics": '<rect class="icon-fill" x="4.5" y="5" width="15" height="11" rx="1.5"/>'
+                   '<path d="M2.5 18h19"/>',
+    "card": '<circle class="icon-fill" cx="8.5" cy="11.5" r="3" stroke="none"/>'
+            '<rect x="3" y="5.5" width="18" height="13" rx="2.5"/>'
+            '<circle cx="8.5" cy="10.5" r="1.75"/>'
+            '<path d="M6 15.5c.6-1.6 1.5-2.4 2.5-2.4s1.9.8 2.5 2.4"/>'
+            '<path d="M14 10h4.5M14 13.5h3.5"/>',
+    "bottle": '<path class="icon-fill" d="M8 13h8v7a1.5 1.5 0 0 1-1.5 1.5h-5A1.5 1.5 0 0 1 8 20z" stroke="none"/>'
+              '<rect x="10" y="2.5" width="4" height="2.5" rx=".5"/>'
+              '<path d="M10.5 5v2.3C9 8.2 8 9.8 8 11.5v8.5A1.5 1.5 0 0 0 9.5 21.5h5a1.5 1.5 0 0 0 1.5-1.5v-8.5'
+              'c0-1.7-1-3.3-2.5-4.2V5"/><path d="M8 13h8"/>',
+    "clothing": '<path class="icon-fill" d="M9 4.5c.6 1.2 1.7 1.9 3 1.9s2.4-.7 3-1.9z" stroke="none"/>'
+                '<rect class="icon-fill" x="13.5" y="9.5" width="2" height="2" rx=".4" stroke="none"/>'
+                '<path d="M9 4.5 4 7l1.5 4.5L8 10.5v10h8v-10l2.5 1L20 7l-5-2.5c-.6 1.2-1.7 1.9-3 1.9s-2.4-.7-3-1.9z"/>',
+    "bag": '<path d="M10 4.5V3.5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1"/>'
+           '<path d="M6 10.5A6 6 0 0 1 12 4.5a6 6 0 0 1 6 6v9a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2z"/>'
+           '<rect class="icon-fill" x="8.5" y="13" width="7" height="4.5" rx="1.5"/>',
+    "keys": '<circle class="icon-fill" cx="6.5" cy="12" r="4"/>'
+            '<circle cx="6.5" cy="12" r="1.25"/>'
+            '<path d="M10.5 12h11M16.5 12v3M19.5 12v2.5"/>',
+    "book": '<rect x="5" y="3" width="14" height="18" rx="1.5"/>'
+            '<path d="M8 3v18"/>'
+            '<path class="icon-fill" d="M13.5 3v5.5l1.5-1.2 1.5 1.2V3"/>',
+    "glasses": '<circle class="icon-fill" cx="7" cy="14.5" r="3.5"/>'
+               '<circle class="icon-fill" cx="17" cy="14.5" r="3.5"/>'
+               '<path d="M10.5 14c1-1 2-1 3 0M3.5 13.5 3 10.5M20.5 13.5l.5-3"/>',
+    "tag": '<path class="icon-fill" d="M12.5 6H9l-5.5 6 5.5 6h3.5z" stroke="none"/>'
+           '<path d="M21 7.5v9a1.5 1.5 0 0 1-1.5 1.5H9l-5.5-6L9 6h10.5A1.5 1.5 0 0 1 21 7.5z"/>'
+           '<circle cx="8.75" cy="12" r="1.25"/><path d="M13.5 10.5h4M13.5 13.5h3"/>',
+    # "Todas las categorias" en el filtro del indice.
+    "all": '<rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/>'
+           '<rect x="4" y="13" width="7" height="7" rx="1.5"/><rect class="icon-fill" x="13" y="13" width="7" height="7" rx="1.5"/>',
+}
+
+# Iconos de la interfaz (entrega segura, buscador): cuadricula de 64 x 64.
+UI_ICONS = {
     "search": '<circle cx="27" cy="27" r="15"/><path d="M38 38l14 14"/>',
     "shield": '<path d="M32 8l20 7v14c0 13-9 22-20 27C21 51 12 42 12 29V15z"/>'
               '<path class="icon-accent-line" d="M24 32l6 6 11-12"/>',
@@ -49,16 +68,16 @@ ICONS = {
 # Palabras de cada categoria por defecto (seed_categories) y de los datos de
 # prueba. Una categoria nueva sin icono propio usa el de "Other".
 CATEGORY_KEYWORDS = (
-    ("electr", "laptop"),
+    ("electr", "electronics"),
     ("card", "card"),
     ("document", "card"),
     ("bottle", "bottle"),
-    ("cloth", "hoodie"),
-    ("bag", "backpack"),
+    ("cloth", "clothing"),
+    ("bag", "bag"),
     ("key", "keys"),
     ("book", "book"),
     ("notebook", "book"),
-    ("accessor", "sunglasses"),
+    ("accessor", "glasses"),
 )
 
 
@@ -72,9 +91,14 @@ def icon_for_category(name):
 
 @register.simple_tag
 def category_icon(name):
-    return _svg(ICONS[icon_for_category(name)])
+    return _svg(CATEGORY_ICONS[icon_for_category(name)], "category-icon", 24)
+
+
+@register.simple_tag
+def all_categories_icon():
+    return _svg(CATEGORY_ICONS["all"], "category-icon", 24)
 
 
 @register.simple_tag
 def ui_icon(name):
-    return _svg(ICONS[name])
+    return _svg(UI_ICONS[name], "ui-icon", 64)

@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load icons %}
 
 {% block title %}Reports | BackToYou{% endblock %}
 
@@ -26,24 +27,6 @@
                     placeholder="Umbrella, keys, Block 38..."
                     value="{{ query|default:'' }}"
                 >
-            </div>
-
-            <div>
-                <label for="category-filter">Category</label>
-                <select id="category-filter" name="category">
-                    <option value="">All categories</option>
-
-                    {% for category in categories %}
-                        <option
-                            value="{{ category.id }}"
-                            {% if selected_category == category.id|stringformat:"s" %}
-                                selected
-                            {% endif %}
-                        >
-                            {{ category.name }}
-                        </option>
-                    {% endfor %}
-                </select>
             </div>
 
             <div>
@@ -76,8 +59,48 @@
             <a class="button ghost" href="{% url 'reports:report_list' %}">
                 Clear Filters
             </a>
+
+            {# NFR37: la categoria se elige por su icono. #}
+            <fieldset class="category-picker">
+                <legend>Category</legend>
+                <div class="category-tiles">
+                    <label class="category-tile">
+                        <input type="radio" name="category" value=""{% if not selected_category %} checked{% endif %}>
+                        {% all_categories_icon %}
+                        <span>All</span>
+                    </label>
+                    {% for category in categories %}
+                        <label class="category-tile">
+                            <input
+                                type="radio"
+                                name="category"
+                                value="{{ category.id }}"
+                                {% if selected_category == category.id|stringformat:"s" %}checked{% endif %}
+                            >
+                            {% category_icon category.name %}
+                            <span>{{ category.name }}</span>
+                        </label>
+                    {% endfor %}
+                </div>
+            </fieldset>
         </form>
     </section>
+
+    <script>
+        // NFR37: con el mouse o el dedo, elegir una categoria ya filtra. Con el
+        // teclado las flechas solo la marcan y se confirma con Search.
+        (function () {
+            const picker = document.querySelector(".category-picker");
+            if (!picker) return;
+            let byPointer = false;
+            picker.addEventListener("pointerdown", function () { byPointer = true; });
+            picker.addEventListener("keydown", function () { byPointer = false; });
+            picker.addEventListener("change", function (event) {
+                if (byPointer) event.target.form.requestSubmit();
+                byPointer = false;
+            });
+        })();
+    </script>
 
     {% if reports %}
         {# Con foto, tarjetas; sin foto, filas. "All as list" muestra todo en filas. #}
