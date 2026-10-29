@@ -1,0 +1,19 @@
+# Servicio de systemd que mantiene BackToYou corriendo con Gunicorn.
+# deploy/setup.sh lo copia a /etc/systemd/system/backtoyou.service.
+# Ver el registro: journalctl -u backtoyou -f
+
+[Unit]
+Description=BackToYou (Gunicorn)
+After=network.target
+
+[Service]
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/home/ubuntu/BackToYou
+# Clave secreta, DEBUG, dominios y cuenta de correo. Nunca se sube a GitHub.
+EnvironmentFile=/etc/backtoyou.env
+ExecStart=/home/ubuntu/BackToYou/.venv/bin/gunicorn backtoyou.wsgi:application --bind 127.0.0.1:8000 --workers 2 --access-logfile -
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
