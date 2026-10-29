@@ -10,6 +10,9 @@ __pycache__/
 media_local/
 media/
 
+# Copia de los archivos estaticos que genera collectstatic (despliegue)
+staticfiles/
+
 # Entorno virtual local
 .venv/
 

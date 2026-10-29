@@ -47,6 +47,12 @@ ALLOWED_HOSTS = [
     if host.strip()
 ]
 
+# En despliegue Nginx atiende el HTTPS y le pasa la peticion a Gunicorn por
+# HTTP. Nginx siempre escribe este encabezado (ver deploy/nginx.conf), asi
+# Django sabe que la peticion original era segura y el chequeo CSRF del login
+# y los formularios no falla.
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
 
 # Application definition
 
@@ -178,6 +184,9 @@ STATIC_URL = 'static/'
 STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
+# Con DEBUG=False Django ya no sirve el CSS ni las imagenes. En despliegue
+# "collectstatic" los copia aqui y Nginx los sirve directamente.
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
 
 # Email

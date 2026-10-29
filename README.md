@@ -119,3 +119,27 @@ To send real emails through Gmail:
 ```bash
 python manage.py test --settings=backtoyou.test_settings
 ```
+
+## Deployment (AWS EC2)
+
+BackToYou runs on a single Ubuntu 24.04 server with Gunicorn and Nginx. The SQLite database and the uploaded photos stay on the server's disk, so they survive updates. They are lost if the instance is terminated, so copy `local.sqlite3` and `media_local/` before doing that.
+
+First install, on the server:
+
+```bash
+git clone https://github.com/Saritaruiz/BackToYou.git /home/ubuntu/BackToYou
+cd /home/ubuntu/BackToYou
+bash deploy/setup.sh <server IP or domain>
+```
+
+To update:
+
+```bash
+cd /home/ubuntu/BackToYou
+git pull
+bash deploy/setup.sh
+```
+
+The secret key, `DEBUG=False`, the allowed hosts and the email account live in `/etc/backtoyou.env`, which `setup.sh` creates the first time. Edit it with `sudo nano /etc/backtoyou.env` and then run `sudo systemctl restart backtoyou`. The application log is in `journalctl -u backtoyou`.
+
+The AI button (FR22) stays disabled on small instances: the vision model needs about 5 GB of RAM.
