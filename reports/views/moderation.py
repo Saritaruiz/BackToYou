@@ -15,7 +15,7 @@ from django.utils import timezone
 from accounts.decorators import administrator_required
 
 from ..email_notifications import notify_report_approved, notify_report_rejected
-from ..forms import ItemReportForm
+from ..forms import ItemReportForm, RejectionForm
 from ..models import ItemReport, ModerationLogEntry
 from ..moderation_log import log_action
 
@@ -41,16 +41,29 @@ def moderate_report_detail(request, report_id):
         status=ItemReport.Status.PENDING_REVIEW,
     )
 
+    rejection_form = RejectionForm()
+
     if request.method == "POST":
         action = request.POST.get("action")
 
         if action == "approve":
             report.status = ItemReport.Status.ACTIVE
+            report.rejection_reason = ""
             success_message = "Report approved successfully."
             notify_moderation_result = notify_report_approved
             log_entry_action = ModerationLogEntry.Action.APPROVED
         elif action == "reject":
+            # RF10: sin motivo no se rechaza; el creador lo necesita para
+            # corregir el reporte y enviarlo de nuevo.
+            rejection_form = RejectionForm(request.POST)
+            if not rejection_form.is_valid():
+                return render(
+                    request,
+                    "reports/moderation_report_detail.html",
+                    {"report": report, "rejection_form": rejection_form},
+                )
             report.status = ItemReport.Status.REJECTED
+            report.rejection_reason = rejection_form.rejection_text()
             success_message = "Report rejected successfully."
             notify_moderation_result = notify_report_rejected
             log_entry_action = ModerationLogEntry.Action.REJECTED
@@ -63,12 +76,13 @@ def moderate_report_detail(request, report_id):
             report.save(
                 update_fields=[
                     "status",
+                    "rejection_reason",
                     "moderated_by",
                     "moderated_at",
                     "updated_at",
                 ],
             )
-            log_action(request.user, log_entry_action, report)
+            log_action(request.user, log_entry_action, report, details=report.rejection_reason)
         notify_moderation_result(report)
 
         messages.success(request, success_message)
@@ -77,7 +91,7 @@ def moderate_report_detail(request, report_id):
     return render(
         request,
         "reports/moderation_report_detail.html",
-        {"report": report},
+        {"report": report, "rejection_form": rejection_form},
     )
 
 

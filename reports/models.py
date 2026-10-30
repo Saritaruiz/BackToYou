@@ -77,6 +77,10 @@ class ItemReport(models.Model):
         null=True,
     )
 
+    # RF10: por que se rechazo o se retiro el reporte. Solo lo ve su creador,
+    # para saber que corregir antes de enviarlo de nuevo a revision.
+    rejection_reason = models.CharField(max_length=255, blank=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -85,8 +89,11 @@ class ItemReport(models.Model):
 
     @property
     def is_editable(self):
-        """RF11: el creador puede editar todo menos un reporte rechazado."""
-        return self.status != self.Status.REJECTED
+        """RF11: el creador puede editar cualquier reporte suyo.
+
+        Un reporte rechazado se corrige y vuelve a revision (ver edit_report).
+        """
+        return True
 
     @property
     def can_be_marked_recovered(self):

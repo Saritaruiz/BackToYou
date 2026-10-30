@@ -158,7 +158,9 @@ class EmailNotificationTests(TestCase):
         report = self.create_report(status=ItemReport.Status.PENDING_REVIEW)
         self.login_as_admin()
 
-        response = self.client.post(self.moderation_url(report), {"action": "reject"})
+        response = self.client.post(
+            self.moderation_url(report), {"action": "reject", "reason": "unclear"}
+        )
 
         self.assertRedirects(response, reverse("administration_pending_reports"))
         self.assertEqual(len(mail.outbox), 1)
@@ -168,13 +170,16 @@ class EmailNotificationTests(TestCase):
         self.assertIn(report.title, email.body)
         self.assertIn("Status: REJECTED", email.body)
         self.assertIn("will not appear in the public report list", email.body)
+        self.assertIn("Reason: The description or the photo is not clear enough", email.body)
 
     def test_report_remains_rejected_if_rejected_email_sending_fails(self):
         report = self.create_report(status=ItemReport.Status.PENDING_REVIEW)
         self.login_as_admin()
 
         with patch("reports.email_notifications.send_mail", side_effect=Exception("boom")):
-            response = self.client.post(self.moderation_url(report), {"action": "reject"})
+            response = self.client.post(
+                self.moderation_url(report), {"action": "reject", "reason": "unclear"}
+            )
 
         self.assertRedirects(response, reverse("administration_pending_reports"))
         report.refresh_from_db()

@@ -23,7 +23,7 @@
         {# NFR38: libro de registro, una fila por reporte. #}
         <section class="ledger" aria-label="My reports">
             {% for report in reports %}
-                <article class="ledger-row">
+                <article class="ledger-row" id="report-{{ report.id }}">
                     <div class="ledger-thumb">
                         {% if report.image %}
                             <img
@@ -43,6 +43,10 @@
                         <p class="card-meta">
                             {{ report.category.name }} · {{ report.location }} · {{ report.event_date }}
                         </p>
+                        {% if report.status == "REJECTED" and report.rejection_reason %}
+                            {# RF10: el motivo del rechazo, para corregirlo con "Edit". #}
+                            <p class="field-help">Rejected: {{ report.rejection_reason }}</p>
+                        {% endif %}
                     </div>
 
                     <div class="pill-row">

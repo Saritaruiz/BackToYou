@@ -87,15 +87,6 @@ class ErrorPagesTests(TestCase):
         self.assertEqual(response.status_code, 403)
         self.assertContains(response, "don't have permission", status_code=403)
 
-    def test_editing_a_rejected_report_explains_the_permission_issue(self):
-        report = self.create_report(status=ItemReport.Status.REJECTED)
-        self.login_as(self.creator)
-
-        response = self.client.get(reverse("reports:edit_report", args=[report.id]))
-
-        self.assertEqual(response.status_code, 403)
-        self.assertContains(response, "don't have permission", status_code=403)
-
     def test_recovering_a_pending_report_explains_the_permission_issue(self):
         report = self.create_report(status=ItemReport.Status.PENDING_REVIEW)
         self.login_as(self.creator)
@@ -108,10 +99,12 @@ class ErrorPagesTests(TestCase):
         self.assertContains(response, "don't have permission", status_code=403)
 
     def test_the_403_page_offers_a_way_out(self):
-        report = self.create_report(status=ItemReport.Status.REJECTED)
+        report = self.create_report(status=ItemReport.Status.PENDING_REVIEW)
         self.login_as(self.creator)
 
-        response = self.client.get(reverse("reports:edit_report", args=[report.id]))
+        response = self.client.get(
+            reverse("reports:mark_report_recovered", args=[report.id])
+        )
 
         self.assertContains(response, reverse("reports:my_reports"), status_code=403)
         self.assertContains(response, reverse("reports:report_list"), status_code=403)

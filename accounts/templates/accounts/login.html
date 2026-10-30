@@ -32,6 +32,7 @@
                 <p class="forgot-link">
                     <a href="{% url 'accounts:password_reset' %}">Forgot your password?</a>
                 </p>
+                {% include "accounts/_show_password.html" %}
 
                 <button type="submit">Login</button>
             </form>

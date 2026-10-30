@@ -37,6 +37,15 @@
                 </div>
                 <h1 class="page-title">{{ report.title }}</h1>
 
+                {% if is_creator and report.status == "REJECTED" %}
+                    {# RF10: solo el creador ve el motivo, para saber que corregir. #}
+                    <p class="message message-error">
+                        <strong>Why it was rejected:</strong>
+                        {{ report.rejection_reason|default:"No reason was given." }}
+                        Edit the report to fix it and send it for review again.
+                    </p>
+                {% endif %}
+
                 <div class="meta-grid facts">
                     <div class="meta-item">
                         <span class="meta-label">Type</span>
@@ -72,6 +81,11 @@
                     {% if can_contact_reporter %}
                         <a class="button" href="{% url 'reports:contact_reporter' report.id %}">
                             Contact Reporter
+                        </a>
+                    {% elif not user.is_authenticated %}
+                        {# RF08: quien reconoce su objeto sin haber iniciado sesion no se queda sin salida; vuelve aqui despues del login. #}
+                        <a class="button" href="{% url 'accounts:login' %}?next={{ request.path|urlencode }}">
+                            Log in to Contact the Reporter
                         </a>
                     {% endif %}
                     {% if can_mark_recovered %}
@@ -116,10 +130,13 @@
         {% if is_creator and contact_messages %}
             <section class="letters" aria-labelledby="messages-heading">
                 <h2 id="messages-heading">Messages about this report</h2>
+                {# RF08: la respuesta va por correo; al responder, quien escribio ve el correo del creador. #}
+                <p class="field-help">Reply by email. Your reply shows your institutional email to the sender.</p>
                 {% for contact in contact_messages %}
                     <article class="letter">
                         <p class="letter-from">{{ contact.sender.email }} &middot; {{ contact.created_at }}</p>
                         <p class="letter-body">{{ contact.message }}</p>
+                        <a class="text-link" href="mailto:{{ contact.sender.email }}?subject={{ 'BackToYou: '|add:report.title|urlencode }}">Reply by email</a>
                     </article>
                 {% endfor %}
             </section>

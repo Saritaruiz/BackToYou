@@ -18,18 +18,14 @@
 
             <form method="post">
                 {% csrf_token %}
-                {{ form.non_field_errors }}
-
-                {% for field in form %}
-                    <div class="form-field">
-                        {{ field.label_tag }}
-                        {{ field }}
-                        {{ field.errors }}
-                    </div>
-                {% endfor %}
+                {# Muestra las reglas de la contrasena antes de que haya un error. #}
+                {% include "accounts/_form_fields.html" %}
+                {% include "accounts/_show_password.html" %}
 
                 <button type="submit">Register</button>
             </form>
+
+            <p class="field-help">We will send you a link to activate your account.</p>
 
             <p>
                 Already registered?

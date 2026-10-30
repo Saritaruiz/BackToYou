@@ -4,18 +4,20 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import redirect, render
+from django.urls import reverse
 from django.utils import timezone
 
 from ..decorators import report_owner_required
-from ..forms import ItemReportForm
+from ..forms import OLD_EVENT_DATE_WARNING, ItemReportForm, event_date_is_old
 from ..models import ItemReport
 
 
 @report_owner_required
 def edit_report(request, report):
-    # El estado no es un campo del formulario, por eso una edicion nunca lo cambia.
+    # El estado no es un campo del formulario: una edicion solo lo cambia
+    # cuando el reporte estaba rechazado (ver abajo).
     if not report.is_editable:
-        raise PermissionDenied("Rejected reports cannot be edited.")
+        raise PermissionDenied("This report cannot be edited.")
 
     if request.method == "POST":
         form = ItemReportForm(
@@ -25,17 +27,31 @@ def edit_report(request, report):
         )
 
         if form.is_valid():
-            form.save()
+            report = form.save(commit=False)
 
-            messages.success(
-                request,
-                "Report updated successfully.",
-            )
+            # RF10: corregir un reporte rechazado lo envia de nuevo a revision.
+            if report.status == ItemReport.Status.REJECTED:
+                report.status = ItemReport.Status.PENDING_REVIEW
+                report.rejection_reason = ""
+                report.save()
+                messages.success(
+                    request,
+                    "Report updated and sent for review again. An administrator will check it before it becomes public.",
+                )
+            else:
+                report.save()
+                messages.success(
+                    request,
+                    "Report updated successfully.",
+                )
+            if "event_date" in form.changed_data and event_date_is_old(report.event_date):
+                messages.warning(request, OLD_EVENT_DATE_WARNING)
 
             if report.status == ItemReport.Status.ACTIVE:
                 return redirect("reports:report_detail", report_id=report.id)
 
-            return redirect("reports:report_list")
+            # RF17: igual que al crear, la fila del reporte queda resaltada.
+            return redirect(f"{reverse('reports:my_reports')}#report-{report.id}")
 
     else:
         form = ItemReportForm(instance=report)

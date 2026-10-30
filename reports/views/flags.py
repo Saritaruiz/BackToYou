@@ -157,10 +157,14 @@ def remove_flagged_report(request, report_id):
     if request.method == "POST":
         reviewed_at = timezone.now()
         report.status = ItemReport.Status.REJECTED
+        # RF10: el creador ve por que se retiro, igual que con un rechazo.
+        report.rejection_reason = f"Removed from public view after community flags: {_reason_text(flags)}."
         report.moderated_by = request.user
         report.moderated_at = reviewed_at
         with transaction.atomic():
-            report.save(update_fields=["status", "moderated_by", "moderated_at", "updated_at"])
+            report.save(
+                update_fields=["status", "rejection_reason", "moderated_by", "moderated_at", "updated_at"]
+            )
             _close_flags(report, request.user, reviewed_at)
             log_action(
                 request.user,

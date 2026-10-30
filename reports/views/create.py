@@ -8,9 +8,10 @@ RF22 AI-Based Object Description (boton de sugerencia en el formulario)
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
+from django.urls import reverse
 
 from .. import ai_description
-from ..forms import ItemReportCreationForm
+from ..forms import OLD_EVENT_DATE_WARNING, ItemReportCreationForm, event_date_is_old
 from ..models import ItemReport
 
 
@@ -51,10 +52,13 @@ def _create_report(request, report_type):
                 request,
                 "Report submitted successfully. It is currently Pending Review and will become publicly visible after administrator approval.",
             )
+            if event_date_is_old(report.event_date):
+                messages.warning(request, OLD_EVENT_DATE_WARNING)
 
-            return redirect(
-                "reports:report_list"
-            )
+            # RF17: en la lista publica el reporte nuevo no aparece (esta
+            # pendiente) y parecia que no se habia guardado. En "My Reports"
+            # se ve resaltado, con su estado.
+            return redirect(f"{reverse('reports:my_reports')}#report-{report.id}")
 
     else:
         form = ItemReportCreationForm(report_type=report_type)

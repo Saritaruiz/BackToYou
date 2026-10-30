@@ -60,8 +60,10 @@ def notify_report_rejected(report):
         (
             "Your BackToYou report was reviewed and rejected.\n\n"
             f"Report: {report.title}\n"
+            f"Reason: {report.rejection_reason or 'Not specified'}\n"
             "Status: REJECTED\n\n"
-            "This report will not appear in the public report list."
+            "This report will not appear in the public report list. You can "
+            "fix it from My Reports and send it for review again."
         ),
     )
 

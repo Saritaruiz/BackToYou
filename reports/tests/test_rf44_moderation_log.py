@@ -73,9 +73,17 @@ class ModerationActionsAreRecordedTests(ModerationLogTestCase):
     def test_rejecting_a_report_is_recorded(self):
         report = self.create_report()
 
-        self.client.post(reverse("administration_moderate_report", args=[report.id]), {"action": "reject"})
+        self.client.post(
+            reverse("administration_moderate_report", args=[report.id]),
+            {"action": "reject", "reason": "duplicate"},
+        )
 
-        self.assert_entry(self.only_entry(), Action.REJECTED, "Lost calculator")
+        self.assert_entry(
+            self.only_entry(),
+            Action.REJECTED,
+            "Lost calculator",
+            "There is already a report for this item.",
+        )
 
     def test_editing_a_report_is_recorded_with_the_changed_fields(self):
         report = self.create_report()

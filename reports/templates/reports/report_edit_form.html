@@ -5,10 +5,19 @@
 {% block content %}
     <section class="form-card">
         <h1 class="page-title">Edit {{ report.get_report_type_display }} Item Report</h1>
-        <p class="lead">
-            Update the item details. The report keeps its current status:
-            {{ report.get_status_display }}.
-        </p>
+        {% if report.status == "REJECTED" %}
+            {# RF10: el motivo dice que corregir; al guardar, el reporte vuelve a revision. #}
+            <p class="message message-error">
+                <strong>Why it was rejected:</strong>
+                {{ report.rejection_reason|default:"No reason was given." }}
+            </p>
+            <p class="lead">Fix the report and save it. It will go back to Pending Review.</p>
+        {% else %}
+            <p class="lead">
+                Update the item details. The report keeps its current status:
+                {{ report.get_status_display }}.
+            </p>
+        {% endif %}
 
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}

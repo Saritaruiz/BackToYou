@@ -15,6 +15,7 @@ from ..email_notifications import notify_report_contact
 from ..forms import ContactMessageForm
 from ..models import Category, ItemReport
 from ..querysets import public_reports, recent_public_reports
+from ..search import Normalized, normalize
 from ..statistics import community_numbers
 
 
@@ -39,11 +40,18 @@ def report_list(request):
     report_type = request.GET.get("type")
 
     if query:
-        reports = reports.filter(
-           Q(title__icontains=query)
-         | Q(description__icontains=query)
-         | Q(location__icontains=query)
-         | Q(category__name__icontains=query)
+        # RF07: "camara" encuentra "Cámara" y "CÁMARA" (ver search.py).
+        text = normalize(query)
+        reports = reports.annotate(
+            search_title=Normalized("title"),
+            search_description=Normalized("description"),
+            search_location=Normalized("location"),
+            search_category=Normalized("category__name"),
+        ).filter(
+           Q(search_title__contains=text)
+         | Q(search_description__contains=text)
+         | Q(search_location__contains=text)
+         | Q(search_category__contains=text)
          | Q(report_type__icontains=query)
     )
     if category_id:

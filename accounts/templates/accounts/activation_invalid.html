@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}Link not valid | BackToYou{% endblock %}
+
+{% block content %}
+    {# NFR34: un enlace usado, vencido o reemplazado no activa nada; se ofrece pedir otro. #}
+    <section class="form-card">
+        <span class="kicker">Link not valid</span>
+        <h1 class="page-title">This link no longer works.</h1>
+        <p class="lead">
+            It was already used, it expired, or there is a newer one. If your
+            account is not active yet, register again with the same email and
+            we will send you a new link.
+        </p>
+
+        <div class="actions">
+            <a class="button" href="{% url 'accounts:register' %}">Register again</a>
+            <a class="button ghost" href="{% url 'accounts:login' %}">Go to Login</a>
+        </div>
+    </section>
+{% endblock %}

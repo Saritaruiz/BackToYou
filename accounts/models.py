@@ -57,3 +57,14 @@ class User(AbstractUser):
         blank=True,
         null=True,
     )
+
+
+# NFR34: intento fallido de iniciar sesion. Sirve para frenar a quien prueba
+# contrasenas una tras otra (ver EafitAuthenticationForm). Se guarda el correo
+# escrito, exista o no la cuenta, y los intentos viejos se borran solos.
+class LoginFailure(models.Model):
+    email = models.CharField(max_length=254, db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    def __str__(self):
+        return f"Failed login for {self.email}"

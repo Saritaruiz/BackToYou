@@ -9,6 +9,11 @@
             Send an internal BackToYou message about
             <strong>{{ report.title }}</strong>.
         </p>
+        {# RF08: quien escribe sabe por donde le van a responder y que dato comparte. #}
+        <p class="field-help">
+            The reporter will see your institutional email ({{ user.email }})
+            and will reply to it. Their email stays private until they do.
+        </p>
 
         <form method="post">
             {% csrf_token %}

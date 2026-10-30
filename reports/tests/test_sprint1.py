@@ -37,8 +37,8 @@ class ReportCreationTests(TestCase):
             },
         )
 
-        self.assertRedirects(response, reverse("reports:report_list"))
         report = ItemReport.objects.get(title="Lost calculator")
+        self.assertRedirects(response, f"{reverse('reports:my_reports')}#report-{report.id}")
         self.assertEqual(report.report_type, ItemReport.ReportType.LOST)
         self.assertEqual(report.status, ItemReport.Status.PENDING_REVIEW)
         self.assertEqual(report.creator, self.user)
@@ -97,8 +97,8 @@ class ReportCreationTests(TestCase):
             },
         )
 
-        self.assertRedirects(response, reverse("reports:report_list"))
         report = ItemReport.objects.get(title="Lost notebook")
+        self.assertRedirects(response, f"{reverse('reports:my_reports')}#report-{report.id}")
         self.assertTrue(report.image.name.startswith("reports/"))
 
     def test_pending_reports_do_not_appear_in_public_list_or_detail(self):
@@ -383,7 +383,7 @@ class ReportModerationTests(TestCase):
 
         response = self.client.post(
             reverse("administration_moderate_report", args=[report.id]),
-            {"action": "reject"},
+            {"action": "reject", "reason": "unclear"},
         )
 
         self.assertRedirects(response, reverse("administration_pending_reports"))

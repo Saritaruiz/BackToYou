@@ -36,13 +36,17 @@ class RegistrationLoginTests(TestCase):
             },
         )
 
-        self.assertRedirects(response, reverse("accounts:login"))
+        self.assertRedirects(response, reverse("accounts:registration_sent"))
         user = get_user_model().objects.get(email="testuser@eafit.edu.co")
         self.assertEqual(user.role, User.Role.REGULAR_USER)
         self.assertNotEqual(user.password, "StrongPass123")
         self.assertTrue(user.check_password("StrongPass123"))
+        # NFR34: la cuenta espera a que se abra el enlace del correo.
+        self.assertFalse(user.is_active)
 
-    def test_duplicate_institutional_email_is_rejected(self):
+    # NFR34: el registro responde igual que con un correo nuevo, para no
+    # revelar que cuentas existen, y no crea una segunda cuenta.
+    def test_duplicate_institutional_email_does_not_reveal_the_account(self):
         get_user_model().objects.create_user(
             username="testuser@eafit.edu.co",
             email="testuser@eafit.edu.co",
@@ -59,8 +63,7 @@ class RegistrationLoginTests(TestCase):
             },
         )
 
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "already registered")
+        self.assertRedirects(response, reverse("accounts:registration_sent"))
         self.assertEqual(get_user_model().objects.count(), 1)
 
     def test_login_logout_and_inactive_user_denial(self):

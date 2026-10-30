@@ -2094,6 +2094,14 @@ input[type="radio"]:focus-visible {
     border-bottom: 1px solid var(--border);
 }
 
+/* RF17: al crear o editar un reporte, la app vuelve a "My Reports" con
+   #report-<id> en la direccion y resalta esa fila. */
+.ledger-row:target {
+    background: var(--accent-soft);
+    box-shadow: -12px 0 0 var(--accent-soft), 12px 0 0 var(--accent-soft);
+    scroll-margin-top: var(--space-6);
+}
+
 .ledger-row::before {
     counter-increment: ledger-row;
     content: counter(ledger-row, decimal-leading-zero);
@@ -2765,6 +2773,17 @@ input[type="radio"]:focus-visible {
     margin: calc(-1 * var(--space-3)) 0 var(--space-6);
     font-size: var(--fs-small);
     text-align: right;
+}
+
+/* RF01/RF39: casilla para ver la contrasena mientras se escribe. */
+.show-password {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin: 0 0 var(--space-6);
+    color: var(--muted);
+    font-size: var(--fs-small);
+    cursor: pointer;
 }
 
 .hero .account-link {

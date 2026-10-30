@@ -180,7 +180,7 @@ class ReportHistoryTests(TestCase):
             reverse("reports:mark_report_recovered", args=[report.id]),
         )
 
-    def test_rejected_report_offers_only_delete(self):
+    def test_rejected_report_offers_edit_and_delete(self):
         report = self.create_report(
             "Rejected report",
             status=ItemReport.Status.REJECTED,
@@ -190,7 +190,7 @@ class ReportHistoryTests(TestCase):
         response = self.client.get(self.url)
 
         self.assertContains(response, reverse("reports:delete_report", args=[report.id]))
-        self.assertNotContains(response, reverse("reports:edit_report", args=[report.id]))
+        self.assertContains(response, reverse("reports:edit_report", args=[report.id]))
         self.assertNotContains(
             response,
             reverse("reports:mark_report_recovered", args=[report.id]),

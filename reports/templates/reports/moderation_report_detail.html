@@ -54,20 +54,31 @@
         <p class="description">{{ report.description }}</p>
 
         {# Una accion principal; rechazar es secundaria y eliminar va aparte. #}
-        <form class="moderation-actions" method="post">
+        <form method="post">
             {% csrf_token %}
-            <button type="submit" name="action" value="approve">
-                Approve
-            </button>
-            <button class="secondary" type="submit" name="action" value="reject">
-                Reject
-            </button>
-            <a class="text-link" href="{% url 'administration_report_edit' report.id %}">
-                Edit
-            </a>
-            <a class="button ghost" href="{% url 'administration_pending_reports' %}">
-                Back to Pending Reports
-            </a>
+            {# RF10: el motivo solo se usa al rechazar; el creador lo lee para corregir el reporte. #}
+            {% for field in rejection_form %}
+                <div class="form-field">
+                    {{ field.label_tag }}
+                    {{ field }}
+                    {{ field.errors }}
+                </div>
+            {% endfor %}
+
+            <div class="moderation-actions">
+                <button type="submit" name="action" value="approve">
+                    Approve
+                </button>
+                <button class="secondary" type="submit" name="action" value="reject">
+                    Reject
+                </button>
+                <a class="text-link" href="{% url 'administration_report_edit' report.id %}">
+                    Edit
+                </a>
+                <a class="button ghost" href="{% url 'administration_pending_reports' %}">
+                    Back to Pending Reports
+                </a>
+            </div>
         </form>
 
         <div class="danger-zone">

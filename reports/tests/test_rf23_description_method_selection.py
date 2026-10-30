@@ -59,8 +59,9 @@ class DescriptionMethodSelectionTests(TestCase):
     def test_manual_submission_with_image(self):
         for kind in ('lost', 'found'):
             response = self.client.post(self.url(kind), self.payload(image=png_upload()))
-            self.assertRedirects(response, reverse('reports:report_list'))
-            self.assertTrue(ItemReport.objects.latest('pk').image.name.startswith('reports/'))
+            report = ItemReport.objects.latest('pk')
+            self.assertRedirects(response, f"{reverse('reports:my_reports')}#report-{report.pk}")
+            self.assertTrue(report.image.name.startswith('reports/'))
 
     def test_omitted_method_is_manual_and_does_not_mutate_input(self):
         data = self.payload()
@@ -69,7 +70,8 @@ class DescriptionMethodSelectionTests(TestCase):
         self.assertTrue(form.is_valid(), form.errors)
         self.assertEqual(form.cleaned_data['description_method'], 'manual')
         self.assertNotIn('description_method', data)
-        self.assertRedirects(self.client.post(self.url(), data), reverse('reports:report_list'))
+        response = self.client.post(self.url(), data)
+        self.assertRedirects(response, f"{reverse('reports:my_reports')}#report-{ItemReport.objects.get().pk}")
 
     def test_invalid_method_is_rejected(self):
         for kind in ('lost', 'found'):
@@ -96,7 +98,7 @@ class DescriptionMethodSelectionTests(TestCase):
         self.assertContains(response, 'AI suggestions are not available right now')
         self.assertContains(response, 'AI-assisted')
         response = self.client.post(self.url(), self.payload())
-        self.assertRedirects(response, reverse('reports:report_list'))
+        self.assertRedirects(response, f"{reverse('reports:my_reports')}#report-{ItemReport.objects.get().pk}")
 
     def test_model_and_shared_form_have_no_method_field(self):
         with self.assertRaises(FieldDoesNotExist):
