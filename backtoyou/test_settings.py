@@ -18,3 +18,5 @@ PASSWORD_HASHERS = [
 # Los tests nunca llaman a Ollama: sin modelo, la IA queda desactivada. Las
 # pruebas de RF22 activan un modelo de prueba y simulan las respuestas.
 OLLAMA_VISION_MODEL = ""
+# Tampoco llaman a Gemini, aunque haya un gemini.env con clave.
+GEMINI_API_KEY = ""

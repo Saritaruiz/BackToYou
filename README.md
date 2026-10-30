@@ -101,6 +101,8 @@ The AI suggestion button uses a vision model that runs locally with [Ollama](htt
 
 To use another vision model or another Ollama address, copy `ollama.env.example` as `ollama.env` and change the values. If Ollama is not running or the model is missing, the rest of the application works normally and the AI button is disabled.
 
+Instead of Ollama, the suggestion can come from the Google Gemini API, which needs no local model: create an API key at https://aistudio.google.com/apikey, copy `gemini.env.example` as `gemini.env` and paste the key. When `GEMINI_API_KEY` has a value, the application uses Gemini; when it is empty, it uses Ollama. With Gemini, the item photos are sent to Google to generate the suggestion.
+
 ### Email (FR39, FR15)
 
 Without any setup, emails (password recovery and notifications) are printed in the terminal where `runserver` is running.
@@ -142,4 +144,4 @@ bash deploy/setup.sh
 
 The secret key, `DEBUG=False`, the allowed hosts and the email account live in `/etc/backtoyou.env`, which `setup.sh` creates the first time. Edit it with `sudo nano /etc/backtoyou.env` and then run `sudo systemctl restart backtoyou`. The application log is in `journalctl -u backtoyou`.
 
-The AI button (FR22) stays disabled on small instances: the vision model needs about 5 GB of RAM.
+The server has no memory to run the Ollama model, so the AI button (FR22) uses the Google Gemini API there. Add `GEMINI_API_KEY=<your key>` to `/etc/backtoyou.env` and restart the service. Without a key, the AI button stays disabled.

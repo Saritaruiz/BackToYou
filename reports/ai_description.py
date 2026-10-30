@@ -1,9 +1,12 @@
 """RF22 - AI-Based Object Description.
 
-Envia la foto del objeto a un modelo de vision que corre en Ollama, en el
-mismo computador, y devuelve una sugerencia de titulo, descripcion y
-categoria. El modelo y la direccion de Ollama se pueden cambiar en ollama.env
-(ver ollama.env.example y settings.py).
+Envia la foto del objeto a un modelo de vision y devuelve una sugerencia de
+titulo, descripcion y categoria. El modelo corre en uno de dos lugares:
+
+- Google Gemini API, si hay una GEMINI_API_KEY. Es lo que usa el servidor de
+  AWS, que no tiene memoria para correr el modelo. Ver gemini.env.example.
+- Ollama, en el mismo computador, en cualquier otro caso. El modelo y la
+  direccion se pueden cambiar en ollama.env (ver ollama.env.example).
 
 La sugerencia nunca crea el reporte: solo llena el formulario para que el
 usuario la revise, la corrija y la envie.
@@ -48,9 +51,16 @@ JSON_OBJECT = re.compile(r"\{.*\}", re.DOTALL)
 # conexion, asi que es mejor desactivar el boton que frenar el formulario.
 AVAILABILITY_TIMEOUT = 1
 
+GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
+
 
 class AIDescriptionError(Exception):
     """Error que se le puede mostrar al usuario tal cual."""
+
+
+def _uses_gemini():
+    # Con una clave de Gemini la app no necesita Ollama.
+    return bool(settings.GEMINI_API_KEY)
 
 
 def _ollama(path, payload=None, timeout=AVAILABILITY_TIMEOUT):
@@ -65,8 +75,30 @@ def _ollama(path, payload=None, timeout=AVAILABILITY_TIMEOUT):
         return json.loads(response.read().decode("utf-8"))
 
 
+def _gemini(payload):
+    """Llama a la API de Gemini y devuelve la respuesta como diccionario."""
+    request = Request(
+        GEMINI_URL.format(model=settings.GEMINI_MODEL),
+        data=json.dumps(payload).encode("utf-8"),
+        # La clave va en un encabezado y no en la URL, para que no quede
+        # escrita en los registros de errores.
+        headers={
+            "Content-Type": "application/json",
+            "x-goog-api-key": settings.GEMINI_API_KEY,
+        },
+    )
+    with urlopen(request, timeout=settings.GEMINI_TIMEOUT) as response:
+        return json.loads(response.read().decode("utf-8"))
+
+
 def is_available():
-    """True si Ollama esta corriendo y ya tiene descargado el modelo."""
+    """True si Gemini esta configurado, o si Ollama corre y tiene el modelo."""
+    if _uses_gemini():
+        # No se consulta a Google cada vez que se abre el formulario: con la
+        # clave y el modelo basta. Si la clave falla, el error se ve al pedir
+        # la sugerencia.
+        return bool(settings.GEMINI_MODEL)
+
     model = settings.OLLAMA_VISION_MODEL
     if not model:
         return False
@@ -90,6 +122,45 @@ def _parse_suggestion(text):
     return suggestion
 
 
+def _ask_ollama(prompt, encoded_image, answer_format):
+    response = _ollama(
+        "/api/chat",
+        {
+            "model": settings.OLLAMA_VISION_MODEL,
+            "messages": [{"role": "user", "content": prompt, "images": [encoded_image]}],
+            "format": answer_format,
+            "stream": False,
+            "options": {"temperature": 0, "num_predict": 400},
+        },
+        timeout=settings.OLLAMA_TIMEOUT,
+    )
+    return response["message"]["content"]
+
+
+def _ask_gemini(prompt, encoded_image, mime_type, answer_format):
+    response = _gemini(
+        {
+            "contents": [
+                {
+                    "parts": [
+                        {"text": prompt},
+                        {"inline_data": {"mime_type": mime_type, "data": encoded_image}},
+                    ]
+                }
+            ],
+            "generationConfig": {
+                "temperature": 0,
+                "responseMimeType": "application/json",
+                "responseJsonSchema": answer_format,
+            },
+        }
+    )
+    # Los modelos que "piensan" pueden devolver partes con su razonamiento
+    # (thought): solo interesa la respuesta.
+    parts = response["candidates"][0]["content"]["parts"]
+    return "".join(part.get("text", "") for part in parts if not part.get("thought"))
+
+
 def describe_item_image(image_file, report_type_label, category_names):
     """Devuelve {"title", "description", "category"} a partir de la foto.
 
@@ -103,6 +174,8 @@ def describe_item_image(image_file, report_type_label, category_names):
 
     image_file.seek(0)
     encoded = base64.b64encode(image_file.read()).decode("ascii")
+    # validate_report_image solo deja pasar JPG y PNG.
+    mime_type = getattr(image_file, "content_type", "") or "image/jpeg"
 
     prompt = (
         f"{INSTRUCTION}\n\n"
@@ -110,7 +183,8 @@ def describe_item_image(image_file, report_type_label, category_names):
         f"Available categories: {', '.join(category_names) or 'none'}."
     )
 
-    # Ollama obliga al modelo a responder con este JSON (structured outputs).
+    # Ollama y Gemini obligan al modelo a responder con este JSON
+    # (structured outputs).
     answer_format = {
         "type": "object",
         "properties": {
@@ -125,22 +199,18 @@ def describe_item_image(image_file, report_type_label, category_names):
     try:
         # El usuario espera con el formulario abierto: si el modelo tarda
         # demasiado, mejor que llene el reporte a mano.
-        response = _ollama(
-            "/api/chat",
-            {
-                "model": settings.OLLAMA_VISION_MODEL,
-                "messages": [{"role": "user", "content": prompt, "images": [encoded]}],
-                "format": answer_format,
-                "stream": False,
-                "options": {"temperature": 0, "num_predict": 400},
-            },
-            timeout=settings.OLLAMA_TIMEOUT,
-        )
-        suggestion = _parse_suggestion(response["message"]["content"])
-    except (OSError, ValueError, TypeError, KeyError, AttributeError):
-        # OSError cubre Ollama apagado, modelo no descargado (HTTP 404) y
-        # tiempo agotado. ValueError cubre JSON invalido (json.JSONDecodeError).
-        logger.exception("RF22: Ollama description request failed.")
+        if _uses_gemini():
+            text = _ask_gemini(prompt, encoded, mime_type, answer_format)
+        else:
+            text = _ask_ollama(prompt, encoded, answer_format)
+        suggestion = _parse_suggestion(text)
+    except (OSError, ValueError, TypeError, KeyError, IndexError, AttributeError):
+        # OSError cubre el servicio apagado o sin red, el tiempo agotado y
+        # las respuestas HTTP de error: modelo no descargado en Ollama, clave
+        # invalida o cupo agotado en Gemini. ValueError cubre JSON invalido
+        # (json.JSONDecodeError). IndexError y KeyError, una respuesta que
+        # Gemini bloqueo y llega sin texto.
+        logger.exception("RF22: AI description request failed.")
         raise AIDescriptionError(
             "The AI service could not describe the image right now. "
             "Please fill in the report manually."

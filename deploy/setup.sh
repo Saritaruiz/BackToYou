@@ -43,6 +43,10 @@ DJANGO_ALLOWED_HOSTS=$HOST
 #EMAIL_HOST_USER=tu.cuenta@gmail.com
 #EMAIL_HOST_PASSWORD=
 #DEFAULT_FROM_EMAIL="BackToYou <tu.cuenta@gmail.com>"
+
+# Sugerencia con IA (RF22) usando Google Gemini. Sin clave, el boton de IA
+# queda desactivado. Clave: https://aistudio.google.com/apikey
+#GEMINI_API_KEY=
 EOF
 fi
 
@@ -51,7 +55,8 @@ fi
 .venv/bin/python manage.py collectstatic --noinput
 
 sudo cp deploy/backtoyou.service /etc/systemd/system/backtoyou.service
-if [ ! -f /etc/nginx/sites-available/backtoyou ]; then
+# certbot marca con "managed by Certbot" las lineas que agrega para el HTTPS.
+if ! grep -qs "Certbot" /etc/nginx/sites-available/backtoyou; then
     sudo cp deploy/nginx.conf /etc/nginx/sites-available/backtoyou
 fi
 sudo ln -sf /etc/nginx/sites-available/backtoyou /etc/nginx/sites-enabled/backtoyou
