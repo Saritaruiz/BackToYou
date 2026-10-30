@@ -39,11 +39,9 @@ def find_registered_user(email, exclude_pk=None):
 
 
 def clean_institutional_email(value, exclude_pk=None):
-    """RF01/RF20: correo institucional y unico.
+    """RF01/RF20: correo institucional y unico, en todos los formularios.
 
-    Lo usan los formularios de administradores y los de Django Admin, que
-    si deben decir que el correo ya esta registrado. El registro publico no
-    lo dice (ver EafitUserRegistrationForm).
+    Lo usan el registro y los formularios de Django Admin.
     """
     email = clean_institutional_domain(value)
     if find_registered_user(email, exclude_pk) is not None:
@@ -132,27 +130,10 @@ class EafitUserRegistrationForm(UserCreationForm):
         model = User
         fields = ("full_name", "email", "password1", "password2")
 
-    role = User.Role.REGULAR_USER
-
-    # NFR34: el registro publico no dice si el correo ya tiene cuenta; la
-    # vista responde igual y le avisa por correo al dueno (ver
-    # views.register). Los formularios de administradores si lo dicen.
-    reveals_registered_email = False
-    registered_user = None
-
     def clean_email(self):
-        if self.reveals_registered_email:
-            return clean_institutional_email(self.cleaned_data["email"])
-        email = clean_institutional_domain(self.cleaned_data["email"])
-        self.registered_user = find_registered_user(email)
-        return email
+        return clean_institutional_email(self.cleaned_data["email"])
 
-    def validate_constraints(self):
-        # Con un correo ya registrado, la restriccion de correo unico de la
-        # base de datos daria su propio error y revelaria que la cuenta
-        # existe. En ese caso la vista no guarda nada.
-        if self.registered_user is None:
-            super().validate_constraints()
+    role = User.Role.REGULAR_USER
 
     def save(self, commit=True):
         user = super().save(commit=False)
@@ -170,12 +151,10 @@ class AdministratorCreationForm(EafitUserRegistrationForm):
     """RF20: un administrador crea otra cuenta de administrador desde la app.
 
     Mismas reglas que el registro (correo institucional unico, contrasena
-    segura), pero la cuenta nace con el rol de administrador, activa desde el
-    principio, y si dice cuando el correo ya esta registrado.
+    segura), pero la cuenta nace con el rol de administrador.
     """
 
     role = User.Role.ADMINISTRATOR
-    reveals_registered_email = True
 
 
 class AdministratorEditForm(forms.ModelForm):

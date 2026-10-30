@@ -1,6 +1,5 @@
 from django.contrib.auth import views as auth_views
 from django.urls import path, reverse_lazy
-from django.views.generic import TemplateView
 
 from .forms import EafitAuthenticationForm, EafitPasswordResetForm
 from . import views
@@ -9,13 +8,6 @@ app_name = "accounts"
 
 urlpatterns = [
     path("register/", views.register, name="register"),
-    # NFR34: la cuenta nueva se activa desde el enlace que llega al correo.
-    path(
-        "register/sent/",
-        TemplateView.as_view(template_name="accounts/registration_sent.html"),
-        name="registration_sent",
-    ),
-    path("activate/<uidb64>/<token>/", views.activate_account, name="activate"),
     path(
         "login/",
         auth_views.LoginView.as_view(

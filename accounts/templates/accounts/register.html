@@ -25,11 +25,10 @@
                 <button type="submit">Register</button>
             </form>
 
-            <p class="field-help">We will send you a link to activate your account.</p>
-
             <p>
                 Already registered?
                 <a href="{% url 'accounts:login' %}">Login</a>
+                or <a href="{% url 'accounts:password_reset' %}">reset your password</a>.
             </p>
         </section>
     </div>
