@@ -27,5 +27,10 @@ urlpatterns = [
         owner_views.mark_report_recovered,
         name="mark_report_recovered",
     ),
+    path(
+    "messages/<int:message_id>/reply/",
+    public_views.reply_to_contact_message,
+    name="reply_to_contact_message",
+    ),
     path("<int:report_id>/", public_views.report_detail, name="report_detail"),
 ]

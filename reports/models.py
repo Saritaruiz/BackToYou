@@ -115,6 +115,14 @@ class ContactMessage(models.Model):
         related_name="sent_contact_messages",
     )
 
+    parent_message = models.ForeignKey(
+    "self",
+    on_delete=models.CASCADE,
+    related_name="replies",
+    blank=True,
+    null=True,
+    )
+
     message = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 

@@ -14,7 +14,7 @@ from django.utils.translation import gettext as _
 
 from ..email_notifications import notify_report_contact
 from ..forms import ContactMessageForm
-from ..models import Category, ItemReport
+from ..models import Category, ContactMessage, ItemReport
 from ..querysets import public_reports
 from ..search import Normalized, normalize
 from ..statistics import community_numbers
@@ -147,11 +147,30 @@ def report_detail(request, report_id):
 
     # Los mensajes recibidos solo los ve el creador del reporte: sin esto,
     # RF08 guarda el mensaje pero el destinatario no tiene donde leerlo.
-    contact_messages = (
-        report.contact_messages.select_related("sender").order_by("-created_at", "-id")
-        if is_creator
-        else []
+# FR40: el creador ve los mensajes recibidos y sus respuestas.
+# El usuario que contacto al creador puede ver sus propios mensajes
+# y las respuestas que recibió dentro de BackToYou.
+    if is_creator:
+        contact_messages = (
+        report.contact_messages
+        .filter(parent_message__isnull=True)
+        .select_related("sender")
+        .prefetch_related("replies__sender")
+        .order_by("-created_at", "-id")
     )
+    elif request.user.is_authenticated:
+         contact_messages = (
+        report.contact_messages
+        .filter(
+            parent_message__isnull=True,
+            sender=request.user,
+        )
+        .select_related("sender")
+        .prefetch_related("replies__sender")
+        .order_by("-created_at", "-id")
+    )
+    else:
+       contact_messages = []
 
     # RF43: quien ya aviso sobre el reporte lo ve, pero nadie mas sabe quien fue.
     can_be_flagged = (
@@ -216,5 +235,53 @@ def contact_reporter(request, report_id):
         {
             "form": form,
             "report": report,
+        },
+    )
+
+@login_required
+def reply_to_contact_message(request, message_id):
+    # FR40: solo el creador del reporte puede responder un mensaje recibido.
+    original_message = get_object_or_404(
+        ContactMessage.objects.select_related("report", "sender"),
+        id=message_id,
+        parent_message__isnull=True,
+    )
+
+    report = original_message.report
+
+    if report.creator != request.user:
+        raise PermissionDenied(
+            "Only the report creator can reply to this message."
+        )
+
+    if request.method == "POST":
+        form = ContactMessageForm(request.POST)
+
+        if form.is_valid():
+            reply = form.save(commit=False)
+            reply.report = report
+            reply.sender = request.user
+            reply.parent_message = original_message
+            reply.save()
+
+            messages.success(
+                request,
+                _("Your reply was sent inside BackToYou."),
+            )
+
+            return redirect(
+                "reports:report_detail",
+                report_id=report.id,
+            )
+    else:
+        form = ContactMessageForm()
+
+    return render(
+        request,
+        "reports/reply_contact_message.html",
+        {
+            "form": form,
+            "report": report,
+            "original_message": original_message,
         },
     )

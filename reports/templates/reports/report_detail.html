@@ -127,19 +127,59 @@
             </div>
         </div>
 
-        {% if is_creator and contact_messages %}
-            <section class="letters" aria-labelledby="messages-heading">
-                <h2 id="messages-heading">{% translate "Messages about this report" %}</h2>
-                {# RF08: la respuesta va por correo; al responder, quien escribio ve el correo del creador. #}
-                <p class="field-help">{% translate "Reply by email. Your reply shows your institutional email to the sender." %}</p>
-                {% for contact in contact_messages %}
-                    <article class="letter">
-                        <p class="letter-from">{{ contact.sender.email }} &middot; {{ contact.created_at }}</p>
-                        <p class="letter-body">{{ contact.message }}</p>
-                        <a class="text-link" href="mailto:{{ contact.sender.email }}?subject={{ 'BackToYou: '|add:report.title|urlencode }}">{% translate "Reply by email" %}</a>
-                    </article>
+        {% if contact_messages %}
+    <section class="letters" aria-labelledby="messages-heading">
+
+        <h2 id="messages-heading">
+            {% if is_creator %}
+                {% translate "Messages about this report" %}
+            {% else %}
+                {% translate "Your messages about this report" %}
+            {% endif %}
+        </h2>
+
+        {% for contact in contact_messages %}
+            <article class="letter">
+
+                <p class="letter-from">
+                    {{ contact.sender.email }}
+                    &middot;
+                    {{ contact.created_at }}
+                </p>
+
+                <p class="letter-body">
+                    {{ contact.message }}
+                </p>
+
+                {% if is_creator %}
+                    <a
+                        class="text-link"
+                        href="{% url 'reports:reply_to_contact_message' contact.id %}"
+                    >
+                        {% translate "Reply in BackToYou" %}
+                    </a>
+                {% endif %}
+
+                {% for reply in contact.replies.all %}
+                    <div class="letter reply">
+
+                        <p class="letter-from">
+                            {% translate "Reply from report creator" %}
+                            &middot;
+                            {{ reply.created_at }}
+                        </p>
+
+                        <p class="letter-body">
+                            {{ reply.message }}
+                        </p>
+
+                    </div>
                 {% endfor %}
-            </section>
-        {% endif %}
+
+            </article>
+        {% endfor %}
+
+    </section>
+{% endif %}
     </article>
 {% endblock %}
