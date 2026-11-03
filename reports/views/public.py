@@ -16,7 +16,7 @@ from ..email_notifications import notify_report_contact
 from ..forms import ContactMessageForm
 from ..models import Category, ContactMessage, ItemReport
 from ..querysets import public_reports
-from ..search import Normalized, normalize
+from ..search import Normalized, normalize, possible_matches
 from ..statistics import community_numbers
 
 
@@ -186,6 +186,7 @@ def report_detail(request, report_id):
         {
             "report": report,
             "is_creator": is_creator,
+            "possible_matches": possible_matches(report) if is_creator else [],
             "contact_messages": contact_messages,
             "can_contact_reporter": (
                 request.user.is_authenticated

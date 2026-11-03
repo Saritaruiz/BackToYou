@@ -127,6 +127,17 @@
             </div>
         </div>
 
+        {% if is_creator %}
+            <section class="letters" aria-labelledby="matches-heading">
+                <h2 id="matches-heading">{% translate "Possible matches" %}</h2>
+                {% for candidate in possible_matches %}
+                    {% include "reports/_report_card.html" with report=candidate layout="row" only %}
+                {% empty %}
+                    <p>{% translate "No similar active reports found yet." %}</p>
+                {% endfor %}
+            </section>
+        {% endif %}
+
         {% if contact_messages %}
     <section class="letters" aria-labelledby="messages-heading">
 
