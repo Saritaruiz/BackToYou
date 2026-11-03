@@ -34,15 +34,20 @@ def home(request):
 
 
 def report_list(request):
-    reports = public_reports().select_related("category").order_by("-created_at", "-id")
+    reports = public_reports().select_related("category")
 
-    query = request.GET.get("q")
-    category_id = request.GET.get("category")
-    report_type = request.GET.get("type")
+    query = request.GET.get("q", "").strip()
+    category_id = request.GET.get("category", "").strip()
+    report_type = request.GET.get("type", "").strip()
+    location = request.GET.get("location", "").strip()
+    date_from = request.GET.get("date_from", "").strip()
+    date_to = request.GET.get("date_to", "").strip()
+    sort = request.GET.get("sort", "newest").strip()
 
     if query:
         # RF07: "camara" encuentra "Cámara" y "CÁMARA" (ver search.py).
         text = normalize(query)
+
         # i18n: el nombre de la categoria tambien se busca como se ve en la
         # pagina, asi "llaves" encuentra la categoria "Keys" en espanol.
         translated_categories = [
@@ -50,27 +55,59 @@ def report_list(request):
             for category in Category.objects.all()
             if text in normalize(_(category.name))
         ]
+
         reports = reports.annotate(
             search_title=Normalized("title"),
             search_description=Normalized("description"),
             search_location=Normalized("location"),
             search_category=Normalized("category__name"),
         ).filter(
-           Q(search_title__contains=text)
-         | Q(search_description__contains=text)
-         | Q(search_location__contains=text)
-         | Q(search_category__contains=text)
-         | Q(category_id__in=translated_categories)
-         | Q(report_type__icontains=query)
-    )
+            Q(search_title__contains=text)
+            | Q(search_description__contains=text)
+            | Q(search_location__contains=text)
+            | Q(search_category__contains=text)
+            | Q(category_id__in=translated_categories)
+            | Q(report_type__icontains=query)
+        )
+
     if category_id:
         reports = reports.filter(category_id=category_id)
 
-    if report_type:
+    if report_type in ItemReport.ReportType.values:
         reports = reports.filter(report_type=report_type)
+
+    # FR42: advanced location filter.
+    if location:
+        reports = reports.annotate(
+            filter_location=Normalized("location"),
+        ).filter(
+            filter_location__contains=normalize(location)
+        )
+
+    # FR42: event date range.
+    if date_from:
+        reports = reports.filter(event_date__gte=date_from)
+
+    if date_to:
+        reports = reports.filter(event_date__lte=date_to)
+
+    # FR42: explicit sorting options.
+    sorting_options = {
+        "newest": ("-created_at", "-id"),
+        "oldest": ("created_at", "id"),
+        "event_newest": ("-event_date", "-id"),
+        "event_oldest": ("event_date", "id"),
+        "title_asc": ("title", "id"),
+        "title_desc": ("-title", "-id"),
+    }
+
+    reports = reports.order_by(
+        *sorting_options.get(sort, sorting_options["newest"])
+    )
 
     categories = Category.objects.all().order_by("name")
     reports = list(reports)
+
     return render(
         request,
         "reports/report_list.html",
@@ -78,15 +115,22 @@ def report_list(request):
             "reports": reports,
             # Los reportes con foto se ven como tarjetas; los demas, como
             # filas compactas con el icono de su categoria.
-            "reports_with_photo": [report for report in reports if report.image],
-            "reports_without_photo": [report for report in reports if not report.image],
+            "reports_with_photo": [
+                report for report in reports if report.image
+            ],
+            "reports_without_photo": [
+                report for report in reports if not report.image
+            ],
             "categories": categories,
             "query": query,
             "selected_category": category_id,
             "selected_type": report_type,
+            "selected_location": location,
+            "selected_date_from": date_from,
+            "selected_date_to": date_to,
+            "selected_sort": sort,
         },
     )
-
 
 def report_detail(request, report_id):
     report = get_object_or_404(ItemReport, id=report_id)

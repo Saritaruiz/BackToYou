@@ -54,6 +54,83 @@
                     </option>
                 </select>
             </div>
+            <div>
+    <label for="location-filter">{% translate "Location" %}</label>
+    <input
+        id="location-filter"
+        type="text"
+        name="location"
+        placeholder="{% translate 'Library, Block 38...' %}"
+        value="{{ selected_location|default:'' }}"
+    >
+</div>
+
+<div>
+    <label for="date-from-filter">{% translate "Date from" %}</label>
+    <input
+        id="date-from-filter"
+        type="date"
+        name="date_from"
+        value="{{ selected_date_from|default:'' }}"
+    >
+</div>
+
+<div>
+    <label for="date-to-filter">{% translate "Date to" %}</label>
+    <input
+        id="date-to-filter"
+        type="date"
+        name="date_to"
+        value="{{ selected_date_to|default:'' }}"
+    >
+</div>
+
+<div>
+    <label for="sort-filter">{% translate "Sort by" %}</label>
+    <select id="sort-filter" name="sort">
+        <option
+            value="newest"
+            {% if selected_sort == "newest" %}selected{% endif %}
+        >
+            {% translate "Newest first" %}
+        </option>
+
+        <option
+            value="oldest"
+            {% if selected_sort == "oldest" %}selected{% endif %}
+        >
+            {% translate "Oldest first" %}
+        </option>
+
+        <option
+            value="event_newest"
+            {% if selected_sort == "event_newest" %}selected{% endif %}
+        >
+            {% translate "Event date: newest" %}
+        </option>
+
+        <option
+            value="event_oldest"
+            {% if selected_sort == "event_oldest" %}selected{% endif %}
+        >
+            {% translate "Event date: oldest" %}
+        </option>
+
+        <option
+            value="title_asc"
+            {% if selected_sort == "title_asc" %}selected{% endif %}
+        >
+            {% translate "Title: A-Z" %}
+        </option>
+
+        <option
+            value="title_desc"
+            {% if selected_sort == "title_desc" %}selected{% endif %}
+        >
+            {% translate "Title: Z-A" %}
+        </option>
+    </select>
+</div>
 
             {% if request.GET.view == "list" %}
                 <input type="hidden" name="view" value="list">
