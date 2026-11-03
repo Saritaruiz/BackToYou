@@ -1,20 +1,21 @@
 {% extends "base.html" %}
+{% load i18n %}
 
-{% block title %}Login | BackToYou{% endblock %}
+{% block title %}{% translate "Login" %} | BackToYou{% endblock %}
 
 {% block content %}
     <div class="auth-layout">
         {# NFR38: mitad decorativa de la pantalla dividida. #}
         <aside class="auth-art" aria-hidden="true">
             <span class="kicker">Nº 001 · BackToYou</span>
-            <p class="auth-quote">Everything lost has a <em>way back.</em></p>
-            <p class="auth-note">Only for @eafit.edu.co accounts</p>
+            <p class="auth-quote">{% blocktranslate trimmed %}Everything lost has a <em>way back.</em>{% endblocktranslate %}</p>
+            <p class="auth-note">{% translate "Only for @eafit.edu.co accounts" %}</p>
         </aside>
 
         <section class="form-card">
-            <span class="kicker">Login</span>
-            <h1 class="page-title">Welcome back.</h1>
-            <p class="lead">Access BackToYou with your institutional email.</p>
+            <span class="kicker">{% translate "Login" %}</span>
+            <h1 class="page-title">{% translate "Welcome back." %}</h1>
+            <p class="lead">{% translate "Access BackToYou with your institutional email." %}</p>
 
             <form method="post">
                 {% csrf_token %}
@@ -30,16 +31,16 @@
 
                 {# RF39: recuperar la contrasena por correo. #}
                 <p class="forgot-link">
-                    <a href="{% url 'accounts:password_reset' %}">Forgot your password?</a>
+                    <a href="{% url 'accounts:password_reset' %}">{% translate "Forgot your password?" %}</a>
                 </p>
                 {% include "accounts/_show_password.html" %}
 
-                <button type="submit">Login</button>
+                <button type="submit">{% translate "Login" %}</button>
             </form>
 
             <p>
-                Don't have an account?
-                <a href="{% url 'accounts:register' %}">Register</a>
+                {% translate "Don't have an account?" %}
+                <a href="{% url 'accounts:register' %}">{% translate "Register" %}</a>
             </p>
         </section>
     </div>

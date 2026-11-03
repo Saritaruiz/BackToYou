@@ -1,6 +1,5 @@
-"""Shared public visibility and RF24 publication ordering."""
+"""Shared public visibility rules."""
 from django.db.models import Count, Max, Prefetch, Q
-from django.db.models.functions import Coalesce
 
 from .models import ItemReport, ReportFlag
 
@@ -39,11 +38,3 @@ def flagged_reports():
         .order_by("-open_flag_count", "-last_flagged_at", "-id")
     )
 
-
-def recent_public_reports():
-    return (
-        public_reports()
-        .select_related("category")
-        .annotate(published_at=Coalesce("moderated_at", "created_at"))
-        .order_by("-published_at", "-id")[:6]
-    )

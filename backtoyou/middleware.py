@@ -14,14 +14,18 @@ revelar que existe un reporte oculto (ver reports/tests/test_error_pages.py).
 
 from urllib.parse import urlparse
 
+from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import redirect
+from django.urls import is_valid_path
 from django.utils.http import url_has_allowed_host_and_scheme
+from django.utils.translation import get_language, get_language_from_path
+from django.utils.translation import gettext_lazy as _
 
 
-PERMISSION_MESSAGE = "You don't have permission to access that page."
-NOT_AVAILABLE_MESSAGE = "That page is not available."
+PERMISSION_MESSAGE = _("You don't have permission to access that page.")
+NOT_AVAILABLE_MESSAGE = _("That page is not available.")
 
 
 class FriendlyAccessErrorsMiddleware:
@@ -33,7 +37,11 @@ class FriendlyAccessErrorsMiddleware:
 
         # Cubre todo 404: el Http404 de una vista y tambien las direcciones
         # que no existen, que Django resuelve antes de llegar a las vistas.
-        if response.status_code == 404 and _is_browser_navigation(request):
+        if (
+            response.status_code == 404
+            and _is_browser_navigation(request)
+            and not _only_missing_the_language(request)
+        ):
             return _notice_and_go_back(request, NOT_AVAILABLE_MESSAGE)
 
         return response
@@ -55,6 +63,19 @@ def _is_browser_navigation(request):
     if request.path.startswith("/admin/"):
         return False
     return "text/html" in request.headers.get("Accept", "")
+
+
+def _only_missing_the_language(request):
+    # "/" o "/reports/" no existen sin el idioma, pero "/es/reports/" si:
+    # LocaleMiddleware redirige alla. Esa direccion no es una pagina que no
+    # existe, asi que no lleva aviso.
+    if get_language_from_path(request.path_info):
+        return False
+    language_path = f"/{get_language()}{request.path_info}"
+    urlconf = getattr(request, "urlconf", None)
+    return is_valid_path(language_path, urlconf) or (
+        settings.APPEND_SLASH and is_valid_path(f"{language_path}/", urlconf)
+    )
 
 
 def _safe_previous_page(request):

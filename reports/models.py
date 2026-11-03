@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 # será para categorizar que tipo de objeto se perdió
 class Category(models.Model): 
@@ -12,15 +13,15 @@ class Category(models.Model):
 # representa cada publicación
 class ItemReport(models.Model):
     class ReportType(models.TextChoices):
-        LOST = "LOST", "Lost"
-        FOUND = "FOUND", "Found"
+        LOST = "LOST", _("Lost")
+        FOUND = "FOUND", _("Found")
 
 
     class Status(models.TextChoices):
-        PENDING_REVIEW = "PENDING_REVIEW", "Pending Review"  # todo reporte nuevo queda automáticamente cómo pendiente
-        ACTIVE = "ACTIVE", "Active"
-        RECOVERED = "RECOVERED", "Recovered"
-        REJECTED = "REJECTED", "Rejected"
+        PENDING_REVIEW = "PENDING_REVIEW", _("Pending Review")  # todo reporte nuevo queda automáticamente cómo pendiente
+        ACTIVE = "ACTIVE", _("Active")
+        RECOVERED = "RECOVERED", _("Recovered")
+        REJECTED = "REJECTED", _("Rejected")
 
     title = models.CharField(max_length=150)
     description = models.TextField()
@@ -124,10 +125,10 @@ class ContactMessage(models.Model):
 # RF43: aviso de un miembro de la comunidad sobre un reporte ya publicado.
 class ReportFlag(models.Model):
     class Reason(models.TextChoices):
-        FALSE_INFORMATION = "FALSE_INFORMATION", "False information"
-        OFFENSIVE = "OFFENSIVE", "Offensive content"
-        PERSONAL_DATA = "PERSONAL_DATA", "Personal data"
-        OTHER = "OTHER", "Other"
+        FALSE_INFORMATION = "FALSE_INFORMATION", _("False information")
+        OFFENSIVE = "OFFENSIVE", _("Offensive content")
+        PERSONAL_DATA = "PERSONAL_DATA", _("Personal data")
+        OTHER = "OTHER", _("Other")
 
     report = models.ForeignKey(
         ItemReport,
@@ -177,12 +178,12 @@ class ReportFlag(models.Model):
 # guarda la ultima decision.
 class ModerationLogEntry(models.Model):
     class Action(models.TextChoices):
-        APPROVED = "APPROVED", "Approved"
-        REJECTED = "REJECTED", "Rejected"
-        EDITED = "EDITED", "Edited"
-        REMOVED = "REMOVED", "Removed"
-        FLAGS_DISMISSED = "FLAGS_DISMISSED", "Flags dismissed"
-        REMOVED_FROM_PUBLIC = "REMOVED_FROM_PUBLIC", "Removed from public view"
+        APPROVED = "APPROVED", _("Approved")
+        REJECTED = "REJECTED", _("Rejected")
+        EDITED = "EDITED", _("Edited")
+        REMOVED = "REMOVED", _("Removed")
+        FLAGS_DISMISSED = "FLAGS_DISMISSED", _("Flags dismissed")
+        REMOVED_FROM_PUBLIC = "REMOVED_FROM_PUBLIC", _("Removed from public view")
 
     action = models.CharField(max_length=30, choices=Action.choices)
 

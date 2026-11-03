@@ -63,7 +63,7 @@ def community_numbers():
     recovered = Q(status=ItemReport.Status.RECOVERED)
     lost = Q(report_type=ItemReport.ReportType.LOST)
     # Un reporte se publica cuando lo aprueban; sin fecha de moderacion
-    # cuenta su fecha de creacion, como en el feed de RF24.
+    # cuenta su fecha de creacion.
     published_last_day = Q(moderated_at__gte=last_day) | Q(moderated_at__isnull=True, created_at__gte=last_day)
 
     numbers = ItemReport.objects.aggregate(

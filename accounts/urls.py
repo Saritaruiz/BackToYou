@@ -8,6 +8,7 @@ app_name = "accounts"
 
 urlpatterns = [
     path("register/", views.register, name="register"),
+    path("register/password-check/", views.password_check, name="password_check"),
     path(
         "login/",
         auth_views.LoginView.as_view(

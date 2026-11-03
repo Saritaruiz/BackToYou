@@ -1,27 +1,30 @@
 {% extends "base.html" %}
-{% load icons %}
+{% load i18n icons %}
 
-{% block title %}My Reports | BackToYou{% endblock %}
+{% block title %}{% translate "My Reports" %} | BackToYou{% endblock %}
 
 {% block content %}
     <section class="hero page-head">
         <div>
-            <span class="kicker">Your archive</span>
-            <h1>My <em>reports.</em></h1>
-            <p class="lead">Every report you have created, with its current status.</p>
-            <p class="account-link"><a class="text-link" href="{% url 'accounts:password_change' %}">Change password</a></p>
+            <span class="kicker">{% translate "Your archive" %}</span>
+            <h1>{% blocktranslate trimmed %}My <em>reports.</em>{% endblocktranslate %}</h1>
+            <p class="lead">{% translate "Every report you have created, with its current status." %}</p>
+            <p class="account-link"><a class="text-link" href="{% url 'accounts:password_change' %}">{% translate "Change password" %}</a></p>
         </div>
         {% if reports %}
             <p class="page-count">
-                <strong>{{ reports|length }}</strong>
-                report{{ reports|length|pluralize }}
+                {% blocktranslate trimmed count counter=reports|length %}
+                    <strong>{{ counter }}</strong> report
+                {% plural %}
+                    <strong>{{ counter }}</strong> reports
+                {% endblocktranslate %}
             </p>
         {% endif %}
     </section>
 
     {% if reports %}
         {# NFR38: libro de registro, una fila por reporte. #}
-        <section class="ledger" aria-label="My reports">
+        <section class="ledger" aria-label="{% translate 'My reports' %}">
             {% for report in reports %}
                 <article class="ledger-row" id="report-{{ report.id }}">
                     <div class="ledger-thumb">
@@ -41,11 +44,11 @@
                     <div class="ledger-main">
                         <h2 class="ledger-title">{{ report.title }}</h2>
                         <p class="card-meta">
-                            {{ report.category.name }} · {{ report.location }} · {{ report.event_date }}
+                            {% translate report.category.name %} · {{ report.location }} · {{ report.event_date }}
                         </p>
                         {% if report.status == "REJECTED" and report.rejection_reason %}
                             {# RF10: el motivo del rechazo, para corregirlo con "Edit". #}
-                            <p class="field-help">Rejected: {{ report.rejection_reason }}</p>
+                            <p class="field-help">{% blocktranslate with reason=report.rejection_reason %}Rejected: {{ reason }}{% endblocktranslate %}</p>
                         {% endif %}
                     </div>
 
@@ -55,31 +58,33 @@
                     </div>
 
                     <div class="ledger-actions">
-                        <a href="{% url 'reports:report_detail' report.id %}">View Details</a>
+                        <a href="{% url 'reports:report_detail' report.id %}">{% translate "View Details" %}</a>
                         {% if report.is_editable %}
-                            <a href="{% url 'reports:edit_report' report.id %}">Edit</a>
+                            <a href="{% url 'reports:edit_report' report.id %}">{% translate "Edit" %}</a>
                         {% endif %}
                         {% if report.can_be_marked_recovered %}
-                            <a href="{% url 'reports:mark_report_recovered' report.id %}">Mark as Recovered</a>
+                            <a href="{% url 'reports:mark_report_recovered' report.id %}">{% translate "Mark as Recovered" %}</a>
                         {% endif %}
-                        <a class="danger-link" href="{% url 'reports:delete_report' report.id %}">Delete</a>
+                        <a class="danger-link" href="{% url 'reports:delete_report' report.id %}">{% translate "Delete" %}</a>
                     </div>
                 </article>
             {% endfor %}
         </section>
     {% else %}
         <section class="empty-state">
-            <h2>You have not created any reports yet.</h2>
+            <h2>{% translate "You have not created any reports yet." %}</h2>
             <p>
-                When you report a lost or found item, it will appear here with
-                its review status.
+                {% blocktranslate trimmed %}
+                    When you report a lost or found item, it will appear here with
+                    its review status.
+                {% endblocktranslate %}
             </p>
             <div class="actions">
                 <a class="button" href="{% url 'reports:create_lost_report' %}">
-                    Report a Lost Item
+                    {% translate "Report a Lost Item" %}
                 </a>
                 <a class="button ghost" href="{% url 'reports:create_found_report' %}">
-                    Report a Found Item
+                    {% translate "Report a Found Item" %}
                 </a>
             </div>
         </section>

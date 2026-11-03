@@ -9,6 +9,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
 from django.urls import reverse
+from django.utils.translation import gettext as _
 
 from .. import ai_description
 from ..forms import OLD_EVENT_DATE_WARNING, ItemReportCreationForm, event_date_is_old
@@ -50,7 +51,7 @@ def _create_report(request, report_type):
 
             messages.success(
                 request,
-                "Report submitted successfully. It is currently Pending Review and will become publicly visible after administrator approval.",
+                _("Report submitted successfully. It is currently Pending Review and will become publicly visible after administrator approval."),
             )
             if event_date_is_old(report.event_date):
                 messages.warning(request, OLD_EVENT_DATE_WARNING)
@@ -63,11 +64,14 @@ def _create_report(request, report_type):
     else:
         form = ItemReportCreationForm(report_type=report_type)
 
-    report_type_label = (
-        "Lost"
-        if report_type == ItemReport.ReportType.LOST
-        else "Found"
-    )
+    # Frases completas y no "Create {tipo} Item Report": en espanol el tipo
+    # va al final ("Crear reporte de objeto perdido").
+    if report_type == ItemReport.ReportType.LOST:
+        page_title = _("Create Lost Item Report")
+        kicker = _("File a report · Lost item")
+    else:
+        page_title = _("Create Found Item Report")
+        kicker = _("File a report · Found item")
 
     return render(
         request,
@@ -75,7 +79,8 @@ def _create_report(request, report_type):
         {
             "form": form,
             "report_type": report_type,
-            "report_type_label": report_type_label,
+            "page_title": page_title,
+            "kicker": kicker,
             "ai_available": ai_description.is_available(),
         },
     )

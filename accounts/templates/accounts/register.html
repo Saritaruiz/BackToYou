@@ -1,34 +1,37 @@
 {% extends "base.html" %}
+{% load i18n %}
 
-{% block title %}Register | BackToYou{% endblock %}
+{% block title %}{% translate "Register" %} | BackToYou{% endblock %}
 
 {% block content %}
     <div class="auth-layout">
         {# NFR38: mitad decorativa de la pantalla dividida. #}
         <aside class="auth-art" aria-hidden="true">
             <span class="kicker">Nº 002 · BackToYou</span>
-            <p class="auth-quote">Report it. Find it. <em>Return it.</em></p>
-            <p class="auth-note">Only for @eafit.edu.co accounts</p>
+            <p class="auth-quote">{% blocktranslate trimmed %}Report it. Find it. <em>Return it.</em>{% endblocktranslate %}</p>
+            <p class="auth-note">{% translate "Only for @eafit.edu.co accounts" %}</p>
         </aside>
 
         <section class="form-card">
-            <span class="kicker">Register</span>
-            <h1 class="page-title">Join the community.</h1>
-            <p class="lead">Create your BackToYou account with an institutional EAFIT email.</p>
+            <span class="kicker">{% translate "Register" %}</span>
+            <h1 class="page-title">{% translate "Join the community." %}</h1>
+            <p class="lead">{% translate "Create your BackToYou account with an institutional EAFIT email." %}</p>
 
             <form method="post">
                 {% csrf_token %}
-                {# Muestra las reglas de la contrasena antes de que haya un error. #}
+                {# Las reglas de la contrasena se ven antes de que haya un error y se marcan al escribir. #}
                 {% include "accounts/_form_fields.html" %}
                 {% include "accounts/_show_password.html" %}
 
-                <button type="submit">Register</button>
+                <button type="submit">{% translate "Register" %}</button>
             </form>
 
             <p>
-                Already registered?
-                <a href="{% url 'accounts:login' %}">Login</a>
-                or <a href="{% url 'accounts:password_reset' %}">reset your password</a>.
+                {% url 'accounts:login' as login_url %}{% url 'accounts:password_reset' as reset_url %}
+                {% blocktranslate trimmed %}
+                    Already registered? <a href="{{ login_url }}">Login</a>
+                    or <a href="{{ reset_url }}">reset your password</a>.
+                {% endblocktranslate %}
             </p>
         </section>
     </div>

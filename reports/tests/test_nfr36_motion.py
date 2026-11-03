@@ -94,11 +94,13 @@ class MotionPagesTests(TestCase):
     # La tarjeta tiene el marco que recorta la foto y el titulo que se subraya.
     def test_report_card_has_the_pieces_of_its_hover(self):
         response = self.client.get(reverse("reports:report_list"), {"view": "list"})
-        home = self.client.get(reverse("home"))
+        # En el indice, los reportes con foto van en tarjeta.
+        ItemReport.objects.filter(pk=self.report.pk).update(image="reports/keys.png")
+        cards = self.client.get(reverse("reports:report_list"))
 
-        self.assertContains(home, '<article class="card report-card">', html=False)
-        self.assertContains(home, '<div class="card-media">', html=False)
-        self.assertContains(home, '<h3 class="card-title"><span>House keys</span></h3>', html=False)
+        self.assertContains(cards, '<article class="card report-card">', html=False)
+        self.assertContains(cards, '<div class="card-media">', html=False)
+        self.assertContains(cards, '<h3 class="card-title"><span>House keys</span></h3>', html=False)
         self.assertContains(response, 'class="view-toggle is-list"', html=False)
         self.assertContains(response, 'class="view-toggle-indicator"', html=False)
 

@@ -1,23 +1,26 @@
 {% extends "base.html" %}
+{% load i18n %}
 
-{% block title %}Action not available | BackToYou{% endblock %}
+{% block title %}{% translate "Action not available" %} | BackToYou{% endblock %}
 
 {% block content %}
     <section class="form-card">
-        <span class="kicker">Error 403 · Not allowed</span>
-        <h1 class="page-title">You don't have permission to do this</h1>
+        <span class="kicker">{% translate "Error 403 · Not allowed" %}</span>
+        <h1 class="page-title">{% translate "You don't have permission to do this" %}</h1>
         <p class="lead">
-            Either this report does not belong to you, its current status
-            does not allow this action, or this section is only available to
-            administrators.
+            {% blocktranslate trimmed %}
+                Either this report does not belong to you, its current status
+                does not allow this action, or this section is only available to
+                administrators.
+            {% endblocktranslate %}
         </p>
 
         <div class="actions">
             <a class="button" href="{% url 'reports:my_reports' %}">
-                Go to My Reports
+                {% translate "Go to My Reports" %}
             </a>
             <a class="button ghost" href="{% url 'reports:report_list' %}">
-                Browse reports
+                {% translate "Browse reports" %}
             </a>
         </div>
     </section>

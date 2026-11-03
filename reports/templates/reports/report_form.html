@@ -1,45 +1,48 @@
 {% extends "base.html" %}
+{% load i18n %}
 
-{% block title %}Create {{ report_type_label }} Report | BackToYou{% endblock %}
+{% block title %}{{ page_title }} | BackToYou{% endblock %}
 
 {% block content %}
     <div class="form-layout">
     {# NFR38: los pasos del reporte a la izquierda del formulario. #}
     <aside class="form-steps" aria-labelledby="form-steps-heading">
-        <h2 class="kicker" id="form-steps-heading">How reporting works</h2>
+        <h2 class="kicker" id="form-steps-heading">{% translate "How reporting works" %}</h2>
         <ol class="steps-list">
             <li>
                 <span class="step-number" aria-hidden="true">I.</span>
                 <div>
-                    <h3>Describe it</h3>
-                    <p>Photo, title, category and description.</p>
+                    <h3>{% translate "Describe it" %}</h3>
+                    <p>{% translate "Photo, title, category and description." %}</p>
                 </div>
             </li>
             <li>
                 <span class="step-number" aria-hidden="true">II.</span>
                 <div>
-                    <h3>Place it</h3>
-                    <p>Where and when it happened.</p>
+                    <h3>{% translate "Place it" %}</h3>
+                    <p>{% translate "Where and when it happened." %}</p>
                 </div>
             </li>
             <li>
                 <span class="step-number" aria-hidden="true">III.</span>
                 <div>
-                    <h3>Send it</h3>
-                    <p>An administrator reviews it and you get an email with the result.</p>
+                    <h3>{% translate "Send it" %}</h3>
+                    <p>{% translate "An administrator reviews it and you get an email with the result." %}</p>
                 </div>
             </li>
         </ol>
-        <p class="form-note">Your name and email are never shown on the report. Other members contact you through BackToYou.</p>
+        <p class="form-note">{% translate "Your name and email are never shown on the report. Other members contact you through BackToYou." %}</p>
     </aside>
 
     <section class="form-card">
-        <span class="kicker">File a report · {{ report_type_label }} item</span>
-        <h1 class="page-title">Create {{ report_type_label }} Item Report</h1>
-        <p class="lead">Submit the item details for administrator review.</p>
+        <span class="kicker">{{ kicker }}</span>
+        <h1 class="page-title">{{ page_title }}</h1>
+        <p class="lead">{% translate "Submit the item details for administrator review." %}</p>
 
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
+            {# Antes del primer campo: quien llena el reporte sabe que puede dejar en blanco. #}
+            <p class="required-note">{% blocktranslate trimmed %}Fields marked with <span class="required-mark">*</span> are required. The rest are optional.{% endblocktranslate %}</p>
             {{ form.non_field_errors }}
 
             {% for field in form %}
@@ -51,10 +54,11 @@
                 </fieldset>
                 {% else %}
                 <div class="form-field">
-                    {{ field.label_tag }}
+                    {% include "reports/_field_label.html" %}
                     {{ field }}
                     {% if field.help_text %}
-                        <p class="field-help">{{ field.help_text }}</p>
+                        {# El id es el que Django pone en aria-describedby del campo. #}
+                        <p class="field-help" id="{{ field.auto_id }}_helptext">{{ field.help_text }}</p>
                     {% endif %}
                     {{ field.errors }}
                 </div>
@@ -65,35 +69,50 @@
                     <div class="ai-assist" id="ai-controls" {% if form.description_method.value != "ai" %}hidden{% endif %}>
                         <button type="button" class="button secondary" id="ai-suggest"
                                 {% if not ai_available %}disabled{% endif %}>
-                            Suggest description with AI
+                            {% translate "Suggest description with AI" %}
                         </button>
                         <p class="ai-status" id="ai-status" aria-live="polite">
                             {% if ai_available %}
-                                Upload a photo and the AI will suggest the title, description and category.
-                                You can edit everything before submitting.
+                                {% blocktranslate trimmed %}
+                                    Upload a photo and the AI will suggest the title, description and category.
+                                    You can edit everything before submitting.
+                                {% endblocktranslate %}
                             {% else %}
-                                AI suggestions are not available right now. Please fill in the report manually.
+                                {% translate "AI suggestions are not available right now. Please fill in the report manually." %}
                             {% endif %}
                         </p>
                         <div class="ai-progress" id="ai-progress" hidden>
-                            <progress id="ai-progress-bar" max="100" value="0" aria-label="AI suggestion progress"></progress>
+                            <progress id="ai-progress-bar" max="100" value="0" aria-label="{% translate 'AI suggestion progress' %}"></progress>
                             <span class="ai-progress-value" id="ai-progress-value">0%</span>
                         </div>
                     </div>
                 {% endif %}
             {% endfor %}
 
-            <button type="submit">Submit Report</button>
+            <button type="submit">{% translate "Submit Report" %}</button>
         </form>
 
         <p>
-            <a href="{% url 'reports:report_list' %}">Back to Reports</a>
+            <a href="{% url 'reports:report_list' %}">{% translate "Back to Reports" %}</a>
         </p>
     </section>
     </div>
 
+        {% translate "Upload a photo of the item first." as msg_photo_first %}
+        {% translate "Analyzing the photo. This can take up to two minutes..." as msg_analyzing %}
+        {% translate "The AI suggestion failed. Please fill in the report manually." as msg_failed %}
+        {% translate "Fields filled automatically by AI. Review and edit them before submitting." as msg_filled %}
+        {% translate "Title and description filled automatically by AI. Choose a category and review everything before submitting." as msg_filled_no_category %}
         <script>
             (function () {
+                // Los avisos de la IA, en el idioma de la pagina.
+                const MESSAGES = {
+                    photoFirst: "{{ msg_photo_first|escapejs }}",
+                    analyzing: "{{ msg_analyzing|escapejs }}",
+                    failed: "{{ msg_failed|escapejs }}",
+                    filled: "{{ msg_filled|escapejs }}",
+                    filledNoCategory: "{{ msg_filled_no_category|escapejs }}",
+                };
                 const button = document.getElementById("ai-suggest");
                 const status = document.getElementById("ai-status");
                 const form = button.closest("form");
@@ -211,7 +230,7 @@
                     if (!available || !isAIMode()) return;
                     const image = imageInput.files[0];
                     if (!image) {
-                        setStatus("Upload a photo of the item first.", "error");
+                        setStatus(MESSAGES.photoFirst, "error");
                         imageInput.focus();
                         return;
                     }
@@ -225,7 +244,7 @@
                     button.setAttribute("aria-busy", "true");
                     const requestRevision = ++revision;
                     controller = new AbortController();
-                    setStatus("Analyzing the photo. This can take up to two minutes...", "");
+                    setStatus(MESSAGES.analyzing, "");
                     const started = startProgress();
 
                     try {
@@ -240,7 +259,7 @@
 
                         if (!response.ok) {
                             stopProgress();
-                            setStatus(result.error || "The AI suggestion failed. Please fill in the report manually.", "error");
+                            setStatus(result.error || MESSAGES.failed, "error");
                             return;
                         }
 
@@ -251,17 +270,12 @@
                             fillFromAI("category", result.category_id);
                         }
 
-                        setStatus(
-                            result.category_id
-                                ? "Fields filled automatically by AI. Review and edit them before submitting."
-                                : "Title and description filled automatically by AI. Choose a category and review everything before submitting.",
-                            "success"
-                        );
+                        setStatus(result.category_id ? MESSAGES.filled : MESSAGES.filledNoCategory, "success");
                         {% endif %}
                     } catch (error) {
                         if (requestRevision !== revision || error.name === "AbortError") return;
                         stopProgress();
-                        setStatus("The AI suggestion failed. Please fill in the report manually.", "error");
+                        setStatus(MESSAGES.failed, "error");
                     } finally {
                         if (requestRevision === revision) {
                             controller = null;

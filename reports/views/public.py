@@ -10,21 +10,22 @@ from django.core.exceptions import PermissionDenied
 from django.db.models import Q
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils.translation import gettext as _
 
 from ..email_notifications import notify_report_contact
 from ..forms import ContactMessageForm
 from ..models import Category, ItemReport
-from ..querysets import public_reports, recent_public_reports
+from ..querysets import public_reports
 from ..search import Normalized, normalize
 from ..statistics import community_numbers
 
 
 def home(request):
+    # Los reportes no van en el inicio: se ven en el indice (report_list).
     return render(
         request,
         "home.html",
         {
-            "recent_reports": recent_public_reports(),
             # Buscador del inicio: numeros reales y atajos por categoria.
             "numbers": community_numbers(),
             "categories": Category.objects.order_by("name"),
@@ -42,6 +43,13 @@ def report_list(request):
     if query:
         # RF07: "camara" encuentra "Cámara" y "CÁMARA" (ver search.py).
         text = normalize(query)
+        # i18n: el nombre de la categoria tambien se busca como se ve en la
+        # pagina, asi "llaves" encuentra la categoria "Keys" en espanol.
+        translated_categories = [
+            category.id
+            for category in Category.objects.all()
+            if text in normalize(_(category.name))
+        ]
         reports = reports.annotate(
             search_title=Normalized("title"),
             search_description=Normalized("description"),
@@ -52,6 +60,7 @@ def report_list(request):
          | Q(search_description__contains=text)
          | Q(search_location__contains=text)
          | Q(search_category__contains=text)
+         | Q(category_id__in=translated_categories)
          | Q(report_type__icontains=query)
     )
     if category_id:
@@ -151,7 +160,7 @@ def contact_reporter(request, report_id):
 
             messages.success(
                 request,
-                "Your message was sent to the reporter inside BackToYou.",
+                _("Your message was sent to the reporter inside BackToYou."),
             )
             return redirect("reports:report_detail", report_id=report.id)
     else:

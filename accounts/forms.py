@@ -1,11 +1,12 @@
 from datetime import timedelta
 
 from django import forms
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, password_validation
 from django.contrib.auth.forms import AuthenticationForm, PasswordResetForm, UserCreationForm
 from django.core.exceptions import ValidationError
 from django.db.models import Q
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 
 from .models import LoginFailure, User
 
@@ -22,7 +23,7 @@ def clean_institutional_domain(value):
     """RF01: el correo debe ser institucional. Devuelve el correo en minusculas."""
     email = (value or "").strip().lower()
     if not email.endswith(INSTITUTIONAL_DOMAIN):
-        raise ValidationError("Please use an institutional email ending in @eafit.edu.co.")
+        raise ValidationError(_("Please use an institutional email ending in @eafit.edu.co."))
     return email
 
 
@@ -45,7 +46,7 @@ def clean_institutional_email(value, exclude_pk=None):
     """
     email = clean_institutional_domain(value)
     if find_registered_user(email, exclude_pk) is not None:
-        raise ValidationError("This institutional email is already registered.")
+        raise ValidationError(_("This institutional email is already registered."))
     return email
 
 
@@ -58,12 +59,12 @@ def _login_is_locked(email):
 
 
 class EafitAuthenticationForm(AuthenticationForm):
-    username = forms.EmailField(label="Institutional email")
+    username = forms.EmailField(label=_("Institutional email"))
 
     error_messages = {
         **AuthenticationForm.error_messages,
-        "too_many_attempts": (
-            f"Too many failed attempts. Wait {LOGIN_LOCKOUT_MINUTES} minutes and "
+        "too_many_attempts": _(
+            "Too many failed attempts. Wait %(minutes)s minutes and "
             "try again, or reset your password."
         ),
     }
@@ -84,6 +85,7 @@ class EafitAuthenticationForm(AuthenticationForm):
                 raise ValidationError(
                     self.error_messages["too_many_attempts"],
                     code="too_many_attempts",
+                    params={"minutes": LOGIN_LOCKOUT_MINUTES},
                 )
 
             user = User.objects.filter(email__iexact=email).first()
@@ -116,15 +118,32 @@ class EafitPasswordResetForm(PasswordResetForm):
     """
 
     email = forms.EmailField(
-        label="Institutional email",
+        label=_("Institutional email"),
         max_length=254,
         widget=forms.EmailInput(attrs={"autocomplete": "email"}),
     )
 
 
+def password_rule_results(password, user):
+    """Registro: True o False por cada regla de AUTH_PASSWORD_VALIDATORS, en orden.
+
+    Es la misma validacion del formulario, regla por regla. La usa la
+    pagina de registro para marcar cada regla mientras la persona escribe.
+    """
+    results = []
+    for validator in password_validation.get_default_password_validators():
+        try:
+            validator.validate(password, user)
+        except ValidationError:
+            results.append(False)
+        else:
+            results.append(True)
+    return results
+
+
 class EafitUserRegistrationForm(UserCreationForm):
-    full_name = forms.CharField(max_length=150, label="Full name")
-    email = forms.EmailField(label="Institutional email")
+    full_name = forms.CharField(max_length=150, label=_("Full name"))
+    email = forms.EmailField(label=_("Institutional email"))
 
     class Meta:
         model = User
@@ -134,6 +153,13 @@ class EafitUserRegistrationForm(UserCreationForm):
         return clean_institutional_email(self.cleaned_data["email"])
 
     role = User.Role.REGULAR_USER
+
+    def _post_clean(self):
+        # La regla "no parecida a tu informacion personal" compara con el
+        # correo y tambien con el nombre, igual que la revision en vivo de la
+        # pagina de registro (views.password_check).
+        self.instance.first_name = (self.cleaned_data.get("full_name") or "").strip()
+        super()._post_clean()
 
     def save(self, commit=True):
         user = super().save(commit=False)
@@ -160,8 +186,8 @@ class AdministratorCreationForm(EafitUserRegistrationForm):
 class AdministratorEditForm(forms.ModelForm):
     """RF20: editar el nombre y el correo de una cuenta de administrador."""
 
-    first_name = forms.CharField(max_length=150, label="Full name")
-    email = forms.EmailField(label="Institutional email")
+    first_name = forms.CharField(max_length=150, label=_("Full name"))
+    email = forms.EmailField(label=_("Institutional email"))
 
     class Meta:
         model = User

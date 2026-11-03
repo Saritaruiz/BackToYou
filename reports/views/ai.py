@@ -7,6 +7,7 @@ sugerencia en JSON para llenar los campos. No crea ni modifica reportes.
 from django import forms
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
+from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
 from .. import ai_description
@@ -19,14 +20,14 @@ from ..models import Category, ItemReport
 def describe_item(request):
     if not ai_description.is_available():
         return JsonResponse(
-            {"error": "AI suggestions are not available right now. Please fill in the report manually."},
+            {"error": _("AI suggestions are not available right now. Please fill in the report manually.")},
             status=503,
         )
 
     image = request.FILES.get("image")
     if not image:
         return JsonResponse(
-            {"error": "Upload a photo of the item to get an AI suggestion."},
+            {"error": _("Upload a photo of the item to get an AI suggestion.")},
             status=400,
         )
 
@@ -36,8 +37,9 @@ def describe_item(request):
         return JsonResponse({"error": error.messages[0]}, status=400)
 
     report_type = request.POST.get("report_type")
+    # Va en la instruccion para el modelo, que siempre esta en ingles.
     report_type_label = (
-        ItemReport.ReportType(report_type).label
+        ItemReport.ReportType(report_type).name.capitalize()
         if report_type in ItemReport.ReportType.values
         else "Lost or found"
     )

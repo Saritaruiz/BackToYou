@@ -1,11 +1,12 @@
 {% extends "base.html" %}
+{% load i18n %}
 
 {% block title %}{{ title }} | BackToYou{% endblock %}
 
 {% block content %}
     <section class="form-card">
         <h1 class="page-title">{{ title }}</h1>
-        <p class="lead">Category names are shown in report creation and edit forms.</p>
+        <p class="lead">{% translate "Category names are shown in report creation and edit forms." %}</p>
 
         <form method="post">
             {% csrf_token %}
@@ -23,7 +24,7 @@
         </form>
 
         <p>
-            <a href="{% url 'administration_category_list' %}">Back to Categories</a>
+            <a href="{% url 'administration_category_list' %}">{% translate "Back to Categories" %}</a>
         </p>
     </section>
 {% endblock %}

@@ -1,35 +1,39 @@
 {% extends "base.html" %}
+{% load i18n %}
 
-{% block title %}Edit {{ report.title }} | BackToYou{% endblock %}
+{% block title %}{% blocktranslate with title=report.title %}Edit {{ title }}{% endblocktranslate %} | BackToYou{% endblock %}
 
 {% block content %}
     <section class="form-card">
-        <span class="role-pill">Moderation Review</span>
-        <h1 class="page-title">Edit {{ report.get_report_type_display }} Item Report</h1>
+        <span class="role-pill">{% translate "Moderation Review" %}</span>
+        <h1 class="page-title">{% if report.report_type == "LOST" %}{% translate "Edit Lost Item Report" %}{% else %}{% translate "Edit Found Item Report" %}{% endif %}</h1>
         <p class="lead">
-            Correct the item details before deciding whether to approve or
-            reject this report. The report keeps its current status:
-            {{ report.get_status_display }}.
+            {% blocktranslate trimmed with status=report.get_status_display %}
+                Correct the item details before deciding whether to approve or
+                reject this report. The report keeps its current status:
+                {{ status }}.
+            {% endblocktranslate %}
         </p>
 
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
+            <p class="required-note">{% blocktranslate trimmed %}Fields marked with <span class="required-mark">*</span> are required. The rest are optional.{% endblocktranslate %}</p>
             {{ form.non_field_errors }}
 
             {% for field in form %}
                 <div class="form-field">
-                    {{ field.label_tag }}
+                    {% include "reports/_field_label.html" %}
                     {{ field }}
                     {{ field.errors }}
                 </div>
             {% endfor %}
 
-            <button type="submit">Save Changes</button>
+            <button type="submit">{% translate "Save Changes" %}</button>
         </form>
 
         <p>
             <a href="{% url 'administration_moderate_report' report.id %}">
-                Back to Review
+                {% translate "Back to Review" %}
             </a>
         </p>
     </section>

@@ -1,20 +1,21 @@
 {% extends "base.html" %}
+{% load i18n %}
 
-{% block title %}Not available | BackToYou{% endblock %}
+{% block title %}{% translate "Not available" %} | BackToYou{% endblock %}
 
 {% block content %}
     <section class="form-card">
-        <span class="kicker">Error 404 · Not found</span>
-        <h1 class="page-title">This page is not available</h1>
+        <span class="kicker">{% translate "Error 404 · Not found" %}</span>
+        <h1 class="page-title">{% translate "This page is not available" %}</h1>
         <p class="lead">
-            The page you are looking for does not exist or is no longer available.
+            {% translate "The page you are looking for does not exist or is no longer available." %}
         </p>
 
         <div class="actions">
             <a class="button" href="{% url 'reports:report_list' %}">
-                Browse reports
+                {% translate "Browse reports" %}
             </a>
-            <a class="button ghost" href="{% url 'home' %}">Go to Home</a>
+            <a class="button ghost" href="{% url 'home' %}">{% translate "Go to Home" %}</a>
         </div>
     </section>
 {% endblock %}

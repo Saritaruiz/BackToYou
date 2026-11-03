@@ -1,70 +1,71 @@
 {% extends "base.html" %}
+{% load i18n %}
 
-{% block title %}Administration | BackToYou{% endblock %}
+{% block title %}{% translate "Administration" %} | BackToYou{% endblock %}
 
 {% block content %}
     <section class="hero">
-        <span class="role-pill">Administrator</span>
-        <h1>BackToYou Administration</h1>
-        <p>Review application operations and access administrative workflows.</p>
+        <span class="role-pill">{% translate "Administrator" %}</span>
+        <h1>{% translate "BackToYou Administration" %}</h1>
+        <p>{% translate "Review application operations and access administrative workflows." %}</p>
     </section>
 
-    <section class="admin-sections" aria-label="Administration sections">
+    <section class="admin-sections" aria-label="{% translate 'Administration sections' %}">
         <article class="card admin-card">
-            <h2>Lost Item Statistics</h2>
-            <p class="description">Review Lost submissions, recovery rate, categories, and monthly trends.</p>
-            <a class="button" href="{% url 'administration_lost_statistics' %}">View Statistics</a>
+            <h2>{% translate "Lost Item Statistics" %}</h2>
+            <p class="description">{% translate "Review Lost submissions, recovery rate, categories, and monthly trends." %}</p>
+            <a class="button" href="{% url 'administration_lost_statistics' %}">{% translate "View Statistics" %}</a>
         </article>
         <article class="card admin-card">
-            <h2>Report Moderation</h2>
-            <p class="description">Review, edit, approve, reject, or remove submitted reports before they become public.</p>
+            <h2>{% translate "Report Moderation" %}</h2>
+            <p class="description">{% translate "Review, edit, approve, reject, or remove submitted reports before they become public." %}</p>
             <a class="button" href="{% url 'administration_pending_reports' %}">
-                Pending Reports
+                {% translate "Pending Reports" %}
             </a>
         </article>
 
         <article class="card admin-card">
-            <h2>Flagged Reports</h2>
+            <h2>{% translate "Flagged Reports" %}</h2>
             <p class="description">
-                Review published reports that the community flagged, and dismiss the flags or remove the report.
+                {% translate "Review published reports that the community flagged, and dismiss the flags or remove the report." %}
                 {% if flagged_report_count %}
-                    <strong>{{ flagged_report_count }} waiting for review.</strong>
+                    <strong>{% blocktranslate with number=flagged_report_count %}{{ number }} waiting for review.{% endblocktranslate %}</strong>
                 {% endif %}
             </p>
             <a class="button" href="{% url 'administration_flagged_reports' %}">
-                Flagged Reports
+                {% translate "Flagged Reports" %}
             </a>
         </article>
 
         <article class="card admin-card">
-            <h2>Activity Log</h2>
-            <p class="description">See who approved, rejected, edited, or removed each report, and when.</p>
+            <h2>{% translate "Activity Log" %}</h2>
+            <p class="description">{% translate "See who approved, rejected, edited, or removed each report, and when." %}</p>
             <a class="button" href="{% url 'administration_activity_log' %}">
-                View Activity Log
+                {% translate "View Activity Log" %}
             </a>
         </article>
 
         <article class="card admin-card">
-            <h2>Categories</h2>
-            <p class="description">Create, rename, and remove report categories.</p>
+            <h2>{% translate "Categories" %}</h2>
+            <p class="description">{% translate "Create, rename, and remove report categories." %}</p>
             <a class="button" href="{% url 'administration_category_list' %}">
-                Manage Categories
+                {% translate "Manage Categories" %}
             </a>
         </article>
 
         <article class="card admin-card">
-            <h2>Administrator Accounts</h2>
-            <p class="description">Create, edit, and deactivate administrators, or grant and revoke administrator access.</p>
+            <h2>{% translate "Administrator Accounts" %}</h2>
+            <p class="description">{% translate "Create, edit, and deactivate administrators, or grant and revoke administrator access." %}</p>
             <a class="button" href="{% url 'administration_administrator_list' %}">
-                Manage Administrators
+                {% translate "Manage Administrators" %}
             </a>
         </article>
 
         <article class="card admin-card">
-            <h2>User Accounts</h2>
-            <p class="description">Activate or deactivate regular user accounts.</p>
+            <h2>{% translate "User Accounts" %}</h2>
+            <p class="description">{% translate "Activate or deactivate regular user accounts." %}</p>
             <a class="button" href="{% url 'administration_user_list' %}">
-                Manage Users
+                {% translate "Manage Users" %}
             </a>
         </article>
     </section>

@@ -75,6 +75,9 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    # Elige el idioma por el prefijo de la URL (/es/, /en/). Debe ir despues
+    # de SessionMiddleware y antes de CommonMiddleware.
+    'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -95,6 +98,8 @@ TEMPLATES = [
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.request',
+                # LANGUAGE_CODE y LANGUAGES en las plantillas (selector de idioma).
+                'django.template.context_processors.i18n',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
@@ -171,7 +176,23 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/6.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+# La interfaz esta en espanol y en ingles. Cada persona elige con el selector
+# de la cabecera; el idioma va en la URL (/es/reports/, /en/reports/). Si
+# entra sin prefijo, se usa el idioma de su navegador y, si no es ninguno de
+# los dos, el espanol.
+# Los textos del codigo estan en ingles; las traducciones al espanol estan en
+# locale/es/LC_MESSAGES/django.po (ver README).
+LANGUAGE_CODE = 'es'
+
+# Cada idioma con su propio nombre: asi lo reconoce quien no entiende el otro.
+LANGUAGES = [
+    ('es', 'Español'),
+    ('en', 'English'),
+]
+
+LOCALE_PATHS = [
+    BASE_DIR / 'locale',
+]
 
 TIME_ZONE = 'UTC'
 

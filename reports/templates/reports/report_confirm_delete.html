@@ -1,30 +1,33 @@
 {% extends "base.html" %}
+{% load i18n %}
 
-{% block title %}Delete {{ report.title }} | BackToYou{% endblock %}
+{% block title %}{% blocktranslate with title=report.title %}Delete {{ title }}{% endblocktranslate %} | BackToYou{% endblock %}
 
 {% block content %}
     <section class="form-card">
-        <h1 class="page-title">Delete this report?</h1>
+        <h1 class="page-title">{% translate "Delete this report?" %}</h1>
         <p class="lead">
-            This action cannot be undone. The report and the messages other
-            users sent about it will be removed from BackToYou.
+            {% blocktranslate trimmed %}
+                This action cannot be undone. The report and the messages other
+                users sent about it will be removed from BackToYou.
+            {% endblocktranslate %}
         </p>
 
         <div class="meta-grid">
             <div class="meta-item">
-                <span class="meta-label">Title</span>
+                <span class="meta-label">{% translate "Title" %}</span>
                 {{ report.title }}
             </div>
             <div class="meta-item">
-                <span class="meta-label">Type</span>
+                <span class="meta-label">{% translate "Type" %}</span>
                 {{ report.get_report_type_display }}
             </div>
             <div class="meta-item">
-                <span class="meta-label">Status</span>
+                <span class="meta-label">{% translate "Status" %}</span>
                 {{ report.get_status_display }}
             </div>
             <div class="meta-item">
-                <span class="meta-label">Date</span>
+                <span class="meta-label">{% translate "Date" %}</span>
                 {{ report.event_date }}
             </div>
         </div>
@@ -32,10 +35,10 @@
         <div class="actions">
             <form method="post">
                 {% csrf_token %}
-                <button class="danger" type="submit">Delete Permanently</button>
+                <button class="danger" type="submit">{% translate "Delete Permanently" %}</button>
             </form>
             <a class="button ghost" href="{% url 'reports:report_list' %}">
-                Cancel
+                {% translate "Cancel" %}
             </a>
         </div>
     </section>

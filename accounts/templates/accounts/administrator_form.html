@@ -1,19 +1,22 @@
 {% extends "base.html" %}
+{% load i18n %}
 
-{% block title %}{% if is_new %}New Administrator{% else %}Edit Administrator{% endif %} | BackToYou{% endblock %}
+{% block title %}{% if is_new %}{% translate "New Administrator" %}{% else %}{% translate "Edit Administrator" %}{% endif %} | BackToYou{% endblock %}
 
 {% block content %}
     <section class="form-card">
         {% if is_new %}
-            <h1 class="page-title">New Administrator</h1>
+            <h1 class="page-title">{% translate "New Administrator" %}</h1>
             <p class="lead">
-                Create an administrator account with an institutional EAFIT
-                email. This account will be able to moderate reports, manage
-                categories, and manage other accounts.
+                {% blocktranslate trimmed %}
+                    Create an administrator account with an institutional EAFIT
+                    email. This account will be able to moderate reports, manage
+                    categories, and manage other accounts.
+                {% endblocktranslate %}
             </p>
         {% else %}
-            <h1 class="page-title">Edit Administrator</h1>
-            <p class="lead">Update the name and institutional email of {{ target.email }}.</p>
+            <h1 class="page-title">{% translate "Edit Administrator" %}</h1>
+            <p class="lead">{% blocktranslate with email=target.email %}Update the name and institutional email of {{ email }}.{% endblocktranslate %}</p>
         {% endif %}
 
         <form method="post">
@@ -29,8 +32,8 @@
             {% endfor %}
 
             <div class="actions">
-                <button type="submit">{% if is_new %}Create administrator{% else %}Save changes{% endif %}</button>
-                <a class="button quiet" href="{% url 'administration_administrator_list' %}">Cancel</a>
+                <button type="submit">{% if is_new %}{% translate "Create administrator" %}{% else %}{% translate "Save changes" %}{% endif %}</button>
+                <a class="button quiet" href="{% url 'administration_administrator_list' %}">{% translate "Cancel" %}</a>
             </div>
         </form>
     </section>

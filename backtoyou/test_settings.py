@@ -20,3 +20,7 @@ PASSWORD_HASHERS = [
 OLLAMA_VISION_MODEL = ""
 # Tampoco llaman a Gemini, aunque haya un gemini.env con clave.
 GEMINI_API_KEY = ""
+
+# Las pruebas comparan los textos fuente, que estan en ingles. Las de i18n
+# (reports/tests/test_i18n.py) piden el espanol de forma explicita.
+LANGUAGE_CODE = "en"

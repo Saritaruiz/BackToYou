@@ -11,6 +11,7 @@ from django.core.exceptions import PermissionDenied
 from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.utils.translation import gettext as _
 
 from accounts.decorators import administrator_required
 
@@ -49,7 +50,7 @@ def moderate_report_detail(request, report_id):
         if action == "approve":
             report.status = ItemReport.Status.ACTIVE
             report.rejection_reason = ""
-            success_message = "Report approved successfully."
+            success_message = _("Report approved successfully.")
             notify_moderation_result = notify_report_approved
             log_entry_action = ModerationLogEntry.Action.APPROVED
         elif action == "reject":
@@ -64,7 +65,7 @@ def moderate_report_detail(request, report_id):
                 )
             report.status = ItemReport.Status.REJECTED
             report.rejection_reason = rejection_form.rejection_text()
-            success_message = "Report rejected successfully."
+            success_message = _("Report rejected successfully.")
             notify_moderation_result = notify_report_rejected
             log_entry_action = ModerationLogEntry.Action.REJECTED
         else:
@@ -116,10 +117,10 @@ def edit_pending_report(request, report_id):
                         request.user,
                         ModerationLogEntry.Action.EDITED,
                         report,
-                        details=f"Changed: {changed}",
+                        details=_("Changed: %(fields)s") % {"fields": changed},
                     )
 
-            messages.success(request, "Report updated successfully.")
+            messages.success(request, _("Report updated successfully."))
             return redirect("administration_moderate_report", report_id=report.id)
     else:
         form = ItemReportForm(instance=report)
@@ -145,7 +146,7 @@ def delete_pending_report(request, report_id):
             log_action(request.user, ModerationLogEntry.Action.REMOVED, report)
             report.delete()
 
-        messages.success(request, f'Report "{deleted_title}" was removed.')
+        messages.success(request, _('Report "%(title)s" was removed.') % {"title": deleted_title})
         return redirect("administration_pending_reports")
 
     return render(

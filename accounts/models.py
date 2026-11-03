@@ -2,6 +2,7 @@ from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.db.models.functions import Lower
+from django.utils.translation import gettext_lazy as _
 
 
 class User(AbstractUser):
@@ -18,8 +19,8 @@ class User(AbstractUser):
         ]
 
     class Role(models.TextChoices):
-        REGULAR_USER = "REGULAR_USER", "Regular User"
-        ADMINISTRATOR = "ADMINISTRATOR", "Administrator"
+        REGULAR_USER = "REGULAR_USER", _("Regular User")
+        ADMINISTRATOR = "ADMINISTRATOR", _("Administrator")
 
     role = models.CharField(
         max_length=20,

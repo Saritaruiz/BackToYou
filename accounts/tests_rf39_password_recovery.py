@@ -28,7 +28,8 @@ class PasswordRecoveryTests(TestCase):
         return self.client.post(reverse("accounts:password_reset"), {"email": email}, follow=True)
 
     def reset_link(self):
-        return re.search(r"https?://[^/\s]+(/accounts/reset/\S+/)", mail.outbox[-1].body).group(1)
+        # El enlace lleva el idioma en que se pidio: /en/accounts/reset/...
+        return re.search(r"https?://[^/\s]+(/[a-z]{2}/accounts/reset/\S+/)", mail.outbox[-1].body).group(1)
 
     def can_login(self, password):
         return self.client.login(username=self.user.username, password=password)

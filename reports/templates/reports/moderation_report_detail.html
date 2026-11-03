@@ -1,11 +1,12 @@
 {% extends "base.html" %}
+{% load i18n %}
 
-{% block title %}Review Report | BackToYou{% endblock %}
+{% block title %}{% translate "Review Report" %} | BackToYou{% endblock %}
 
 {% block content %}
     <article class="detail-card panel">
-        <span class="role-pill">Moderation Review</span>
-        <h1 class="page-title">Review Report</h1>
+        <span class="role-pill">{% translate "Moderation Review" %}</span>
+        <h1 class="page-title">{% translate "Review Report" %}</h1>
         <div class="pill-row">
             <span class="type-pill type-{{ report.report_type|lower }}">{{ report.get_report_type_display }}</span>
             <span class="status-pill status-{{ report.status|lower }}">{{ report.get_status_display }}</span>
@@ -21,36 +22,36 @@
 
         <div class="meta-grid">
             <div class="meta-item">
-                <span class="meta-label">Title</span>
+                <span class="meta-label">{% translate "Title" %}</span>
                 {{ report.title }}
             </div>
             <div class="meta-item">
-                <span class="meta-label">Category</span>
-                {{ report.category.name }}
+                <span class="meta-label">{% translate "Category" %}</span>
+                {% translate report.category.name %}
             </div>
             <div class="meta-item">
-                <span class="meta-label">Type</span>
+                <span class="meta-label">{% translate "Type" %}</span>
                 {{ report.get_report_type_display }}
             </div>
             <div class="meta-item">
-                <span class="meta-label">Date</span>
+                <span class="meta-label">{% translate "Date" %}</span>
                 {{ report.event_date }}
             </div>
             <div class="meta-item">
-                <span class="meta-label">Location</span>
+                <span class="meta-label">{% translate "Location" %}</span>
                 {{ report.location }}
             </div>
             <div class="meta-item">
-                <span class="meta-label">Creator</span>
-                User #{{ report.creator.id }}
+                <span class="meta-label">{% translate "Creator" %}</span>
+                {% blocktranslate with id=report.creator.id %}User #{{ id }}{% endblocktranslate %}
             </div>
             <div class="meta-item">
-                <span class="meta-label">Status</span>
+                <span class="meta-label">{% translate "Status" %}</span>
                 {{ report.get_status_display }}
             </div>
         </div>
 
-        <h2>Description</h2>
+        <h2>{% translate "Description" %}</h2>
         <p class="description">{{ report.description }}</p>
 
         {# Una accion principal; rechazar es secundaria y eliminar va aparte. #}
@@ -67,26 +68,26 @@
 
             <div class="moderation-actions">
                 <button type="submit" name="action" value="approve">
-                    Approve
+                    {% translate "Approve" %}
                 </button>
                 <button class="secondary" type="submit" name="action" value="reject">
-                    Reject
+                    {% translate "Reject" %}
                 </button>
                 <a class="text-link" href="{% url 'administration_report_edit' report.id %}">
-                    Edit
+                    {% translate "Edit" %}
                 </a>
                 <a class="button ghost" href="{% url 'administration_pending_reports' %}">
-                    Back to Pending Reports
+                    {% translate "Back to Pending Reports" %}
                 </a>
             </div>
         </form>
 
         <div class="danger-zone">
             <div>
-                <p class="danger-title">Danger zone</p>
-                <p class="danger-text">Remove a report that should never become public. It cannot be undone.</p>
+                <p class="danger-title">{% translate "Danger zone" %}</p>
+                <p class="danger-text">{% translate "Remove a report that should never become public. It cannot be undone." %}</p>
             </div>
-            <a class="danger-link" href="{% url 'administration_report_delete' report.id %}">Remove</a>
+            <a class="danger-link" href="{% url 'administration_report_delete' report.id %}">{% translate "Remove" %}</a>
         </div>
     </article>
 {% endblock %}

@@ -116,6 +116,29 @@ To send real emails through Gmail:
 
 `email.env` is in `.gitignore`, so the password never reaches GitHub.
 
+### Translations (Spanish / English)
+
+The interface is available in Spanish and English. The language is part of the URL (`/es/reports/`, `/en/reports/`) and users switch it with the ES / EN selector in the header. A visit without a language prefix uses the browser language, or Spanish when it is neither.
+
+The source texts are written in English in the templates (`{% translate %}`, `{% blocktranslate %}`) and in the Python code (`gettext`). The Spanish translations are in `locale/es/LC_MESSAGES/django.po`, and Django reads the compiled `django.mo` next to it. Both files are in the repository, so nothing needs to be compiled to run the app.
+
+After adding or changing texts:
+
+1. Install GNU gettext. On Windows: `winget install mlocati.GetText`.
+2. Update the `.po` file with the new texts, then write their translations (a text editor or [Poedit](https://poedit.net) works):
+
+   ```bash
+   python manage.py makemessages -l es --ignore=.venv
+   ```
+
+3. Compile it (Poedit also does this when it saves):
+
+   ```bash
+   python manage.py compilemessages --ignore=.venv
+   ```
+
+The tests in `reports/tests/test_i18n.py` fail if a text has no translation or if the `.mo` was not compiled after the `.po` changed.
+
 ### Tests
 
 ```bash

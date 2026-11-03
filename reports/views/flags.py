@@ -15,6 +15,7 @@ from django.db import IntegrityError, transaction
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.utils.translation import gettext as _, gettext_lazy
 
 from accounts.decorators import administrator_required
 
@@ -25,7 +26,7 @@ from ..moderation_log import log_action
 from ..querysets import flagged_reports, open_flags
 
 
-ALREADY_FLAGGED_MESSAGE = "You already flagged this report. An administrator will review it."
+ALREADY_FLAGGED_MESSAGE = gettext_lazy("You already flagged this report. An administrator will review it.")
 
 
 @login_required
@@ -59,7 +60,7 @@ def flag_report(request, report_id):
             else:
                 messages.success(
                     request,
-                    "Thank you. The report was flagged and an administrator will review it.",
+                    _("Thank you. The report was flagged and an administrator will review it."),
                 )
             return redirect("reports:report_detail", report_id=report.id)
     else:
@@ -135,7 +136,7 @@ def review_flagged_report(request, report_id):
                 report,
                 details=_reason_text(flags),
             )
-        messages.success(request, "The flags were dismissed. The report stays public.")
+        messages.success(request, _("The flags were dismissed. The report stays public."))
         return redirect("administration_flagged_reports")
 
     return render(
@@ -158,7 +159,9 @@ def remove_flagged_report(request, report_id):
         reviewed_at = timezone.now()
         report.status = ItemReport.Status.REJECTED
         # RF10: el creador ve por que se retiro, igual que con un rechazo.
-        report.rejection_reason = f"Removed from public view after community flags: {_reason_text(flags)}."
+        report.rejection_reason = _("Removed from public view after community flags: %(reasons)s.") % {
+            "reasons": _reason_text(flags),
+        }
         report.moderated_by = request.user
         report.moderated_at = reviewed_at
         with transaction.atomic():
@@ -172,9 +175,9 @@ def remove_flagged_report(request, report_id):
                 report,
                 details=_reason_text(flags),
             )
-        notify_report_removed(report, [reason for reason, _ in _reason_summary(flags)])
+        notify_report_removed(report, [reason for reason, count in _reason_summary(flags)])
 
-        messages.success(request, f'Report "{report.title}" was removed from public view.')
+        messages.success(request, _('Report "%(title)s" was removed from public view.') % {"title": report.title})
         return redirect("administration_flagged_reports")
 
     return render(

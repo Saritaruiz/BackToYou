@@ -40,7 +40,7 @@ class RoleRuleTests(TestCase):
         self.assertIsNotNone(self.regular.role_changed_at)
 
     def test_change_role_refuses_to_remove_the_last_active_admin(self):
-        with self.assertRaisesMessage(RoleChangeError, LAST_ADMIN_MESSAGE):
+        with self.assertRaisesMessage(RoleChangeError, str(LAST_ADMIN_MESSAGE)):
             change_role(self.admin, User.Role.REGULAR_USER, changed_by=self.admin)
 
         self.admin.refresh_from_db()

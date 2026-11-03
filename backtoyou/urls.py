@@ -15,6 +15,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.conf import settings
+from django.conf.urls.i18n import i18n_patterns
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
@@ -24,7 +25,19 @@ from reports import views as report_views
 from reports.views import public as public_views
 from reports.views.statistics import lost_statistics_dashboard
 
+from .views import set_language
+
+# Sin prefijo de idioma: Django Admin y el formulario que cambia el idioma
+# (el selector de la cabecera). Django pide que set_language no lleve prefijo.
 urlpatterns = [
+    path("admin/", admin.site.urls),
+    path("i18n/setlang/", set_language, name="set_language"),
+]
+
+# Las paginas de BackToYou llevan el idioma al inicio: /es/reports/,
+# /en/reports/. Tambien el idioma por defecto, para que cada direccion
+# muestre siempre el mismo idioma.
+urlpatterns += i18n_patterns(
     path("administration/statistics/lost/", lost_statistics_dashboard, name="administration_lost_statistics"),
     path("", public_views.home, name="home"),
     path("administration/", account_views.administration_panel, name="administration"),
@@ -123,10 +136,9 @@ urlpatterns = [
         account_admin_views.toggle_user_status,
         name="administration_user_toggle",
     ),
-    path("admin/", admin.site.urls),
     path("accounts/", include("accounts.urls")),
     path("reports/", include("reports.urls")),
-]
+)
 
 if settings.DEBUG:
     urlpatterns += static(

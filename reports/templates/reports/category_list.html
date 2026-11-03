@@ -1,29 +1,31 @@
 {% extends "base.html" %}
+{% load i18n %}
 
-{% block title %}Categories | BackToYou{% endblock %}
+{% block title %}{% translate "Categories" %} | BackToYou{% endblock %}
 
 {% block content %}
     <section class="hero">
-        <span class="role-pill">Administrator</span>
-        <h1>Categories</h1>
-        <p>Manage the categories available for lost and found reports.</p>
+        <span class="role-pill">{% translate "Administrator" %}</span>
+        <h1>{% translate "Categories" %}</h1>
+        <p>{% translate "Manage the categories available for lost and found reports." %}</p>
         <div class="actions">
             <a class="button" href="{% url 'administration_category_create' %}">
-                New Category
+                {% translate "New Category" %}
             </a>
             <a class="button ghost" href="{% url 'administration' %}">
-                Back to Administration
+                {% translate "Back to Administration" %}
             </a>
         </div>
     </section>
 
     {% if categories %}
-        <section class="panel table-wrap" aria-label="Category list">
+        <section class="panel table-wrap" aria-label="{% translate 'Category list' %}">
             <table class="data-table">
                 <thead>
                     <tr>
-                        <th scope="col">Category name</th>
-                        <th scope="col">Actions</th>
+                        {# El nombre tal como esta guardado: es el que se edita. #}
+                        <th scope="col">{% translate "Category name" %}</th>
+                        <th scope="col">{% translate "Actions" %}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -36,13 +38,13 @@
                                         class="button secondary"
                                         href="{% url 'administration_category_edit' category.id %}"
                                     >
-                                        Edit
+                                        {% translate "Edit" %}
                                     </a>
                                     <a
                                         class="button danger"
                                         href="{% url 'administration_category_delete' category.id %}"
                                     >
-                                        Delete
+                                        {% translate "Delete" %}
                                     </a>
                                 </div>
                             </td>
@@ -53,8 +55,8 @@
         </section>
     {% else %}
         <section class="empty-state">
-            <h2>No categories have been created yet.</h2>
-            <p>Create a category so users can classify their reports.</p>
+            <h2>{% translate "No categories have been created yet." %}</h2>
+            <p>{% translate "Create a category so users can classify their reports." %}</p>
         </section>
     {% endif %}
 {% endblock %}

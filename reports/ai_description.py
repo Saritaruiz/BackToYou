@@ -19,6 +19,8 @@ import re
 from urllib.request import Request, urlopen
 
 from django.conf import settings
+from django.utils.translation import get_language
+from django.utils.translation import gettext as _
 
 
 logger = logging.getLogger(__name__)
@@ -30,7 +32,7 @@ INSTRUCTION = (
     "reports. Look at the photo and describe the item so its owner can "
     "recognize it: type of object, brand if visible, color, size, material and "
     "distinctive marks such as stickers, scratches or cases. "
-    "Write in English, in a neutral tone. The title must be short (under 10 "
+    "Use a neutral tone. The title must be short (under 10 "
     "words). The description must be 2 to 4 sentences. "
     "Never transcribe personal data visible in the photo, such as names, "
     "document or student ID numbers, phone numbers, emails or addresses; "
@@ -42,6 +44,10 @@ INSTRUCTION = (
     'exactly these keys: {"item_visible": true, "title": "...", '
     '"description": "...", "category": "..."}'
 )
+
+# La sugerencia se escribe en el idioma de la pagina (ver settings.LANGUAGES).
+# La instruccion sigue en ingles: es la que mejor siguen los modelos.
+LANGUAGE_NAMES = {"es": "Spanish", "en": "English"}
 
 # Algunos modelos envuelven el JSON en ```json ... ``` o agregan texto.
 JSON_OBJECT = re.compile(r"\{.*\}", re.DOTALL)
@@ -169,7 +175,7 @@ def describe_item_image(image_file, report_type_label, category_names):
     """
     if not is_available():
         raise AIDescriptionError(
-            "AI suggestions are not available right now. Please fill in the report manually."
+            _("AI suggestions are not available right now. Please fill in the report manually.")
         )
 
     image_file.seek(0)
@@ -177,8 +183,10 @@ def describe_item_image(image_file, report_type_label, category_names):
     # validate_report_image solo deja pasar JPG y PNG.
     mime_type = getattr(image_file, "content_type", "") or "image/jpeg"
 
+    language = LANGUAGE_NAMES.get((get_language() or "en")[:2], "English")
     prompt = (
         f"{INSTRUCTION}\n\n"
+        f"Write the title and description in {language}.\n"
         f"Report type: {report_type_label} item.\n"
         f"Available categories: {', '.join(category_names) or 'none'}."
     )
@@ -212,14 +220,18 @@ def describe_item_image(image_file, report_type_label, category_names):
         # Gemini bloqueo y llega sin texto.
         logger.exception("RF22: AI description request failed.")
         raise AIDescriptionError(
-            "The AI service could not describe the image right now. "
-            "Please fill in the report manually."
+            _(
+                "The AI service could not describe the image right now. "
+                "Please fill in the report manually."
+            )
         )
 
     if not suggestion.get("item_visible"):
         raise AIDescriptionError(
-            "We could not identify an item in this image. "
-            "Try a clearer photo or fill in the report manually."
+            _(
+                "We could not identify an item in this image. "
+                "Try a clearer photo or fill in the report manually."
+            )
         )
 
     category = str(suggestion.get("category") or "")

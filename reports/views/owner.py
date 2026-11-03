@@ -6,6 +6,7 @@ from django.core.exceptions import PermissionDenied
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.translation import gettext as _
 
 from ..decorators import report_owner_required
 from ..forms import OLD_EVENT_DATE_WARNING, ItemReportForm, event_date_is_old
@@ -36,13 +37,13 @@ def edit_report(request, report):
                 report.save()
                 messages.success(
                     request,
-                    "Report updated and sent for review again. An administrator will check it before it becomes public.",
+                    _("Report updated and sent for review again. An administrator will check it before it becomes public."),
                 )
             else:
                 report.save()
                 messages.success(
                     request,
-                    "Report updated successfully.",
+                    _("Report updated successfully."),
                 )
             if "event_date" in form.changed_data and event_date_is_old(report.event_date):
                 messages.warning(request, OLD_EVENT_DATE_WARNING)
@@ -75,7 +76,7 @@ def delete_report(request, report):
 
         messages.success(
             request,
-            f'Report "{deleted_title}" was deleted.',
+            _('Report "%(title)s" was deleted.') % {"title": deleted_title},
         )
 
         return redirect("reports:report_list")
@@ -109,7 +110,7 @@ def mark_report_recovered(request, report):
         # NFR36: "recovered" activa la celebracion discreta del aviso.
         messages.success(
             request,
-            "The item was marked as recovered. It is back with its owner.",
+            _("The item was marked as recovered. It is back with its owner."),
             extra_tags="recovered",
         )
 

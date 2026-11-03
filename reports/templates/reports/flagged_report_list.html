@@ -1,25 +1,27 @@
 {% extends "base.html" %}
-{% load icons %}
+{% load i18n icons %}
 
-{% block title %}Flagged Reports | BackToYou{% endblock %}
+{% block title %}{% translate "Flagged Reports" %} | BackToYou{% endblock %}
 
 {% block content %}
     <section class="hero page-head">
         <div>
-            <span class="role-pill">Moderation</span>
-            <h1>Flagged <em>reports.</em></h1>
-            <p class="lead">Published reports that members of the community flagged as a problem.</p>
+            <span class="role-pill">{% translate "Moderation" %}</span>
+            <h1>{% blocktranslate trimmed %}Flagged <em>reports.</em>{% endblocktranslate %}</h1>
+            <p class="lead">{% translate "Published reports that members of the community flagged as a problem." %}</p>
         </div>
         {% if reports %}
             <p class="page-count">
-                <strong>{{ reports|length }}</strong>
-                waiting for review
+                {% blocktranslate trimmed with number=reports|length %}
+                    <strong>{{ number }}</strong>
+                    waiting for review
+                {% endblocktranslate %}
             </p>
         {% endif %}
     </section>
 
     {% if reports %}
-        <section class="ledger" aria-label="Flagged reports">
+        <section class="ledger" aria-label="{% translate 'Flagged reports' %}">
             {% for report in reports %}
                 <article class="ledger-row">
                     <div class="ledger-thumb">
@@ -39,7 +41,7 @@
                     <div class="ledger-main">
                         <h2 class="ledger-title">{{ report.title }}</h2>
                         <p class="card-meta">
-                            {{ report.category.name }} · {{ report.event_date }}
+                            {% translate report.category.name %} · {{ report.event_date }}
                         </p>
                         <p class="flag-reason-summary">
                             {% for reason, count in report.reason_summary %}
@@ -49,13 +51,18 @@
                     </div>
 
                     <p class="flag-count">
-                        <strong>{{ report.open_flag_count }}</strong>
-                        flag{{ report.open_flag_count|pluralize }}
+                        {% blocktranslate trimmed count counter=report.open_flag_count %}
+                            <strong>{{ counter }}</strong>
+                            flag
+                        {% plural %}
+                            <strong>{{ counter }}</strong>
+                            flags
+                        {% endblocktranslate %}
                     </p>
 
                     <div class="ledger-actions">
                         <a class="button" href="{% url 'administration_flagged_report' report.id %}">
-                            Review Flags
+                            {% translate "Review Flags" %}
                         </a>
                     </div>
                 </article>
@@ -63,8 +70,8 @@
         </section>
     {% else %}
         <section class="empty-state">
-            <h2>No reports are flagged right now.</h2>
-            <p>When someone flags a published report, it will appear here.</p>
+            <h2>{% translate "No reports are flagged right now." %}</h2>
+            <p>{% translate "When someone flags a published report, it will appear here." %}</p>
         </section>
     {% endif %}
 {% endblock %}
