@@ -35,6 +35,8 @@ def home(request):
 
 def report_list(request):
     reports = public_reports().select_related("category")
+    # NFR33: reutilizar el catalogo para traducir la busqueda y para el filtro.
+    categories = list(Category.objects.order_by("name"))
 
     query = request.GET.get("q", "").strip()
     category_id = request.GET.get("category", "").strip()
@@ -52,7 +54,7 @@ def report_list(request):
         # pagina, asi "llaves" encuentra la categoria "Keys" en espanol.
         translated_categories = [
             category.id
-            for category in Category.objects.all()
+            for category in categories
             if text in normalize(_(category.name))
         ]
 
@@ -105,7 +107,6 @@ def report_list(request):
         *sorting_options.get(sort, sorting_options["newest"])
     )
 
-    categories = Category.objects.all().order_by("name")
     reports = list(reports)
 
     return render(
@@ -133,11 +134,11 @@ def report_list(request):
     )
 
 def report_detail(request, report_id):
-    report = get_object_or_404(ItemReport, id=report_id)
+    report = get_object_or_404(ItemReport.objects.select_related("category"), id=report_id)
 
     is_creator = (
         request.user.is_authenticated
-        and request.user == report.creator
+        and request.user.pk == report.creator_id
     )
 
     # Un reporte que no esta publicado solo lo puede abrir su creador. Se
@@ -155,7 +156,7 @@ def report_detail(request, report_id):
         report.contact_messages
         .filter(parent_message__isnull=True)
         .select_related("sender")
-        .prefetch_related("replies__sender")
+        .prefetch_related("replies")
         .order_by("-created_at", "-id")
     )
     elif request.user.is_authenticated:
@@ -166,7 +167,7 @@ def report_detail(request, report_id):
             sender=request.user,
         )
         .select_related("sender")
-        .prefetch_related("replies__sender")
+        .prefetch_related("replies")
         .order_by("-created_at", "-id")
     )
     else:
@@ -209,7 +210,7 @@ def contact_reporter(request, report_id):
         id=report_id,
     )
 
-    if report.creator == request.user:
+    if report.creator_id == request.user.pk:
         raise PermissionDenied("You cannot contact yourself about your own report.")
 
     if request.method == "POST":
@@ -249,7 +250,7 @@ def reply_to_contact_message(request, message_id):
 
     report = original_message.report
 
-    if report.creator != request.user:
+    if report.creator_id != request.user.pk:
         raise PermissionDenied(
             "Only the report creator can reply to this message."
         )

@@ -145,6 +145,65 @@ The tests in `reports/tests/test_i18n.py` fail if a text has no translation or i
 python manage.py test --settings=backtoyou.test_settings
 ```
 
+## NFR33 - Performance audit
+
+Measured with Django 6.0.7, SQLite and `backtoyou.test_settings`, using the
+Django test client to render complete pages. Authenticated counts include
+the session and user queries. Fixture creation and login are outside the
+measurement. Tests compare 1 and 21 records (26 for notifications/history).
+
+| Page or operation | Before | After |
+| --- | ---: | ---: |
+| Pending moderation, 1 / 21 reports | 4 / 24 | 3 / 3 |
+| Moderation detail | 5 | 3 |
+| Anonymous report detail | 2 | 1 |
+| Owner/sender detail with messages and replies | 9 | 6 |
+| Public search | 3 | 2 |
+| Contact / reply form | 4 | 3 |
+| Public list | 2 | 2 |
+| My Reports | 3 | 3 |
+| Flagged reports | 4 | 4 |
+| Notifications / moderation history | 5 | 5 |
+| Lost statistics page | 5 | 5 |
+
+Changes and reasons:
+
+- Join categories in the pending queue to eliminate one query per report.
+- Join the category in public detail, and category/creator in moderation
+  detail. Compare creator IDs for permissions without loading user objects.
+- Reuse the category list for translated search and its filter dropdown.
+- Prefetch replies without their authors: the template uses the parent
+  sender and a fixed label for the owner's replies. Visibility is unchanged.
+- Remove the unused report join from moderation history; the template reads
+  its stored snapshot and `report_id`.
+- Match suggestions still scan every eligible candidate in one query, but
+  retain only the best five in a heap. Ranking storage is O(5), instead of
+  O(number of matches), and selection is O(n log 5) instead of sorting all
+  matches. Scores and date/ID tie-breaks are unchanged. The test places the
+  best candidate last among 100 candidates to guard against early truncation.
+
+Existing efficient paths are protected too: statistics use three aggregate
+queries (one for homepage numbers), notifications remain paginated at 20,
+flags preload their open flags, and My Reports joins categories. Account
+lists use three queries including authentication; homepage and administration
+overview use two and three respectively. No cache or new infrastructure is used.
+
+Run the query budgets and regression:
+
+```bash
+python manage.py test reports.tests.test_nfr33_performance --settings=backtoyou.test_settings --noinput
+python manage.py test reports --settings=backtoyou.test_settings --noinput
+```
+
+Limits: fixed query counts do not guarantee fixed runtime or a production
+latency SLA. Public/owner/pending lists and message threads remain unpaginated;
+large result sets still cost rendering time and memory. Text search normalizes
+rows in SQLite, and suggestions still score all eligible candidates in Python.
+The heap bounds retained rankings, not database-driver fetch buffers. These
+changes preserve current behavior; high-volume pagination, search indexing and
+load/concurrency benchmarks need representative production data and targets.
+No schema migration is required.
+
 ## Deployment (AWS EC2)
 
 BackToYou runs on a single Ubuntu 24.04 server with Gunicorn and Nginx. The SQLite database and the uploaded photos stay on the server's disk, so they survive updates. They are lost if the instance is terminated, so copy `local.sqlite3` and `media_local/` before doing that.

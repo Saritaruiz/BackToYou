@@ -6,6 +6,8 @@ SQLite una funcion que quita tildes y pasa a minusculas, y la busqueda
 compara el texto ya normalizado de los dos lados.
 """
 
+from heapq import heappush, heappushpop
+
 import re
 import unicodedata
 
@@ -104,7 +106,12 @@ def possible_matches(report):
             + 0.15 * _word_similarity(location_words, _match_words(candidate.location))
             + 0.05 * max(0, 1 - days / 30)
         )
-        ranked.append((score, days, candidate))
+        # NFR33: mantener solo los cinco mejores durante el recorrido.
+        # La raiz es el peor; los desempates mantienen el orden de FR41.
+        match = (score, -days, -candidate.pk, candidate)
+        if len(ranked) < 5:
+            heappush(ranked, match)
+        else:
+            heappushpop(ranked, match)
 
-    ranked.sort(key=lambda match: (-match[0], match[1], match[2].pk))
-    return [candidate for _, _, candidate in ranked[:5]]
+    return [match[3] for match in sorted(ranked, reverse=True)]

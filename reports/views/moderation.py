@@ -28,7 +28,7 @@ from ..moderation_log import log_action
 def pending_report_list(request):
     reports = ItemReport.objects.filter(
         status=ItemReport.Status.PENDING_REVIEW,
-    ).order_by("-created_at", "-id")
+    ).select_related("category").order_by("-created_at", "-id")
 
     return render(
         request,
@@ -40,7 +40,7 @@ def pending_report_list(request):
 @administrator_required
 def moderate_report_detail(request, report_id):
     report = get_object_or_404(
-        ItemReport,
+        ItemReport.objects.select_related("category", "creator"),
         id=report_id,
         status=ItemReport.Status.PENDING_REVIEW,
     )
