@@ -3,17 +3,18 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
+from django.core.paginator import Paginator
 from django.db.models import F, Value
 from django.db.models.functions import Greatest
-from django.views.decorators.http import require_http_methods
-from django.shortcuts import redirect, render
+from django.views.decorators.http import require_http_methods, require_POST
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext as _
 
 from ..decorators import report_owner_required
 from ..forms import OLD_EVENT_DATE_WARNING, ItemReportForm, event_date_is_old
-from ..models import ItemReport, REPORT_VALIDITY
+from ..models import ItemReport, REPORT_VALIDITY, ReportReviewNotification
 
 
 @report_owner_required
@@ -167,3 +168,25 @@ def renew_report(request, report):
         "report": report,
         "renewed_until": max(report.expires_at, timezone.now()) + REPORT_VALIDITY,
     })
+
+
+@login_required
+def notifications(request):
+    notices = ReportReviewNotification.objects.filter(recipient=request.user)
+    return render(request, "reports/notifications.html", {
+        "page": Paginator(notices, 20).get_page(request.GET.get("page")),
+        "unread_count": notices.filter(read_at__isnull=True).count(),
+    })
+
+
+@login_required
+@require_POST
+def mark_notification_read(request, notification_id):
+    notice = get_object_or_404(
+        ReportReviewNotification, pk=notification_id, recipient=request.user,
+    )
+    # Repetir el POST conserva la fecha de la primera lectura.
+    ReportReviewNotification.objects.filter(pk=notice.pk, read_at__isnull=True).update(
+        read_at=timezone.now(),
+    )
+    return redirect("reports:notifications")

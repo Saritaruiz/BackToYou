@@ -242,4 +242,5 @@ class ExpirationMigrationTests(TransactionTestCase):
                 self.assertEqual(report.description, "Keep history")
                 self.assertEqual(report.status, "ACTIVE")
         finally:
-            MigrationExecutor(connection).migrate(target)
+            executor = MigrationExecutor(connection)
+            executor.migrate(executor.loader.graph.leaf_nodes())

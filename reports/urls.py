@@ -13,6 +13,12 @@ urlpatterns = [
     path("lost/new/", create_views.create_lost_report, name="create_lost_report"),
     path("found/new/", create_views.create_found_report, name="create_found_report"),
     path("mine/", owner_views.my_reports, name="my_reports"),
+    path("notifications/", owner_views.notifications, name="notifications"),
+    path(
+        "notifications/<int:notification_id>/read/",
+        owner_views.mark_notification_read,
+        name="mark_notification_read",
+    ),
     path("ai/describe/", ai_views.describe_item, name="ai_describe_item"),
     path(
         "<int:report_id>/contact/",

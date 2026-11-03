@@ -258,3 +258,34 @@ class ModerationLogEntry(models.Model):
 
     def delete(self, *args, **kwargs):
         raise PermissionDenied("Moderation log entries cannot be deleted.")
+
+
+class ReportReviewNotification(models.Model):
+    """FR26: aviso privado, uno por decision del historial de moderacion."""
+    class Kind(models.TextChoices):
+        APPROVED = "APPROVED", _("Approved")
+        REJECTED = "REJECTED", _("Rejected")
+
+    recipient = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
+        related_name="report_review_notifications",
+    )
+    report = models.ForeignKey(
+        ItemReport, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="review_notifications",
+    )
+    moderation_entry = models.OneToOneField(
+        ModerationLogEntry, on_delete=models.CASCADE,
+        related_name="review_notification",
+    )
+    kind = models.CharField(max_length=10, choices=Kind.choices)
+    # Copia de la decision: sigue legible si se edita o elimina el reporte.
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    read_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ("-created_at", "-id")
+
+    def __str__(self):
+        return self.message

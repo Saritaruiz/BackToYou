@@ -56,6 +56,7 @@
                     <a class="nav-cta nav-cta-lost" href="{% url 'reports:create_lost_report' %}"{% if current == "create_lost_report" %} aria-current="page"{% endif %}>{% translate "Create Lost" %}</a>
                     <a class="nav-cta nav-cta-found" href="{% url 'reports:create_found_report' %}"{% if current == "create_found_report" %} aria-current="page"{% endif %}>{% translate "Create Found" %}</a>
                     <a href="{% url 'reports:my_reports' %}"{% if current == "my_reports" or current == "edit_report" or current == "delete_report" or current == "mark_report_recovered" %} aria-current="page"{% endif %}>{% translate "My Reports" %}</a>
+                    <a href="{% url 'reports:notifications' %}"{% if current == "notifications" %} aria-current="page"{% endif %}>{% translate "Notifications" %}</a>
                     {% if user.role == "ADMINISTRATOR" %}
                         <details class="nav-dropdown{% if 'administration' in current %} is-current{% endif %}">
                             <summary>{% translate "Administration" %}</summary>

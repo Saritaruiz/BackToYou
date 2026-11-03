@@ -9,6 +9,7 @@ de revision, es decir, antes de que sea visible para el publico.
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
+from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.utils.translation import gettext as _
@@ -17,7 +18,9 @@ from accounts.decorators import administrator_required
 
 from ..email_notifications import notify_report_approved, notify_report_rejected
 from ..forms import ItemReportForm, RejectionForm
-from ..models import ItemReport, ModerationLogEntry, default_report_expiration
+from ..models import (
+    ItemReport, ModerationLogEntry, ReportReviewNotification, default_report_expiration,
+)
 from ..moderation_log import log_action
 
 
@@ -75,6 +78,14 @@ def moderate_report_detail(request, report_id):
         report.moderated_by = request.user
         report.moderated_at = timezone.now()
         with transaction.atomic():
+            # FR26: solo una solicitud puede consumir la revision pendiente.
+            # La actualizacion condicional evita decisiones y avisos duplicados,
+            # incluso si dos administradores cargaron el mismo formulario.
+            claimed = ItemReport.objects.filter(
+                pk=report.pk, status=ItemReport.Status.PENDING_REVIEW,
+            ).update(status=report.status)
+            if not claimed:
+                raise Http404("This report has already been reviewed.")
             report.save(
                 update_fields=[
                     "status",
@@ -85,7 +96,16 @@ def moderate_report_detail(request, report_id):
                     "updated_at",
                 ],
             )
-            log_action(request.user, log_entry_action, report, details=report.rejection_reason)
+            entry = log_action(request.user, log_entry_action, report, details=report.rejection_reason)
+            notification_message = (
+                _('Your report "%(title)s" was approved.')
+                if action == "approve"
+                else _('Your report "%(title)s" was rejected: %(reason)s')
+            ) % {"title": report.title, "reason": report.rejection_reason}
+            ReportReviewNotification.objects.create(
+                recipient=report.creator, report=report, moderation_entry=entry,
+                kind=log_entry_action, message=notification_message,
+            )
         notify_moderation_result(report)
 
         messages.success(request, success_message)
