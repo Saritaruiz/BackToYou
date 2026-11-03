@@ -21,6 +21,7 @@ urlpatterns = [
     ),
     path("<int:report_id>/flag/", flag_views.flag_report, name="flag_report"),
     path("<int:report_id>/edit/", owner_views.edit_report, name="edit_report"),
+    path("<int:report_id>/renew/", owner_views.renew_report, name="renew_report"),
     path("<int:report_id>/delete/", owner_views.delete_report, name="delete_report"),
     path(
         "<int:report_id>/recovered/",

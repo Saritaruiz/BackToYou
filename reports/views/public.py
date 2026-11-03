@@ -142,7 +142,7 @@ def report_detail(request, report_id):
 
     # Un reporte que no esta publicado solo lo puede abrir su creador. Se
     # responde 404 y no 403 para no revelar que el reporte existe.
-    if report.status != ItemReport.Status.ACTIVE and not is_creator:
+    if not report.is_public and not is_creator:
         raise Http404("This report is not available.")
 
     # Los mensajes recibidos solo los ve el creador del reporte: sin esto,
@@ -176,7 +176,7 @@ def report_detail(request, report_id):
     can_be_flagged = (
         request.user.is_authenticated
         and not is_creator
-        and report.status == ItemReport.Status.ACTIVE
+        and report.is_public
     )
     has_flagged_report = can_be_flagged and report.flags.filter(flagged_by=request.user).exists()
 
@@ -191,7 +191,7 @@ def report_detail(request, report_id):
             "can_contact_reporter": (
                 request.user.is_authenticated
                 and not is_creator
-                and report.status == ItemReport.Status.ACTIVE
+                and report.is_public
             ),
             "can_edit_report": is_creator and report.is_editable,
             "can_delete_report": is_creator,
@@ -205,9 +205,8 @@ def report_detail(request, report_id):
 @login_required
 def contact_reporter(request, report_id):
     report = get_object_or_404(
-        ItemReport,
+        public_reports(),
         id=report_id,
-        status=ItemReport.Status.ACTIVE,
     )
 
     if report.creator == request.user:

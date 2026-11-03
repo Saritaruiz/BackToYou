@@ -1,6 +1,9 @@
+from datetime import timedelta
+
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
 from django.db import models
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 # será para categorizar que tipo de objeto se perdió
@@ -9,6 +12,14 @@ class Category(models.Model):
 
     def __str__(self):
         return self.name
+
+# FR45: periodo de vigencia desde aprobacion o renovacion.
+REPORT_VALIDITY = timedelta(days=30)
+
+
+def default_report_expiration():
+    return timezone.now() + REPORT_VALIDITY
+
 
 # representa cada publicación
 class ItemReport(models.Model):
@@ -82,11 +93,25 @@ class ItemReport(models.Model):
     # para saber que corregir antes de enviarlo de nuevo a revision.
     rejection_reason = models.CharField(max_length=255, blank=True)
 
+    expires_at = models.DateTimeField(default=default_report_expiration)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.title
+
+    @property
+    def is_expired(self):
+        return self.status == self.Status.ACTIVE and self.expires_at <= timezone.now()
+
+    @property
+    def is_public(self):
+        return self.status == self.Status.ACTIVE and not self.is_expired
+
+    @property
+    def can_be_renewed(self):
+        return self.status == self.Status.ACTIVE
 
     @property
     def is_editable(self):

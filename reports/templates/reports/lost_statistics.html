@@ -12,12 +12,13 @@
     <section class="stats-summary" aria-label="{% translate 'Lifetime totals of stored Lost reports' %}">
         <article class="card"><h2>{% translate "Total Lost reports" %}</h2><p>{{ summary.total }}</p></article>
         <article class="card"><h2>{% translate "Active Lost reports" %}</h2><p>{{ summary.active }}</p></article>
+        <article class="card"><h2>{% translate "Expired Lost reports" %}</h2><p>{{ summary.expired }}</p></article>
         <article class="card"><h2>{% translate "Recovered Lost reports" %}</h2><p>{{ summary.recovered }}</p></article>
         <article class="card"><h2>{% translate "Pending Review Lost reports" %}</h2><p>{{ summary.pending }}</p></article>
         <article class="card"><h2>{% translate "Rejected Lost reports" %}</h2><p>{{ summary.rejected }}</p></article>
         <article class="card"><h2>{% translate "Recovery rate among approved Lost reports" %}</h2>
             <p>{% if summary.recovery_rate == None %}{% translate "N/A" %}{% else %}{{ summary.recovery_rate|floatformat:1 }}%{% endif %}</p>
-            <small>{% translate "Recovered / (Active + Recovered). Pending and rejected reports are excluded." %}</small>
+            <small>{% translate "Recovered / (Active + Expired + Recovered). Pending and rejected reports are excluded." %}</small>
         </article>
     </section>
     <section class="panel" aria-labelledby="category-heading">

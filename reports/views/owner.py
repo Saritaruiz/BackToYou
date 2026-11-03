@@ -3,6 +3,9 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
+from django.db.models import F, Value
+from django.db.models.functions import Greatest
+from django.views.decorators.http import require_http_methods
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -10,7 +13,7 @@ from django.utils.translation import gettext as _
 
 from ..decorators import report_owner_required
 from ..forms import OLD_EVENT_DATE_WARNING, ItemReportForm, event_date_is_old
-from ..models import ItemReport
+from ..models import ItemReport, REPORT_VALIDITY
 
 
 @report_owner_required
@@ -138,3 +141,29 @@ def my_reports(request):
         "reports/my_reports.html",
         {"reports": reports},
     )
+
+
+@report_owner_required
+@require_http_methods(["GET", "POST"])
+def renew_report(request, report):
+    """FR45: renovar no cambia contenido, moderacion ni fechas historicas."""
+    if not report.can_be_renewed:
+        raise PermissionDenied("Only an active report can be renewed.")
+    if request.method == "POST":
+        now = timezone.now()
+        # Una sola actualizacion condicional: no reactiva un reporte retirado
+        # mientras se confirmaba ni pierde extensiones concurrentes.
+        updated = ItemReport.objects.filter(
+            pk=report.pk, creator=request.user, status=ItemReport.Status.ACTIVE,
+        ).update(
+            expires_at=Greatest(F("expires_at"), Value(now)) + REPORT_VALIDITY,
+            updated_at=now,
+        )
+        if not updated:
+            raise PermissionDenied("Only an active report can be renewed.")
+        messages.success(request, _("Report renewed for 30 more days."))
+        return redirect("reports:report_detail", report_id=report.pk)
+    return render(request, "reports/report_confirm_renew.html", {
+        "report": report,
+        "renewed_until": max(report.expires_at, timezone.now()) + REPORT_VALIDITY,
+    })

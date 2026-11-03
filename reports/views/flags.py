@@ -23,7 +23,7 @@ from ..email_notifications import notify_report_removed
 from ..forms import ReportFlagForm
 from ..models import ItemReport, ModerationLogEntry, ReportFlag
 from ..moderation_log import log_action
-from ..querysets import flagged_reports, open_flags
+from ..querysets import flagged_reports, open_flags, public_reports
 
 
 ALREADY_FLAGGED_MESSAGE = gettext_lazy("You already flagged this report. An administrator will review it.")
@@ -32,9 +32,8 @@ ALREADY_FLAGGED_MESSAGE = gettext_lazy("You already flagged this report. An admi
 @login_required
 def flag_report(request, report_id):
     report = get_object_or_404(
-        ItemReport,
+        public_reports(),
         id=report_id,
-        status=ItemReport.Status.ACTIVE,
     )
 
     if report.creator == request.user:

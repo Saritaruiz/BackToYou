@@ -54,11 +54,18 @@
 
                     <div class="pill-row">
                         <span class="type-pill type-{{ report.report_type|lower }}">{{ report.get_report_type_display }}</span>
-                        <span class="status-pill status-{{ report.status|lower }}">{{ report.get_status_display }}</span>
+                        {% if report.is_expired %}
+                            <span class="status-pill">{% translate "Expired" %}</span>
+                        {% else %}
+                            <span class="status-pill status-{{ report.status|lower }}">{{ report.get_status_display }}</span>
+                        {% endif %}
                     </div>
 
                     <div class="ledger-actions">
                         <a href="{% url 'reports:report_detail' report.id %}">{% translate "View Details" %}</a>
+                        {% if report.can_be_renewed %}
+                            <a href="{% url 'reports:renew_report' report.id %}">{% translate "Renew Report" %}</a>
+                        {% endif %}
                         {% if report.is_editable %}
                             <a href="{% url 'reports:edit_report' report.id %}">{% translate "Edit" %}</a>
                         {% endif %}

@@ -17,7 +17,7 @@ from accounts.decorators import administrator_required
 
 from ..email_notifications import notify_report_approved, notify_report_rejected
 from ..forms import ItemReportForm, RejectionForm
-from ..models import ItemReport, ModerationLogEntry
+from ..models import ItemReport, ModerationLogEntry, default_report_expiration
 from ..moderation_log import log_action
 
 
@@ -49,6 +49,7 @@ def moderate_report_detail(request, report_id):
 
         if action == "approve":
             report.status = ItemReport.Status.ACTIVE
+            report.expires_at = default_report_expiration()
             report.rejection_reason = ""
             success_message = _("Report approved successfully.")
             notify_moderation_result = notify_report_approved
@@ -77,6 +78,7 @@ def moderate_report_detail(request, report_id):
             report.save(
                 update_fields=[
                     "status",
+                    "expires_at",
                     "rejection_reason",
                     "moderated_by",
                     "moderated_at",

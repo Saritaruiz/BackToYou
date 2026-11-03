@@ -33,7 +33,11 @@
             <div class="report-detail-body">
                 <div class="pill-row">
                     <span class="type-pill type-{{ report.report_type|lower }}">{{ report.get_report_type_display }}</span>
-                    <span class="status-pill status-{{ report.status|lower }}">{{ report.get_status_display }}</span>
+                    {% if report.is_expired %}
+                        <span class="status-pill">{% translate "Expired" %}</span>
+                    {% else %}
+                        <span class="status-pill status-{{ report.status|lower }}">{{ report.get_status_display }}</span>
+                    {% endif %}
                 </div>
                 <h1 class="page-title">{{ report.title }}</h1>
 
@@ -65,13 +69,20 @@
                     </div>
                     <div class="meta-item">
                         <span class="meta-label">{% translate "Status" %}</span>
-                        {{ report.get_status_display }}
+                        {% if report.is_expired %}{% translate "Expired" %}{% else %}{{ report.get_status_display }}{% endif %}
                     </div>
                     <div class="meta-item">
                         <span class="meta-label">{% translate "Reported by" %}</span>
                         {% translate "BackToYou community member" %}
                     </div>
                 </div>
+
+                {% if is_creator and report.can_be_renewed %}
+                    {% if report.is_expired %}
+                        <p>{% translate "This report has expired and is no longer public. Renew it to publish it again." %}</p>
+                    {% endif %}
+                    <p>{% blocktranslate with expiry=report.expires_at %}Expiration date: {{ expiry }}{% endblocktranslate %}</p>
+                {% endif %}
 
                 <h2 class="section-label">{% translate "Description" %}</h2>
                 <p class="description drop-cap">{{ report.description }}</p>
@@ -92,6 +103,9 @@
                         <a class="button" href="{% url 'reports:mark_report_recovered' report.id %}">
                             {% translate "Mark as Recovered" %}
                         </a>
+                    {% endif %}
+                    {% if is_creator and report.can_be_renewed %}
+                        <a class="button ghost" href="{% url 'reports:renew_report' report.id %}">{% translate "Renew Report" %}</a>
                     {% endif %}
                     {% if can_edit_report %}
                         <a class="text-link" href="{% url 'reports:edit_report' report.id %}">

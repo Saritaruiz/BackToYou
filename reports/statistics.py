@@ -10,14 +10,16 @@ from .models import ItemReport
 
 def lost_statistics():
     lost = ItemReport.objects.filter(report_type=ItemReport.ReportType.LOST)
+    now = timezone.now()
     summary = lost.aggregate(
         total=Count('pk'),
-        active=Count('pk', filter=Q(status=ItemReport.Status.ACTIVE)),
+        active=Count('pk', filter=Q(status=ItemReport.Status.ACTIVE, expires_at__gt=now)),
+        expired=Count('pk', filter=Q(status=ItemReport.Status.ACTIVE, expires_at__lte=now)),
         recovered=Count('pk', filter=Q(status=ItemReport.Status.RECOVERED)),
         pending=Count('pk', filter=Q(status=ItemReport.Status.PENDING_REVIEW)),
         rejected=Count('pk', filter=Q(status=ItemReport.Status.REJECTED)),
     )
-    approved = summary['active'] + summary['recovered']
+    approved = summary['active'] + summary['expired'] + summary['recovered']
     summary['recovery_rate'] = round(100 * summary['recovered'] / approved, 1) if approved else None
     categories = list(lost.values('category_id', 'category__name').annotate(total=Count('pk'))
                       .order_by('-total', 'category__name', 'category_id'))
@@ -55,11 +57,13 @@ def community_numbers():
     """Inicio: numeros reales que muestran que BackToYou funciona.
 
     La tasa de recuperacion es la misma de RF25: Recovered / (Active +
-    Recovered) entre los reportes Lost.
+    Recovered) entre los reportes Lost, conservando los expirados en el
+    denominador de aprobados.
     """
     now = timezone.now()
     last_day = now - timedelta(days=1)
-    active = Q(status=ItemReport.Status.ACTIVE)
+    approved_active = Q(status=ItemReport.Status.ACTIVE)
+    active = approved_active & Q(expires_at__gt=now)
     recovered = Q(status=ItemReport.Status.RECOVERED)
     lost = Q(report_type=ItemReport.ReportType.LOST)
     # Un reporte se publica cuando lo aprueban; sin fecha de moderacion
@@ -71,7 +75,7 @@ def community_numbers():
         recovered=Count('pk', filter=recovered),
         returned_this_week=Count('pk', filter=recovered & Q(recovered_at__gte=now - timedelta(days=7))),
         new_last_day=Count('pk', filter=active & published_last_day),
-        lost_active=Count('pk', filter=lost & active),
+        lost_active=Count('pk', filter=lost & approved_active),
         lost_recovered=Count('pk', filter=lost & recovered),
     )
     approved = numbers.pop('lost_active') + numbers['lost_recovered']
