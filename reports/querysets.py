@@ -1,12 +1,14 @@
-"""Shared public visibility and RF24 publication ordering."""
+"""Shared public visibility rules."""
 from django.db.models import Count, Max, Prefetch, Q
-from django.db.models.functions import Coalesce
+from django.utils import timezone
 
 from .models import ItemReport, ReportFlag
 
 
 def public_reports():
-    return ItemReport.objects.filter(status=ItemReport.Status.ACTIVE)
+    return ItemReport.objects.filter(
+        status=ItemReport.Status.ACTIVE, expires_at__gt=timezone.now(),
+    )
 
 
 def open_flags():
@@ -15,14 +17,16 @@ def open_flags():
 
 
 def flagged_reports():
-    """RF43: reportes publicados con avisos abiertos, los mas avisados primero.
+    """RF43: reportes aprobados con avisos abiertos, incluidos los expirados.
+
+    Expirar no oculta avisos pendientes de moderacion.
 
     Cada reporte trae open_flag_count y sus avisos abiertos en open_flag_list,
     en un numero fijo de consultas.
     """
     is_open = Q(flags__reviewed_at__isnull=True)
     return (
-        public_reports()
+        ItemReport.objects.filter(status=ItemReport.Status.ACTIVE)
         .annotate(
             open_flag_count=Count("flags", filter=is_open),
             last_flagged_at=Max("flags__created_at", filter=is_open),
@@ -39,11 +43,3 @@ def flagged_reports():
         .order_by("-open_flag_count", "-last_flagged_at", "-id")
     )
 
-
-def recent_public_reports():
-    return (
-        public_reports()
-        .select_related("category")
-        .annotate(published_at=Coalesce("moderated_at", "created_at"))
-        .order_by("-published_at", "-id")[:6]
-    )

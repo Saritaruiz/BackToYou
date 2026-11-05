@@ -13,6 +13,12 @@ urlpatterns = [
     path("lost/new/", create_views.create_lost_report, name="create_lost_report"),
     path("found/new/", create_views.create_found_report, name="create_found_report"),
     path("mine/", owner_views.my_reports, name="my_reports"),
+    path("notifications/", owner_views.notifications, name="notifications"),
+    path(
+        "notifications/<int:notification_id>/read/",
+        owner_views.mark_notification_read,
+        name="mark_notification_read",
+    ),
     path("ai/describe/", ai_views.describe_item, name="ai_describe_item"),
     path(
         "<int:report_id>/contact/",
@@ -21,11 +27,17 @@ urlpatterns = [
     ),
     path("<int:report_id>/flag/", flag_views.flag_report, name="flag_report"),
     path("<int:report_id>/edit/", owner_views.edit_report, name="edit_report"),
+    path("<int:report_id>/renew/", owner_views.renew_report, name="renew_report"),
     path("<int:report_id>/delete/", owner_views.delete_report, name="delete_report"),
     path(
         "<int:report_id>/recovered/",
         owner_views.mark_report_recovered,
         name="mark_report_recovered",
+    ),
+    path(
+    "messages/<int:message_id>/reply/",
+    public_views.reply_to_contact_message,
+    name="reply_to_contact_message",
     ),
     path("<int:report_id>/", public_views.report_detail, name="report_detail"),
 ]

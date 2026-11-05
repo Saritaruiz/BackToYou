@@ -55,12 +55,25 @@ class ContactMessagesVisibilityTests(TestCase):
         self.assertContains(response, self.sender.email)
 
     def test_another_user_does_not_see_the_messages(self):
-        self.login_as(self.sender)
+        other = get_user_model().objects.create_user(
+            username="other@eafit.edu.co",
+            email="other@eafit.edu.co",
+            password="StrongPass123",
+        )
+        self.login_as(other)
 
         response = self.client.get(self.url)
 
         self.assertNotContains(response, "Messages about this report")
         self.assertNotContains(response, "I think I found your calculator")
+
+    def test_the_sender_sees_their_own_message(self):
+        self.login_as(self.sender)
+
+        response = self.client.get(self.url)
+
+        self.assertContains(response, "Your messages about this report")
+        self.assertContains(response, "I think I found your calculator")
 
     def test_anonymous_visitor_does_not_see_the_messages(self):
         response = self.client.get(self.url)

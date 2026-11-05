@@ -24,6 +24,9 @@ load_dotenv(BASE_DIR / "ollama.env")
 # Igual con el correo (RF39, RF15): email.env tiene la cuenta que envia los
 # correos y nunca se sube a GitHub. Ver email.env.example.
 load_dotenv(BASE_DIR / "email.env")
+# Y con Gemini (RF22): gemini.env tiene la clave de la API. Ver
+# gemini.env.example.
+load_dotenv(BASE_DIR / "gemini.env")
 
 
 # Quick-start development settings - unsuitable for production
@@ -72,6 +75,9 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    # Elige el idioma por el prefijo de la URL (/es/, /en/). Debe ir despues
+    # de SessionMiddleware y antes de CommonMiddleware.
+    'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -92,6 +98,8 @@ TEMPLATES = [
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.request',
+                # LANGUAGE_CODE y LANGUAGES en las plantillas (selector de idioma).
+                'django.template.context_processors.i18n',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
@@ -168,7 +176,23 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/6.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+# La interfaz esta en espanol y en ingles. Cada persona elige con el selector
+# de la cabecera; el idioma va en la URL (/es/reports/, /en/reports/). Si
+# entra sin prefijo, se usa el idioma de su navegador y, si no es ninguno de
+# los dos, el espanol.
+# Los textos del codigo estan en ingles; las traducciones al espanol estan en
+# locale/es/LC_MESSAGES/django.po (ver README).
+LANGUAGE_CODE = 'es'
+
+# Cada idioma con su propio nombre: asi lo reconoce quien no entiende el otro.
+LANGUAGES = [
+    ('es', 'Español'),
+    ('en', 'English'),
+]
+
+LOCALE_PATHS = [
+    BASE_DIR / 'locale',
+]
 
 TIME_ZONE = 'UTC'
 
@@ -230,3 +254,13 @@ OLLAMA_VISION_MODEL = os.environ.get("OLLAMA_VISION_MODEL", "gemma3:4b")
 # Segundos que espera la respuesta. En un computador sin tarjeta grafica el
 # modelo tarda cerca de minuto y medio en analizar la foto.
 OLLAMA_TIMEOUT = int(os.environ.get("OLLAMA_TIMEOUT", "180"))
+
+# RF22 con Google Gemini API. Si hay clave, la sugerencia la hace Gemini y no
+# hace falta Ollama: es lo que usa el servidor de AWS, que no tiene memoria
+# para correr el modelo. Se configura en gemini.env (ver gemini.env.example)
+# o, en el servidor, en /etc/backtoyou.env.
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
+GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-3.5-flash-lite")
+# Segundos que espera la respuesta. Debe ser menor que el --timeout de
+# Gunicorn en deploy/backtoyou.service.
+GEMINI_TIMEOUT = int(os.environ.get("GEMINI_TIMEOUT", "60"))

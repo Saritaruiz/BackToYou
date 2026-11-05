@@ -1,15 +1,16 @@
 {% extends "base.html" %}
+{% load i18n %}
 
-{% block title %}User Accounts | BackToYou{% endblock %}
+{% block title %}{% translate "User Accounts" %} | BackToYou{% endblock %}
 
 {% block content %}
     <section class="hero">
-        <span class="role-pill">Administrator</span>
-        <h1>User Accounts</h1>
-        <p>Activate or deactivate regular user accounts.</p>
+        <span class="role-pill">{% translate "Administrator" %}</span>
+        <h1>{% translate "User Accounts" %}</h1>
+        <p>{% translate "Activate or deactivate regular user accounts." %}</p>
         <div class="actions">
             <a class="button ghost" href="{% url 'administration' %}">
-                Back to Administration
+                {% translate "Back to Administration" %}
             </a>
         </div>
     </section>
@@ -17,31 +18,31 @@
     <section class="panel">
         <form class="filter-form" method="get">
             <div>
-                <label for="user-search">Search by name or email</label>
+                <label for="user-search">{% translate "Search by name or email" %}</label>
                 <input
                     id="user-search"
                     type="text"
                     name="q"
-                    placeholder="Search users..."
+                    placeholder="{% translate 'Search users...' %}"
                     value="{{ query|default:'' }}"
                 >
             </div>
-            <button type="submit">Search</button>
+            <button type="submit">{% translate "Search" %}</button>
             <a class="button ghost" href="{% url 'administration_user_list' %}">
-                Clear
+                {% translate "Clear" %}
             </a>
         </form>
     </section>
 
     {% if accounts %}
-        <section class="panel table-wrap" aria-label="User list">
+        <section class="panel table-wrap" aria-label="{% translate 'User list' %}">
             <table class="data-table">
                 <thead>
                     <tr>
-                        <th scope="col">Name</th>
-                        <th scope="col">Email</th>
-                        <th scope="col">Status</th>
-                        <th scope="col">Actions</th>
+                        <th scope="col">{% translate "Name" %}</th>
+                        <th scope="col">{% translate "Email" %}</th>
+                        <th scope="col">{% translate "Status" %}</th>
+                        <th scope="col">{% translate "Actions" %}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -49,7 +50,7 @@
                         <tr>
                             <td>{{ account.first_name }}</td>
                             <td>{{ account.email }}</td>
-                            <td>{% if account.is_active %}Active{% else %}Inactive{% endif %}</td>
+                            <td>{% if account.is_active %}{% translate "Active" context "account" %}{% else %}{% translate "Inactive" context "account" %}{% endif %}</td>
                             <td>
                                 <div class="table-actions">
                                     {% if account.is_active %}
@@ -57,14 +58,14 @@
                                             class="button danger"
                                             href="{% url 'administration_user_toggle' account.id %}"
                                         >
-                                            Deactivate
+                                            {% translate "Deactivate" %}
                                         </a>
                                     {% else %}
                                         <a
                                             class="button secondary"
                                             href="{% url 'administration_user_toggle' account.id %}"
                                         >
-                                            Activate
+                                            {% translate "Activate" %}
                                         </a>
                                     {% endif %}
                                 </div>
@@ -76,8 +77,8 @@
         </section>
     {% else %}
         <section class="empty-state">
-            <h2>No matching user accounts.</h2>
-            <p>Try a different search, or clear it to see every regular user.</p>
+            <h2>{% translate "No matching user accounts." %}</h2>
+            <p>{% translate "Try a different search, or clear it to see every regular user." %}</p>
         </section>
     {% endif %}
 {% endblock %}

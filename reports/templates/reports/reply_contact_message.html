@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "Reply to Message" %} | BackToYou{% endblock %}
+
+{% block content %}
+    <section class="form-shell">
+        <div class="form-card">
+            <span class="kicker">{% translate "Internal message" %}</span>
+
+            <h1>{% translate "Reply to message" %}</h1>
+
+            <p class="lead">
+                {% blocktranslate trimmed with title=report.title %}
+                    Reply regarding "{{ title }}".
+                {% endblocktranslate %}
+            </p>
+
+            <div class="letter">
+                <p class="letter-from">
+                    {{ original_message.sender.email }}
+                    &middot;
+                    {{ original_message.created_at }}
+                </p>
+
+                <p class="letter-body">
+                    {{ original_message.message }}
+                </p>
+            </div>
+
+            <form method="post">
+                {% csrf_token %}
+
+                {{ form.as_p }}
+
+                <div class="actions">
+                    <button type="submit">
+                        {% translate "Send Reply" %}
+                    </button>
+
+                    <a
+                        class="button ghost"
+                        href="{% url 'reports:report_detail' report.id %}"
+                    >
+                        {% translate "Cancel" %}
+                    </a>
+                </div>
+            </form>
+        </div>
+    </section>
+{% endblock %}

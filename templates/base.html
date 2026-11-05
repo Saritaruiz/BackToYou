@@ -1,6 +1,6 @@
-{% load static tz %}
+{% load static tz i18n %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ LANGUAGE_CODE }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -20,15 +20,15 @@
         <div class="header-inner">
             {# NFR38: franja superior tipo periodico, con la fecha del dia. #}
             <div class="masthead-top">
-                <p>Universidad EAFIT · Lost &amp; Found</p>
+                <p>{% translate "Universidad EAFIT · Lost &amp; Found" %}</p>
                 {# La app guarda las horas en UTC; la fecha visible es la de Medellin. #}
-                <p class="masthead-date">{% timezone "America/Bogota" %}{% now "l, F j, Y" %}{% endtimezone %}</p>
+                <p class="masthead-date">{% timezone "America/Bogota" %}{% if LANGUAGE_CODE == "es" %}{% now "l, j \d\e F \d\e Y" %}{% else %}{% now "l, F j, Y" %}{% endif %}{% endtimezone %}</p>
                 {# Solo el nombre: el correo nunca se muestra en la cabecera. #}
                 <p class="masthead-greeting">
                     {% if user.is_authenticated and user.first_name %}
-                        Hello, {{ user.first_name }}
+                        {% blocktranslate with name=user.first_name %}Hello, {{ name }}{% endblocktranslate %}
                     {% else %}
-                        For the EAFIT community
+                        {% translate "For the EAFIT community" %}
                     {% endif %}
                 </p>
             </div>
@@ -44,40 +44,52 @@
 
             {# RNF27: en pantallas pequenas el menu se abre con este boton (sin JavaScript). #}
             <input class="nav-toggle" type="checkbox" id="nav-toggle">
-            <label class="nav-toggle-label" for="nav-toggle">Menu</label>
+            <label class="nav-toggle-label" for="nav-toggle">{% translate "Menu" %}</label>
 
             {# NFR31: aria-current marca la seccion en la que esta la persona. #}
-            <nav class="site-nav" aria-label="Main navigation">
-                <a href="{% url 'home' %}"{% if current == "home" %} aria-current="page"{% endif %}>Home</a>
-                <a href="{% url 'reports:report_list' %}"{% if current == "report_list" or current == "report_detail" or current == "contact_reporter" %} aria-current="page"{% endif %}>Reports</a>
+            <nav class="site-nav" aria-label="{% translate 'Main navigation' %}">
+                <a href="{% url 'home' %}"{% if current == "home" %} aria-current="page"{% endif %}>{% translate "Home" %}</a>
+                <a href="{% url 'reports:report_list' %}"{% if current == "report_list" or current == "report_detail" or current == "contact_reporter" %} aria-current="page"{% endif %}>{% translate "Reports" %}</a>
 
                 {% if user.is_authenticated %}
-                    <a href="{% url 'reports:create_lost_report' %}"{% if current == "create_lost_report" %} aria-current="page"{% endif %}>Create Lost</a>
-                    <a href="{% url 'reports:create_found_report' %}"{% if current == "create_found_report" %} aria-current="page"{% endif %}>Create Found</a>
-                    <a href="{% url 'reports:my_reports' %}"{% if current == "my_reports" or current == "edit_report" or current == "delete_report" or current == "mark_report_recovered" %} aria-current="page"{% endif %}>My Reports</a>
+                    {# Reportar es la razon de ser de BackToYou: estos dos van como botones. #}
+                    <a class="nav-cta nav-cta-lost" href="{% url 'reports:create_lost_report' %}"{% if current == "create_lost_report" %} aria-current="page"{% endif %}>{% translate "Create Lost" %}</a>
+                    <a class="nav-cta nav-cta-found" href="{% url 'reports:create_found_report' %}"{% if current == "create_found_report" %} aria-current="page"{% endif %}>{% translate "Create Found" %}</a>
+                    <a href="{% url 'reports:my_reports' %}"{% if current == "my_reports" or current == "edit_report" or current == "delete_report" or current == "mark_report_recovered" %} aria-current="page"{% endif %}>{% translate "My Reports" %}</a>
+                    <a href="{% url 'reports:notifications' %}"{% if current == "notifications" %} aria-current="page"{% endif %}>{% translate "Notifications" %}</a>
                     {% if user.role == "ADMINISTRATOR" %}
                         <details class="nav-dropdown{% if 'administration' in current %} is-current{% endif %}">
-                            <summary>Administration</summary>
+                            <summary>{% translate "Administration" %}</summary>
                             <div class="nav-dropdown-menu">
-                                <a href="{% url 'administration' %}"{% if current == "administration" %} aria-current="page"{% endif %}>Overview</a>
-                                <a href="{% url 'administration_lost_statistics' %}"{% if current == "administration_lost_statistics" %} aria-current="page"{% endif %}>Lost Item Statistics</a>
-                                <a href="{% url 'administration_pending_reports' %}"{% if current == "administration_pending_reports" %} aria-current="page"{% endif %}>Pending Reports</a>
-                                <a href="{% url 'administration_flagged_reports' %}"{% if current == "administration_flagged_reports" %} aria-current="page"{% endif %}>Flagged Reports</a>
-                                <a href="{% url 'administration_activity_log' %}"{% if current == "administration_activity_log" %} aria-current="page"{% endif %}>Activity Log</a>
-                                <a href="{% url 'administration_category_list' %}"{% if current == "administration_category_list" %} aria-current="page"{% endif %}>Categories</a>
-                                <a href="{% url 'administration_administrator_list' %}"{% if current == "administration_administrator_list" %} aria-current="page"{% endif %}>Administrators</a>
-                                <a href="{% url 'administration_user_list' %}"{% if current == "administration_user_list" %} aria-current="page"{% endif %}>User Accounts</a>
+                                <a href="{% url 'administration' %}"{% if current == "administration" %} aria-current="page"{% endif %}>{% translate "Overview" %}</a>
+                                <a href="{% url 'administration_lost_statistics' %}"{% if current == "administration_lost_statistics" %} aria-current="page"{% endif %}>{% translate "Lost Item Statistics" %}</a>
+                                <a href="{% url 'administration_pending_reports' %}"{% if current == "administration_pending_reports" %} aria-current="page"{% endif %}>{% translate "Pending Reports" %}</a>
+                                <a href="{% url 'administration_flagged_reports' %}"{% if current == "administration_flagged_reports" %} aria-current="page"{% endif %}>{% translate "Flagged Reports" %}</a>
+                                <a href="{% url 'administration_activity_log' %}"{% if current == "administration_activity_log" %} aria-current="page"{% endif %}>{% translate "Activity Log" %}</a>
+                                <a href="{% url 'administration_category_list' %}"{% if current == "administration_category_list" %} aria-current="page"{% endif %}>{% translate "Categories" %}</a>
+                                <a href="{% url 'administration_administrator_list' %}"{% if current == "administration_administrator_list" %} aria-current="page"{% endif %}>{% translate "Administrators" %}</a>
+                                <a href="{% url 'administration_user_list' %}"{% if current == "administration_user_list" %} aria-current="page"{% endif %}>{% translate "User Accounts" %}</a>
                             </div>
                         </details>
                     {% endif %}
                     <form class="nav-logout" action="{% url 'accounts:logout' %}" method="post">
                         {% csrf_token %}
-                        <button type="submit">Logout</button>
+                        <button type="submit">{% translate "Logout" %}</button>
                     </form>
                 {% else %}
-                    <a href="{% url 'accounts:register' %}"{% if current == "register" %} aria-current="page"{% endif %}>Register</a>
-                    <a href="{% url 'accounts:login' %}"{% if current == "login" %} aria-current="page"{% endif %}>Login</a>
+                    <a href="{% url 'accounts:register' %}"{% if current == "register" %} aria-current="page"{% endif %}>{% translate "Register" %}</a>
+                    <a href="{% url 'accounts:login' %}"{% if current == "login" %} aria-current="page"{% endif %}>{% translate "Login" %}</a>
                 {% endif %}
+
+                {# i18n: set_language guarda el idioma elegido y vuelve a esta misma pagina en ese idioma. #}
+                <form class="language-switch" action="{% url 'set_language' %}" method="post">
+                    {% csrf_token %}
+                    <input name="next" type="hidden" value="{{ request.get_full_path }}">
+                    <span class="visually-hidden">{% translate "Language" %}</span>
+                    {% for code, name in LANGUAGES %}
+                        <button type="submit" name="language" value="{{ code }}" lang="{{ code }}" aria-label="{{ name }}"{% if code == LANGUAGE_CODE %} aria-current="true"{% endif %}>{{ code|upper }}</button>
+                    {% endfor %}
+                </form>
             </nav>
         </div>
     </header>
@@ -102,36 +114,37 @@
 
     <footer class="site-footer">
         <div class="footer-inner">
+            {# El eslogan es parte de la marca: no se traduce. #}
             <p class="footer-slogan">Lost. Found. <em>Back to You.</em></p>
 
             <div class="footer-columns">
                 <div>
                     <p class="footer-heading">BackToYou</p>
-                    <p>The lost and found of the EAFIT community. Report it, find it, return it.</p>
+                    <p>{% translate "The lost and found of the EAFIT community. Report it, find it, return it." %}</p>
                 </div>
                 <div>
-                    <p class="footer-heading">Explore</p>
+                    <p class="footer-heading">{% translate "Explore" %}</p>
                     <ul class="footer-links">
-                        <li><a href="{% url 'home' %}">Home</a></li>
-                        <li><a href="{% url 'reports:report_list' %}">All reports</a></li>
+                        <li><a href="{% url 'home' %}">{% translate "Home" %}</a></li>
+                        <li><a href="{% url 'reports:report_list' %}">{% translate "All reports" %}</a></li>
                     </ul>
                 </div>
                 <div>
-                    <p class="footer-heading">Account</p>
+                    <p class="footer-heading">{% translate "Account" %}</p>
                     <ul class="footer-links">
                         {% if user.is_authenticated %}
-                            <li><a href="{% url 'reports:create_lost_report' %}">Report a lost item</a></li>
-                            <li><a href="{% url 'reports:create_found_report' %}">Report a found item</a></li>
-                            <li><a href="{% url 'reports:my_reports' %}">My reports</a></li>
-                            <li><a href="{% url 'accounts:password_change' %}">Change password</a></li>
+                            <li><a href="{% url 'reports:create_lost_report' %}">{% translate "Report a lost item" %}</a></li>
+                            <li><a href="{% url 'reports:create_found_report' %}">{% translate "Report a found item" %}</a></li>
+                            <li><a href="{% url 'reports:my_reports' %}">{% translate "My reports" %}</a></li>
+                            <li><a href="{% url 'accounts:password_change' %}">{% translate "Change password" %}</a></li>
                         {% else %}
-                            <li><a href="{% url 'accounts:register' %}">Register</a></li>
-                            <li><a href="{% url 'accounts:login' %}">Login</a></li>
+                            <li><a href="{% url 'accounts:register' %}">{% translate "Register" %}</a></li>
+                            <li><a href="{% url 'accounts:login' %}">{% translate "Login" %}</a></li>
                         {% endif %}
                     </ul>
                 </div>
                 <div>
-                    <p class="footer-heading">Made by</p>
+                    <p class="footer-heading">{% translate "Made by" %}</p>
                     <ul class="footer-links">
                         <li>Sara Ruiz</li>
                         <li>Isabel Acevedo Acosta</li>
@@ -141,7 +154,7 @@
 
             <div class="footer-base">
                 <p>© {% now "Y" %} BackToYou</p>
-                <p>University Lost and Found Web Application</p>
+                <p>{% translate "University Lost and Found Web Application" %}</p>
             </div>
         </div>
     </footer>

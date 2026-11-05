@@ -58,7 +58,7 @@ class LostStatisticsTests(TestCase):
             self.report(status=status, report_type='FOUND')
         self.report(status='ACTIVE')
         result = lost_statistics()
-        self.assertEqual(result['summary'], dict(total=5, active=2, recovered=1, pending=1, rejected=1, recovery_rate=33.3))
+        self.assertEqual(result['summary'], dict(total=5, active=2, expired=0, recovered=1, pending=1, rejected=1, recovery_rate=33.3))
         self.assertEqual(result['categories'][0]['total'], 5)
         self.assertEqual(sum(row['total'] for row in result['months']), 5)
 
@@ -137,7 +137,7 @@ class LostStatisticsTests(TestCase):
         self.client.force_login(self.admin)
         self.client.get(self.url)
         self.assertEqual(list(ItemReport.objects.values()), before)
-        self.assertEqual(list(self.client.get(reverse('home')).context['recent_reports']), [active])
+        self.assertEqual(list(self.client.get(reverse('reports:report_list')).context['reports']), [active])
         self.assertEqual(self.client.get(reverse('reports:report_detail', args=[private.pk])).status_code, 404)
 
     def test_navigation_is_admin_only(self):

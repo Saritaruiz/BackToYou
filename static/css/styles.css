@@ -2094,6 +2094,14 @@ input[type="radio"]:focus-visible {
     border-bottom: 1px solid var(--border);
 }
 
+/* RF17: al crear o editar un reporte, la app vuelve a "My Reports" con
+   #report-<id> en la direccion y resalta esa fila. */
+.ledger-row:target {
+    background: var(--accent-soft);
+    box-shadow: -12px 0 0 var(--accent-soft), 12px 0 0 var(--accent-soft);
+    scroll-margin-top: var(--space-6);
+}
+
 .ledger-row::before {
     counter-increment: ledger-row;
     content: counter(ledger-row, decimal-leading-zero);
@@ -2767,6 +2775,17 @@ input[type="radio"]:focus-visible {
     text-align: right;
 }
 
+/* RF01/RF39: casilla para ver la contrasena mientras se escribe. */
+.show-password {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin: 0 0 var(--space-6);
+    color: var(--muted);
+    font-size: var(--fs-small);
+    cursor: pointer;
+}
+
 .hero .account-link {
     margin: var(--space-2) 0 0;
     font-size: var(--fs-small);
@@ -2934,6 +2953,252 @@ button[aria-busy="true"]::before {
 
 .form-field .ai-filled {
     background-color: var(--accent-soft);
+}
+
+/* ===== Reportar es la idea del producto =====
+   En el menu, "Create Lost" y "Create Found" son botones rellenos con el
+   color de su etiqueta (type-lost y type-found); en el inicio, dos bloques
+   grandes debajo del buscador. */
+.site-nav a.nav-cta {
+    margin-inline: 2px;
+    color: var(--on-dark);
+}
+
+.site-nav a.nav-cta-lost {
+    background: var(--charcoal);
+}
+
+.site-nav a.nav-cta-found {
+    background: var(--accent);
+}
+
+.site-nav a.nav-cta:hover {
+    color: var(--on-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 14px rgba(28, 38, 33, 0.18);
+}
+
+.site-nav a.nav-cta-lost:hover {
+    background: var(--salvia-700);
+}
+
+.site-nav a.nav-cta-found:hover {
+    background: var(--accent);
+    box-shadow: inset 0 0 0 999px rgba(0, 0, 0, 0.18), 0 6px 14px rgba(28, 38, 33, 0.18);
+}
+
+/* NFR31: en un boton relleno, la seccion actual se marca con un subrayado claro. */
+.site-nav a.nav-cta[aria-current="page"] {
+    color: var(--on-dark);
+    text-decoration-color: var(--ciruela-200);
+}
+
+@media (max-width: 1080px) {
+    .site-nav a.nav-cta {
+        margin: var(--space-1) 0;
+        border-bottom-color: transparent;
+    }
+}
+
+.report-cta {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-4);
+    max-width: 880px;
+    margin: var(--space-8) auto 0;
+    text-align: left;
+}
+
+.cta-card {
+    position: relative;
+    display: grid;
+    align-content: start;
+    gap: var(--space-1);
+    padding: var(--space-6) var(--space-16) var(--space-6) var(--space-6);
+    border-radius: var(--radius);
+    color: var(--on-dark);
+    transition: transform var(--dur-fast) var(--ease-change), box-shadow var(--dur-fast) var(--ease-change),
+        background-color var(--dur-fast) var(--ease-change);
+}
+
+.cta-lost {
+    background: var(--charcoal);
+}
+
+.cta-found {
+    background: var(--accent);
+}
+
+.cta-card:hover {
+    color: var(--on-dark);
+    text-decoration: none;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgba(28, 38, 33, 0.22);
+}
+
+.cta-lost:hover {
+    background: var(--salvia-800);
+}
+
+.cta-card:active {
+    transform: translateY(0);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.cta-kicker {
+    color: var(--salvia-200);
+    font-size: var(--fs-label);
+    font-weight: 700;
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+}
+
+.cta-found .cta-kicker,
+.cta-found .cta-note {
+    color: var(--ciruela-200);
+}
+
+.cta-title {
+    font-family: var(--font-heading);
+    font-size: var(--fs-h3);
+    font-weight: var(--fw-regular);
+    line-height: 1.1;
+}
+
+.cta-note {
+    color: var(--salvia-200);
+    font-size: var(--fs-small);
+    font-weight: var(--fw-regular);
+}
+
+.cta-arrow {
+    position: absolute;
+    top: 50%;
+    right: var(--space-6);
+    font-size: 32px;
+    line-height: 1;
+    transform: translateY(-50%);
+    transition: transform var(--dur-fast) var(--ease-change);
+}
+
+.cta-card:hover .cta-arrow {
+    transform: translate(4px, -50%);
+}
+
+@media (max-width: 600px) {
+    .report-cta {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ===== i18n: selector de idioma, al final del menu ===== */
+.language-switch {
+    display: flex;
+    align-items: center;
+    margin: 0 0 0 var(--space-2);
+}
+
+.site-nav .language-switch button {
+    min-width: 40px;
+    padding-inline: 8px;
+    background: transparent;
+    color: var(--muted);
+}
+
+.site-nav .language-switch button + button {
+    border-left: 1px solid var(--border-strong);
+    border-radius: 0;
+}
+
+.site-nav .language-switch button:hover {
+    background: transparent;
+    color: var(--accent);
+    transform: none;
+    box-shadow: none;
+}
+
+.site-nav .language-switch button[aria-current="true"] {
+    color: var(--charcoal);
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 6px;
+}
+
+@media (max-width: 1080px) {
+    .language-switch {
+        margin: var(--space-2) 0 0;
+    }
+}
+
+/* ===== Registro: las reglas de la contrasena se marcan mientras se escribe =====
+   Circulo vacio mientras no hay contrasena, chulo si la regla se cumple y
+   X si no. El texto oculto dice lo mismo a quien usa lector de pantalla. */
+.password-rules {
+    display: grid;
+    gap: 6px;
+    margin: var(--space-2) 0 0;
+    padding: 0;
+    list-style: none;
+    color: var(--muted);
+    font-size: var(--fs-small);
+}
+
+.password-rule {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-2);
+    transition: color var(--dur-fast) var(--ease-change);
+}
+
+.password-rule::before {
+    content: "";
+    flex: none;
+    width: 18px;
+    height: 18px;
+    margin-top: 1px;
+    border: 1.5px solid var(--border-strong);
+    border-radius: 50%;
+    background: center / 12px 12px no-repeat;
+    transition: background-color var(--dur-fast) var(--ease-change), border-color var(--dur-fast) var(--ease-change);
+}
+
+.password-rule[data-state="pass"] {
+    color: var(--success);
+}
+
+.password-rule[data-state="pass"]::before {
+    border-color: var(--success);
+    background-color: var(--success);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 6.2l2.3 2.3 4.7-5' fill='none' stroke='%23F5F8F5' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+.password-rule[data-state="fail"] {
+    color: var(--danger);
+}
+
+.password-rule[data-state="fail"]::before {
+    border-color: var(--danger);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M3.5 3.5l5 5M8.5 3.5l-5 5' fill='none' stroke='%2356425C' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E");
+}
+
+/* ===== RF03/RF04: cada campo del reporte dice si es obligatorio u opcional ===== */
+.required-note {
+    margin: 0 0 var(--space-6);
+    color: var(--muted);
+    font-size: var(--fs-small);
+}
+
+.required-mark {
+    color: var(--accent);
+    font-weight: 700;
+}
+
+.optional-mark {
+    color: var(--muted);
+    font-size: var(--fs-small);
+    font-variant-caps: normal;
+    font-weight: var(--fw-regular);
+    letter-spacing: 0;
 }
 
 /* NFR32: si la persona pidio reducir el movimiento, los cambios son

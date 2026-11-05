@@ -1,30 +1,33 @@
 {% extends "base.html" %}
+{% load i18n %}
 
-{% block title %}Mark {{ report.title }} as recovered | BackToYou{% endblock %}
+{% block title %}{% blocktranslate with title=report.title %}Mark {{ title }} as recovered{% endblocktranslate %} | BackToYou{% endblock %}
 
 {% block content %}
     <section class="form-card">
-        <h1 class="page-title">Mark this item as recovered?</h1>
+        <h1 class="page-title">{% translate "Mark this item as recovered?" %}</h1>
         <p class="lead">
-            The report will leave the public list and other users will no longer
-            be able to contact you about it. It stays in your report history.
+            {% blocktranslate trimmed %}
+                The report will leave the public list and other users will no longer
+                be able to contact you about it. It stays in your report history.
+            {% endblocktranslate %}
         </p>
 
         <div class="meta-grid">
             <div class="meta-item">
-                <span class="meta-label">Title</span>
+                <span class="meta-label">{% translate "Title" %}</span>
                 {{ report.title }}
             </div>
             <div class="meta-item">
-                <span class="meta-label">Type</span>
+                <span class="meta-label">{% translate "Type" %}</span>
                 {{ report.get_report_type_display }}
             </div>
             <div class="meta-item">
-                <span class="meta-label">Location</span>
+                <span class="meta-label">{% translate "Location" %}</span>
                 {{ report.location }}
             </div>
             <div class="meta-item">
-                <span class="meta-label">Status</span>
+                <span class="meta-label">{% translate "Status" %}</span>
                 {{ report.get_status_display }}
             </div>
         </div>
@@ -32,10 +35,10 @@
         <div class="actions">
             <form method="post">
                 {% csrf_token %}
-                <button class="success" type="submit">Mark as Recovered</button>
+                <button class="success" type="submit">{% translate "Mark as Recovered" %}</button>
             </form>
             <a class="button ghost" href="{% url 'reports:report_detail' report.id %}">
-                Cancel
+                {% translate "Cancel" %}
             </a>
         </div>
     </section>

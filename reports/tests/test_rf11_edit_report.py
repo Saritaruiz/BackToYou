@@ -177,7 +177,7 @@ class EditReportTests(TestCase):
             self.valid_payload(),
         )
 
-        self.assertRedirects(response, reverse("reports:report_list"))
+        self.assertRedirects(response, f"{reverse('reports:my_reports')}#report-{report.id}")
 
         report.refresh_from_db()
         self.assertEqual(report.status, ItemReport.Status.PENDING_REVIEW)
@@ -198,25 +198,29 @@ class EditReportTests(TestCase):
         self.assertEqual(report.status, ItemReport.Status.RECOVERED)
         self.assertEqual(report.title, "Lost calculator (updated)")
 
-    # Given a Rejected report, when the creator attempts to edit it, then the
-    # system denies the action.
-    def test_rejected_report_cannot_be_edited(self):
+    # RF10: given a Rejected report, when the creator fixes it, then the report
+    # goes back to Pending Review and the rejection reason is cleared.
+    def test_rejected_report_goes_back_to_review_after_editing(self):
         report = self.create_report(status=ItemReport.Status.REJECTED)
+        report.rejection_reason = "There is already a report for this item."
+        report.save()
         self.login_as_creator()
 
         get_response = self.client.get(
             reverse("reports:edit_report", args=[report.id])
         )
-        post_response = self.client.post(
+        self.assertContains(get_response, "There is already a report for this item.")
+
+        response = self.client.post(
             reverse("reports:edit_report", args=[report.id]),
             self.valid_payload(),
         )
 
-        self.assertEqual(get_response.status_code, 403)
-        self.assertEqual(post_response.status_code, 403)
-
+        self.assertRedirects(response, f"{reverse('reports:my_reports')}#report-{report.id}")
         report.refresh_from_db()
-        self.assertEqual(report.title, "Lost calculator")
+        self.assertEqual(report.status, ItemReport.Status.PENDING_REVIEW)
+        self.assertEqual(report.rejection_reason, "")
+        self.assertEqual(report.title, "Lost calculator (updated)")
 
     # Given a successful update, when the report is saved, then the system
     # records the date and time of the modification.

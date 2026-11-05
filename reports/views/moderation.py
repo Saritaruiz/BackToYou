@@ -9,14 +9,18 @@ de revision, es decir, antes de que sea visible para el publico.
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
+from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.utils.translation import gettext as _
 
 from accounts.decorators import administrator_required
 
 from ..email_notifications import notify_report_approved, notify_report_rejected
-from ..forms import ItemReportForm
-from ..models import ItemReport, ModerationLogEntry
+from ..forms import ItemReportForm, RejectionForm
+from ..models import (
+    ItemReport, ModerationLogEntry, ReportReviewNotification, default_report_expiration,
+)
 from ..moderation_log import log_action
 
 
@@ -24,7 +28,7 @@ from ..moderation_log import log_action
 def pending_report_list(request):
     reports = ItemReport.objects.filter(
         status=ItemReport.Status.PENDING_REVIEW,
-    ).order_by("-created_at", "-id")
+    ).select_related("category").order_by("-created_at", "-id")
 
     return render(
         request,
@@ -36,22 +40,36 @@ def pending_report_list(request):
 @administrator_required
 def moderate_report_detail(request, report_id):
     report = get_object_or_404(
-        ItemReport,
+        ItemReport.objects.select_related("category", "creator"),
         id=report_id,
         status=ItemReport.Status.PENDING_REVIEW,
     )
+
+    rejection_form = RejectionForm()
 
     if request.method == "POST":
         action = request.POST.get("action")
 
         if action == "approve":
             report.status = ItemReport.Status.ACTIVE
-            success_message = "Report approved successfully."
+            report.expires_at = default_report_expiration()
+            report.rejection_reason = ""
+            success_message = _("Report approved successfully.")
             notify_moderation_result = notify_report_approved
             log_entry_action = ModerationLogEntry.Action.APPROVED
         elif action == "reject":
+            # RF10: sin motivo no se rechaza; el creador lo necesita para
+            # corregir el reporte y enviarlo de nuevo.
+            rejection_form = RejectionForm(request.POST)
+            if not rejection_form.is_valid():
+                return render(
+                    request,
+                    "reports/moderation_report_detail.html",
+                    {"report": report, "rejection_form": rejection_form},
+                )
             report.status = ItemReport.Status.REJECTED
-            success_message = "Report rejected successfully."
+            report.rejection_reason = rejection_form.rejection_text()
+            success_message = _("Report rejected successfully.")
             notify_moderation_result = notify_report_rejected
             log_entry_action = ModerationLogEntry.Action.REJECTED
         else:
@@ -60,15 +78,34 @@ def moderate_report_detail(request, report_id):
         report.moderated_by = request.user
         report.moderated_at = timezone.now()
         with transaction.atomic():
+            # FR26: solo una solicitud puede consumir la revision pendiente.
+            # La actualizacion condicional evita decisiones y avisos duplicados,
+            # incluso si dos administradores cargaron el mismo formulario.
+            claimed = ItemReport.objects.filter(
+                pk=report.pk, status=ItemReport.Status.PENDING_REVIEW,
+            ).update(status=report.status)
+            if not claimed:
+                raise Http404("This report has already been reviewed.")
             report.save(
                 update_fields=[
                     "status",
+                    "expires_at",
+                    "rejection_reason",
                     "moderated_by",
                     "moderated_at",
                     "updated_at",
                 ],
             )
-            log_action(request.user, log_entry_action, report)
+            entry = log_action(request.user, log_entry_action, report, details=report.rejection_reason)
+            notification_message = (
+                _('Your report "%(title)s" was approved.')
+                if action == "approve"
+                else _('Your report "%(title)s" was rejected: %(reason)s')
+            ) % {"title": report.title, "reason": report.rejection_reason}
+            ReportReviewNotification.objects.create(
+                recipient=report.creator, report=report, moderation_entry=entry,
+                kind=log_entry_action, message=notification_message,
+            )
         notify_moderation_result(report)
 
         messages.success(request, success_message)
@@ -77,7 +114,7 @@ def moderate_report_detail(request, report_id):
     return render(
         request,
         "reports/moderation_report_detail.html",
-        {"report": report},
+        {"report": report, "rejection_form": rejection_form},
     )
 
 
@@ -102,10 +139,10 @@ def edit_pending_report(request, report_id):
                         request.user,
                         ModerationLogEntry.Action.EDITED,
                         report,
-                        details=f"Changed: {changed}",
+                        details=_("Changed: %(fields)s") % {"fields": changed},
                     )
 
-            messages.success(request, "Report updated successfully.")
+            messages.success(request, _("Report updated successfully."))
             return redirect("administration_moderate_report", report_id=report.id)
     else:
         form = ItemReportForm(instance=report)
@@ -131,7 +168,7 @@ def delete_pending_report(request, report_id):
             log_action(request.user, ModerationLogEntry.Action.REMOVED, report)
             report.delete()
 
-        messages.success(request, f'Report "{deleted_title}" was removed.')
+        messages.success(request, _('Report "%(title)s" was removed.') % {"title": deleted_title})
         return redirect("administration_pending_reports")
 
     return render(

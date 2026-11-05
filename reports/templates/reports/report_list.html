@@ -1,45 +1,48 @@
 {% extends "base.html" %}
-{% load icons %}
+{% load i18n icons %}
 
-{% block title %}Reports | BackToYou{% endblock %}
+{% block title %}{% translate "Reports" %} | BackToYou{% endblock %}
 
 {% block content %}
     <section class="hero page-head">
         <div>
-            <span class="kicker">The index</span>
-            <h1>Lost and found <em>reports.</em></h1>
-            <p class="lead">Browse active reports from the EAFIT community.</p>
+            <span class="kicker">{% translate "The index" %}</span>
+            <h1>{% blocktranslate trimmed %}Lost and found <em>reports.</em>{% endblocktranslate %}</h1>
+            <p class="lead">{% translate "Browse active reports from the EAFIT community." %}</p>
         </div>
         <p class="page-count">
-            <strong>{{ reports|length }}</strong>
-            report{{ reports|length|pluralize }} found
+            {% blocktranslate trimmed count counter=reports|length %}
+                <strong>{{ counter }}</strong> report found
+            {% plural %}
+                <strong>{{ counter }}</strong> reports found
+            {% endblocktranslate %}
         </p>
     </section>
 
-    <section class="filter-bar" aria-label="Search and filters">
+    <section class="filter-bar" aria-label="{% translate 'Search and filters' %}">
         <form class="filter-form" method="get">
             <div>
-                <label for="report-search">Search</label>
+                <label for="report-search">{% translate "Search" %}</label>
                 <input
                     id="report-search"
                     type="text"
                     name="q"
-                    placeholder="Umbrella, keys, Block 38..."
+                    placeholder="{% translate 'Umbrella, keys, Block 38...' %}"
                     value="{{ query|default:'' }}"
                 >
             </div>
 
             <div>
-                <label for="type-filter">Type</label>
+                <label for="type-filter">{% translate "Type" %}</label>
                 <select id="type-filter" name="type">
-                    <option value="">All types</option>
+                    <option value="">{% translate "All types" %}</option>
                     <option
                         value="LOST"
                         {% if selected_type == "LOST" %}
                             selected
                         {% endif %}
                     >
-                        Lost
+                        {% translate "Lost" %}
                     </option>
                     <option
                         value="FOUND"
@@ -47,27 +50,104 @@
                             selected
                         {% endif %}
                     >
-                        Found
+                        {% translate "Found" %}
                     </option>
                 </select>
             </div>
+            <div>
+    <label for="location-filter">{% translate "Location" %}</label>
+    <input
+        id="location-filter"
+        type="text"
+        name="location"
+        placeholder="{% translate 'Library, Block 38...' %}"
+        value="{{ selected_location|default:'' }}"
+    >
+</div>
+
+<div>
+    <label for="date-from-filter">{% translate "Date from" %}</label>
+    <input
+        id="date-from-filter"
+        type="date"
+        name="date_from"
+        value="{{ selected_date_from|default:'' }}"
+    >
+</div>
+
+<div>
+    <label for="date-to-filter">{% translate "Date to" %}</label>
+    <input
+        id="date-to-filter"
+        type="date"
+        name="date_to"
+        value="{{ selected_date_to|default:'' }}"
+    >
+</div>
+
+<div>
+    <label for="sort-filter">{% translate "Sort by" %}</label>
+    <select id="sort-filter" name="sort">
+        <option
+            value="newest"
+            {% if selected_sort == "newest" %}selected{% endif %}
+        >
+            {% translate "Newest first" %}
+        </option>
+
+        <option
+            value="oldest"
+            {% if selected_sort == "oldest" %}selected{% endif %}
+        >
+            {% translate "Oldest first" %}
+        </option>
+
+        <option
+            value="event_newest"
+            {% if selected_sort == "event_newest" %}selected{% endif %}
+        >
+            {% translate "Event date: newest" %}
+        </option>
+
+        <option
+            value="event_oldest"
+            {% if selected_sort == "event_oldest" %}selected{% endif %}
+        >
+            {% translate "Event date: oldest" %}
+        </option>
+
+        <option
+            value="title_asc"
+            {% if selected_sort == "title_asc" %}selected{% endif %}
+        >
+            {% translate "Title: A-Z" %}
+        </option>
+
+        <option
+            value="title_desc"
+            {% if selected_sort == "title_desc" %}selected{% endif %}
+        >
+            {% translate "Title: Z-A" %}
+        </option>
+    </select>
+</div>
 
             {% if request.GET.view == "list" %}
                 <input type="hidden" name="view" value="list">
             {% endif %}
-            <button type="submit">Search</button>
+            <button type="submit">{% translate "Search" %}</button>
             <a class="button ghost" href="{% url 'reports:report_list' %}">
-                Clear Filters
+                {% translate "Clear Filters" %}
             </a>
 
             {# NFR37: la categoria se elige por su icono. #}
             <fieldset class="category-picker">
-                <legend>Category</legend>
+                <legend>{% translate "Category" %}</legend>
                 <div class="category-tiles">
                     <label class="category-tile">
                         <input type="radio" name="category" value=""{% if not selected_category %} checked{% endif %}>
                         {% all_categories_icon %}
-                        <span>All</span>
+                        <span>{% translate "All" %}</span>
                     </label>
                     {% for category in categories %}
                         <label class="category-tile">
@@ -78,7 +158,7 @@
                                 {% if selected_category == category.id|stringformat:"s" %}checked{% endif %}
                             >
                             {% category_icon category.name %}
-                            <span>{{ category.name }}</span>
+                            <span>{% translate category.name %}</span>
                         </label>
                     {% endfor %}
                 </div>
@@ -104,14 +184,14 @@
 
     {% if reports %}
         {# Con foto, tarjetas; sin foto, filas. "All as list" muestra todo en filas. #}
-        <nav class="view-toggle{% if request.GET.view == 'list' %} is-list{% endif %}" aria-label="Display">
+        <nav class="view-toggle{% if request.GET.view == 'list' %} is-list{% endif %}" aria-label="{% translate 'Display' %}">
             <span class="view-toggle-indicator" aria-hidden="true"></span>
-            <a href="{% querystring view=None %}"{% if request.GET.view != "list" %} aria-current="true"{% endif %}>Photos first</a>
-            <a href="{% querystring view='list' %}"{% if request.GET.view == "list" %} aria-current="true"{% endif %}>All as list</a>
+            <a href="{% querystring view=None %}"{% if request.GET.view != "list" %} aria-current="true"{% endif %}>{% translate "Photos first" %}</a>
+            <a href="{% querystring view='list' %}"{% if request.GET.view == "list" %} aria-current="true"{% endif %}>{% translate "All as list" %}</a>
         </nav>
 
         {% if request.GET.view == "list" %}
-            <section class="report-rows" aria-label="Report results">
+            <section class="report-rows" aria-label="{% translate 'Report results' %}">
                 {% for report in reports %}
                     {% include "reports/_report_card.html" with report=report layout="row" only %}
                 {% endfor %}
@@ -120,9 +200,9 @@
             {% if reports_with_photo %}
                 <section aria-labelledby="with-photo-heading">
                     <div class="section-head">
-                        <h2 id="with-photo-heading">With photo</h2>
+                        <h2 id="with-photo-heading">{% translate "With photo" %}</h2>
                     </div>
-                    <div class="grid" aria-label="Reports with photo">
+                    <div class="grid" aria-label="{% translate 'Reports with photo' %}">
                         {% for report in reports_with_photo %}
                             {% include "reports/_report_card.html" with report=report only %}
                         {% endfor %}
@@ -132,7 +212,7 @@
             {% if reports_without_photo %}
                 <section aria-labelledby="without-photo-heading">
                     <div class="section-head">
-                        <h2 id="without-photo-heading">Without photo</h2>
+                        <h2 id="without-photo-heading">{% translate "Without photo" %}</h2>
                     </div>
                     <div class="report-rows">
                         {% for report in reports_without_photo %}
@@ -144,8 +224,8 @@
         {% endif %}
     {% else %}
         <section class="empty-state">
-            <h2>No active reports are currently available.</h2>
-            <p>Try adjusting your filters or check again later.</p>
+            <h2>{% translate "No active reports are currently available." %}</h2>
+            <p>{% translate "Try adjusting your filters or check again later." %}</p>
         </section>
     {% endif %}
 {% endblock %}

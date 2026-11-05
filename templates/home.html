@@ -1,127 +1,117 @@
 {% extends "base.html" %}
-{% load icons %}
+{% load i18n icons %}
 
-{% block title %}Home | BackToYou{% endblock %}
+{% block title %}{% translate "Home" %} | BackToYou{% endblock %}
 
 {% block after_header %}
     {# Franja Ciruela con numeros reales de la comunidad. #}
     <div class="ticker">
         <p class="ticker-inner">
-            <span><strong>{{ numbers.returned_this_week }}</strong> returned this week</span>
-            <span><strong>{{ numbers.active }}</strong> active report{{ numbers.active|pluralize }}</span>
-            <span><strong>{{ numbers.new_last_day }}</strong> new in the last 24 hours</span>
+            <span>{% blocktranslate trimmed count counter=numbers.returned_this_week %}<strong>{{ counter }}</strong> returned this week{% plural %}<strong>{{ counter }}</strong> returned this week{% endblocktranslate %}</span>
+            <span>{% blocktranslate trimmed count counter=numbers.active %}<strong>{{ counter }}</strong> active report{% plural %}<strong>{{ counter }}</strong> active reports{% endblocktranslate %}</span>
+            <span>{% blocktranslate trimmed count counter=numbers.new_last_day %}<strong>{{ counter }}</strong> new in the last 24 hours{% plural %}<strong>{{ counter }}</strong> new in the last 24 hours{% endblocktranslate %}</span>
             {% if numbers.recovery_rate is not None %}
-                <span><strong>{{ numbers.recovery_rate|floatformat:0 }}%</strong> of lost items recovered</span>
+                <span>{% blocktranslate trimmed with rate=numbers.recovery_rate|floatformat:0 %}<strong>{{ rate }}%</strong> of lost items recovered{% endblocktranslate %}</span>
             {% endif %}
         </p>
     </div>
 {% endblock %}
 
 {% block content %}
-    {# Buscar primero: la pregunta que trae quien perdio algo. #}
+    {# Buscar primero: la pregunta que trae quien perdio algo. Los reportes estan en el indice (Reports). #}
     <section class="hero search-hero">
+        {# El eslogan es parte de la marca: no se traduce. #}
         <span class="kicker">Lost. Found. Back to You.</span>
-        <h1>What did you <em>lose?</em></h1>
+        <h1>{% blocktranslate trimmed %}What did you <em>lose?</em>{% endblocktranslate %}</h1>
 
         <form class="big-search" action="{% url 'reports:report_list' %}" method="get" role="search">
             {% ui_icon "search" %}
-            <label class="visually-hidden" for="home-search">Search reports</label>
+            <label class="visually-hidden" for="home-search">{% translate "Search reports" %}</label>
             <input
                 id="home-search"
                 type="search"
                 name="q"
-                placeholder="Black umbrella, student ID, keys with a green keyring..."
+                placeholder="{% translate 'Black umbrella, student ID, keys with a green keyring...' %}"
             >
-            <button type="submit">Search {{ numbers.active }} report{{ numbers.active|pluralize }}</button>
+            <button type="submit">{% blocktranslate trimmed count counter=numbers.active %}Search {{ counter }} report{% plural %}Search {{ counter }} reports{% endblocktranslate %}</button>
         </form>
 
         {% if categories %}
-            <nav class="category-chips" aria-label="Browse by category">
+            <nav class="category-chips" aria-label="{% translate 'Browse by category' %}">
                 {% for category in categories %}
                     <a class="chip" href="{% url 'reports:report_list' %}?category={{ category.id }}">
-                        {% category_icon category.name %}{{ category.name }}
+                        {% category_icon category.name %}{% translate category.name %}
                     </a>
                 {% endfor %}
             </nav>
         {% endif %}
 
-        <p class="alt-line">
-            Found something?
-            <a class="text-link" href="{% url 'reports:create_found_report' %}">Report a found item</a>
-            <span aria-hidden="true">·</span>
-            Not in the list?
-            <a class="text-link" href="{% url 'reports:create_lost_report' %}">Report a lost item</a>
-        </p>
-    </section>
-
-    <section aria-labelledby="recent-reports-heading">
-        <div class="section-head">
-            <h2 id="recent-reports-heading">Recently Published Reports</h2>
-            <a class="text-link" href="{% url 'reports:report_list' %}">Browse All Reports</a>
-        </div>
-        {% if recent_reports %}
-            <div class="grid grid-3" aria-label="Recently published reports">
-                {% for report in recent_reports %}
-                    {% include "reports/_report_card.html" with report=report only %}
-                {% endfor %}
-            </div>
-        {% else %}
-            <div class="empty-state">
-                <h3>No active reports are currently available.</h3>
-                <p>Check again later for recently published Lost and Found reports.</p>
-            </div>
-        {% endif %}
+        {# Reportar es la idea del producto: dos llamados grandes, no un enlace de texto. #}
+        <nav class="report-cta" aria-label="{% translate 'Report an item' %}">
+            <a class="cta-card cta-lost" href="{% url 'reports:create_lost_report' %}">
+                <span class="cta-kicker">{% translate "Not in the list?" %}</span>
+                <span class="cta-title">{% translate "Report a lost item" %}</span>
+                <span class="cta-note">{% translate "Tell the community what you lost and where." %}</span>
+                <span class="cta-arrow" aria-hidden="true">→</span>
+            </a>
+            <a class="cta-card cta-found" href="{% url 'reports:create_found_report' %}">
+                <span class="cta-kicker">{% translate "Found something?" %}</span>
+                <span class="cta-title">{% translate "Report a found item" %}</span>
+                <span class="cta-note">{% translate "Add a photo so its owner can recognize it." %}</span>
+                <span class="cta-arrow" aria-hidden="true">→</span>
+            </a>
+        </nav>
     </section>
 
     {# Confianza: numeros reales (misma tasa que RF25). #}
     <section class="trust-numbers" aria-labelledby="numbers-heading">
-        <h2 class="kicker" id="numbers-heading">BackToYou in numbers</h2>
+        <h2 class="kicker" id="numbers-heading">{% translate "BackToYou in numbers" %}</h2>
         <div class="numbers-row">
-            <p><strong data-count-to="{{ numbers.recovered }}">{{ numbers.recovered }}</strong> item{{ numbers.recovered|pluralize }} back with their owners</p>
+            <p>{% blocktranslate trimmed count counter=numbers.recovered %}<strong data-count-to="{{ counter }}">{{ counter }}</strong> item back with its owner{% plural %}<strong data-count-to="{{ counter }}">{{ counter }}</strong> items back with their owners{% endblocktranslate %}</p>
             <p>
                 {% if numbers.recovery_rate is None %}
                     <strong>—</strong>
                 {% else %}
                     <strong data-count-to="{{ numbers.recovery_rate|floatformat:0 }}" data-suffix="%">{{ numbers.recovery_rate|floatformat:0 }}%</strong>
                 {% endif %}
-                of approved lost reports recovered
+                {% translate "of approved lost reports recovered" %}
             </p>
-            <p><strong data-count-to="{{ numbers.active }}">{{ numbers.active }}</strong> active report{{ numbers.active|pluralize }} right now</p>
+            <p>{% blocktranslate trimmed count counter=numbers.active %}<strong data-count-to="{{ counter }}">{{ counter }}</strong> active report right now{% plural %}<strong data-count-to="{{ counter }}">{{ counter }}</strong> active reports right now{% endblocktranslate %}</p>
         </div>
     </section>
 
     <div class="trust-grid">
         <section aria-labelledby="after-report-heading">
             <div class="section-head">
-                <h2 id="after-report-heading">What happens after you report</h2>
+                <h2 id="after-report-heading">{% translate "What happens after you report" %}</h2>
             </div>
             <ol class="steps-list">
                 <li>
                     <span class="step-number" aria-hidden="true">I.</span>
                     <div>
-                        <h3>Sent</h3>
-                        <p>You see a confirmation as soon as you submit it.</p>
+                        <h3>{% translate "Sent" %}</h3>
+                        <p>{% translate "You see a confirmation as soon as you submit it." %}</p>
                     </div>
                 </li>
                 <li>
                     <span class="step-number" aria-hidden="true">II.</span>
                     <div>
-                        <h3>Reviewed</h3>
-                        <p>An administrator checks it and you get an email with the result.</p>
+                        <h3>{% translate "Reviewed" %}</h3>
+                        <p>{% translate "An administrator checks it and you get an email with the result." %}</p>
                     </div>
                 </li>
                 <li>
                     <span class="step-number" aria-hidden="true">III.</span>
                     <div>
-                        <h3>Published</h3>
-                        <p>The community can find it and contact you through BackToYou.</p>
+                        <h3>{% translate "Published" %}</h3>
+                        <p>{% translate "The community can find it and contact you through BackToYou." %}</p>
                     </div>
                 </li>
                 <li>
                     <span class="step-number" aria-hidden="true">IV.</span>
                     <div>
-                        <h3>Back to you</h3>
-                        <p>When you have the item, mark it as recovered.</p>
+                        <h3>{% translate "Back to you" %}</h3>
+                        <p>{% translate "When you have the item, mark it as recovered." %}</p>
                     </div>
                 </li>
             </ol>

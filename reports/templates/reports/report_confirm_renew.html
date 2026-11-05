@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Renew Report" %} | BackToYou{% endblock %}
+{% block content %}
+    <section class="form-card">
+        <h1 class="page-title">{% translate "Renew this report?" %}</h1>
+        <p class="lead">{{ report.title }}</p>
+        <p>{% translate "Renewal adds 30 days to the remaining validity, or starts 30 days from now if the report has expired." %}</p>
+        <p>{% blocktranslate with expiry=renewed_until %}New expiration date: {{ expiry }}{% endblocktranslate %}</p>
+        <div class="actions">
+            <form method="post">
+                {% csrf_token %}
+                <button type="submit">{% translate "Renew Report" %}</button>
+            </form>
+            <a class="button ghost" href="{% url 'reports:report_detail' report.id %}">{% translate "Cancel" %}</a>
+        </div>
+    </section>
+{% endblock %}

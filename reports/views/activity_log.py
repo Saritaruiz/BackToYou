@@ -14,7 +14,8 @@ ENTRIES_PER_PAGE = 50
 
 @administrator_required
 def activity_log(request):
-    entries = ModerationLogEntry.objects.select_related("report").order_by("-created_at", "-id")
+    # La plantilla usa las copias del historial y report_id, no el reporte.
+    entries = ModerationLogEntry.objects.order_by("-created_at", "-id")
 
     selected_administrator = request.GET.get("administrator", "")
     selected_action = request.GET.get("action", "")

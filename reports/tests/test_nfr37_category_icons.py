@@ -45,11 +45,11 @@ class CategoryIconTests(SimpleTestCase):
 
 class ReportWithoutPhotoTests(TestCase):
     # Un reporte sin foto muestra el icono de su categoria, no una caja vacia.
-    def test_card_without_photo_shows_the_category_icon(self):
+    def test_report_without_photo_shows_the_category_icon(self):
         creator = get_user_model().objects.create_user(
             username="creator@eafit.edu.co", email="creator@eafit.edu.co", password="StrongPass123",
         )
-        ItemReport.objects.create(
+        report = ItemReport.objects.create(
             title="House keys",
             description="Three keys",
             category=Category.objects.create(name="Keys"),
@@ -60,7 +60,7 @@ class ReportWithoutPhotoTests(TestCase):
             status=ItemReport.Status.ACTIVE,
         )
 
-        response = self.client.get(reverse("home"))
+        response = self.client.get(reverse("reports:report_detail", args=[report.id]))
 
         self.assertContains(response, '<div class="report-placeholder">', html=False)
         self.assertContains(response, '<svg class="icon category-icon"', html=False)

@@ -1,17 +1,18 @@
 {% extends "base.html" %}
+{% load i18n %}
 
-{% block title %}Delete {{ category.name }} | BackToYou{% endblock %}
+{% block title %}{% blocktranslate with name=category.name %}Delete {{ name }}{% endblocktranslate %} | BackToYou{% endblock %}
 
 {% block content %}
     <section class="form-card">
-        <h1 class="page-title">Delete this category?</h1>
+        <h1 class="page-title">{% translate "Delete this category?" %}</h1>
         <p class="lead">
-            Categories currently used by reports cannot be deleted.
+            {% translate "Categories currently used by reports cannot be deleted." %}
         </p>
 
         <div class="meta-grid">
             <div class="meta-item">
-                <span class="meta-label">Category name</span>
+                <span class="meta-label">{% translate "Category name" %}</span>
                 {{ category.name }}
             </div>
         </div>
@@ -19,10 +20,10 @@
         <div class="actions">
             <form method="post">
                 {% csrf_token %}
-                <button class="danger" type="submit">Delete Category</button>
+                <button class="danger" type="submit">{% translate "Delete Category" %}</button>
             </form>
             <a class="button ghost" href="{% url 'administration_category_list' %}">
-                Cancel
+                {% translate "Cancel" %}
             </a>
         </div>
     </section>

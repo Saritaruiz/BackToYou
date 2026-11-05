@@ -9,20 +9,25 @@ editarlas despues desde Administration > Categories (RF14).
 """
 
 from django.core.management.base import BaseCommand
+from django.utils.translation import gettext_noop
 
 from reports.models import Category
 
 
+# Se guardan en ingles. gettext_noop las deja en el archivo de traducciones,
+# asi las plantillas las muestran en el idioma de la pagina con
+# {% translate category.name %}. Una categoria que cree un administrador se
+# ve tal como la escribio.
 DEFAULT_CATEGORIES = [
-    "Electronics",
-    "IDs & cards",
-    "Bottles",
-    "Clothing",
-    "Bags & cases",
-    "Keys",
-    "Books & notebooks",
-    "Accessories",
-    "Other",
+    gettext_noop("Electronics"),
+    gettext_noop("IDs & cards"),
+    gettext_noop("Bottles"),
+    gettext_noop("Clothing"),
+    gettext_noop("Bags & cases"),
+    gettext_noop("Keys"),
+    gettext_noop("Books & notebooks"),
+    gettext_noop("Accessories"),
+    gettext_noop("Other"),
 ]
 
 

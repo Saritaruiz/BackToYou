@@ -7,13 +7,14 @@ Django Admin (admin.py), para que las dos sigan exactamente las mismas reglas.
 
 from django.db import transaction
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 
 from .models import User
 
 
-LAST_ADMIN_MESSAGE = "You cannot revoke the last active administrator account."
-LAST_ADMIN_DEACTIVATE_MESSAGE = "You cannot deactivate the last active administrator account."
-LAST_ADMIN_DELETE_MESSAGE = "You cannot delete the last active administrator account."
+LAST_ADMIN_MESSAGE = _("You cannot revoke the last active administrator account.")
+LAST_ADMIN_DEACTIVATE_MESSAGE = _("You cannot deactivate the last active administrator account.")
+LAST_ADMIN_DELETE_MESSAGE = _("You cannot delete the last active administrator account.")
 
 
 class RoleChangeError(Exception):

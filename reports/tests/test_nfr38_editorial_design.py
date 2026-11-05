@@ -43,7 +43,8 @@ class EditorialPagesTests(TestCase):
         )
 
     def current_links(self, response):
-        return re.findall(r'<a href="[^"]*" aria-current="page">([^<]+)</a>', response.content.decode())
+        # Los botones de crear reporte llevan su clase antes del href.
+        return re.findall(r'<a (?:class="[^"]*" )?href="[^"]*" aria-current="page">([^<]+)</a>', response.content.decode())
 
     # NFR31: la seccion actual se marca en el menu, y solo una.
     def test_navigation_marks_only_the_current_section(self):

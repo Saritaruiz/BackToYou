@@ -1,25 +1,27 @@
 {% extends "base.html" %}
-{% load icons %}
+{% load i18n icons %}
 
-{% block title %}Pending Reports | BackToYou{% endblock %}
+{% block title %}{% translate "Pending Reports" %} | BackToYou{% endblock %}
 
 {% block content %}
     <section class="hero page-head">
         <div>
-            <span class="role-pill">Moderation</span>
-            <h1>Pending <em>reports.</em></h1>
-            <p class="lead">Review submitted reports before they appear publicly.</p>
+            <span class="role-pill">{% translate "Moderation" %}</span>
+            <h1>{% blocktranslate trimmed %}Pending <em>reports.</em>{% endblocktranslate %}</h1>
+            <p class="lead">{% translate "Review submitted reports before they appear publicly." %}</p>
         </div>
         {% if reports %}
             <p class="page-count">
-                <strong>{{ reports|length }}</strong>
-                waiting for review
+                {% blocktranslate trimmed with number=reports|length %}
+                    <strong>{{ number }}</strong>
+                    waiting for review
+                {% endblocktranslate %}
             </p>
         {% endif %}
     </section>
 
     {% if reports %}
-        <section class="ledger" aria-label="Pending reports">
+        <section class="ledger" aria-label="{% translate 'Pending reports' %}">
             {% for report in reports %}
                 <article class="ledger-row">
                     <div class="ledger-thumb">
@@ -39,7 +41,7 @@
                     <div class="ledger-main">
                         <h2 class="ledger-title">{{ report.title }}</h2>
                         <p class="card-meta">
-                            {{ report.category.name }} · {{ report.event_date }}
+                            {% translate report.category.name %} · {{ report.event_date }}
                         </p>
                     </div>
 
@@ -50,7 +52,7 @@
 
                     <div class="ledger-actions">
                         <a class="button" href="{% url 'administration_moderate_report' report.id %}">
-                            Review Report
+                            {% translate "Review Report" %}
                         </a>
                     </div>
                 </article>
@@ -58,8 +60,8 @@
         </section>
     {% else %}
         <section class="empty-state">
-            <h2>No pending reports are currently waiting for review.</h2>
-            <p>New submissions will appear here automatically.</p>
+            <h2>{% translate "No pending reports are currently waiting for review." %}</h2>
+            <p>{% translate "New submissions will appear here automatically." %}</p>
         </section>
     {% endif %}
 {% endblock %}

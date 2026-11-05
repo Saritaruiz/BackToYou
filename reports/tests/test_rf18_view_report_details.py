@@ -155,7 +155,7 @@ class ViewReportDetailsTests(TestCase):
             ItemReport.Status.ACTIVE: (True, True, True),
             ItemReport.Status.PENDING_REVIEW: (True, True, False),
             ItemReport.Status.RECOVERED: (True, True, False),
-            ItemReport.Status.REJECTED: (False, True, False),
+            ItemReport.Status.REJECTED: (True, True, False),
         }
 
         for status, (can_edit, can_delete, can_recover) in expected.items():

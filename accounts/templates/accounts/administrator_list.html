@@ -1,31 +1,32 @@
 {% extends "base.html" %}
+{% load i18n %}
 
-{% block title %}Administrator Accounts | BackToYou{% endblock %}
+{% block title %}{% translate "Administrator Accounts" %} | BackToYou{% endblock %}
 
 {% block content %}
     <section class="hero">
-        <span class="role-pill">Administrator</span>
-        <h1>Administrator Accounts</h1>
-        <p>Create, activate, or deactivate administrators, and grant or revoke administrator access. At least one active administrator must always remain.</p>
+        <span class="role-pill">{% translate "Administrator" %}</span>
+        <h1>{% translate "Administrator Accounts" %}</h1>
+        <p>{% translate "Create, activate, or deactivate administrators, and grant or revoke administrator access. At least one active administrator must always remain." %}</p>
         <div class="actions">
             <a class="button" href="{% url 'administration_administrator_create' %}">
-                New Administrator
+                {% translate "New Administrator" %}
             </a>
             <a class="button ghost" href="{% url 'administration' %}">
-                Back to Administration
+                {% translate "Back to Administration" %}
             </a>
         </div>
     </section>
 
-    <section class="panel table-wrap" aria-label="Account list">
+    <section class="panel table-wrap" aria-label="{% translate 'Account list' %}">
         <table class="data-table">
             <thead>
                 <tr>
-                    <th scope="col">Name</th>
-                    <th scope="col">Email</th>
-                    <th scope="col">Role</th>
-                    <th scope="col">Status</th>
-                    <th scope="col">Actions</th>
+                    <th scope="col">{% translate "Name" %}</th>
+                    <th scope="col">{% translate "Email" %}</th>
+                    <th scope="col">{% translate "Role" %}</th>
+                    <th scope="col">{% translate "Status" %}</th>
+                    <th scope="col">{% translate "Actions" %}</th>
                 </tr>
             </thead>
             <tbody>
@@ -34,7 +35,7 @@
                         <td>{{ account.first_name|default:"—" }}</td>
                         <td>{{ account.email }}</td>
                         <td>{{ account.get_role_display }}</td>
-                        <td>{% if account.is_active %}Active{% else %}Inactive{% endif %}</td>
+                        <td>{% if account.is_active %}{% translate "Active" context "account" %}{% else %}{% translate "Inactive" context "account" %}{% endif %}</td>
                         <td>
                             <div class="table-actions">
                                 {% if account.role == "ADMINISTRATOR" %}
@@ -42,20 +43,20 @@
                                         class="button secondary"
                                         href="{% url 'administration_administrator_status' account.id %}"
                                     >
-                                        {% if account.is_active %}Deactivate{% else %}Activate{% endif %}
+                                        {% if account.is_active %}{% translate "Deactivate" %}{% else %}{% translate "Activate" %}{% endif %}
                                     </a>
                                     <a
                                         class="button danger"
                                         href="{% url 'administration_administrator_toggle' account.id %}"
                                     >
-                                        Revoke Admin
+                                        {% translate "Revoke Admin" %}
                                     </a>
                                 {% else %}
                                     <a
                                         class="button secondary"
                                         href="{% url 'administration_administrator_toggle' account.id %}"
                                     >
-                                        Grant Admin
+                                        {% translate "Grant Admin" %}
                                     </a>
                                 {% endif %}
                             </div>

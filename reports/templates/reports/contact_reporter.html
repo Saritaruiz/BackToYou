@@ -1,13 +1,24 @@
 {% extends "base.html" %}
+{% load i18n %}
 
-{% block title %}Contact Reporter | BackToYou{% endblock %}
+{% block title %}{% translate "Contact Reporter" %} | BackToYou{% endblock %}
 
 {% block content %}
     <section class="form-card">
-        <h1 class="page-title">Contact Reporter</h1>
+        <h1 class="page-title">{% translate "Contact Reporter" %}</h1>
         <p class="lead">
-            Send an internal BackToYou message about
-            <strong>{{ report.title }}</strong>.
+            {% blocktranslate trimmed with title=report.title %}
+                Send an internal BackToYou message about
+                <strong>{{ title }}</strong>.
+            {% endblocktranslate %}
+        </p>
+        {# RF08 y FR40: quien escribe sabe que dato comparte y donde vera la respuesta. #}
+        <p class="field-help">
+            {% blocktranslate trimmed with email=user.email %}
+                The reporter will see your institutional email ({{ email }}).
+                Their reply will appear in this report, inside BackToYou, and
+                their email stays private.
+            {% endblocktranslate %}
         </p>
 
         <form method="post">
@@ -22,12 +33,12 @@
                 </div>
             {% endfor %}
 
-            <button type="submit">Send Message</button>
+            <button type="submit">{% translate "Send Message" %}</button>
         </form>
 
         <p>
             <a href="{% url 'reports:report_detail' report.id %}">
-                Back to Report
+                {% translate "Back to Report" %}
             </a>
         </p>
     </section>

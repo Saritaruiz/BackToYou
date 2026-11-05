@@ -1,30 +1,35 @@
 {% extends "base.html" %}
+{% load i18n %}
 
-{% block title %}Confirm role change | BackToYou{% endblock %}
+{% block title %}{% translate "Confirm role change" %} | BackToYou{% endblock %}
 
 {% block content %}
     <section class="form-card">
         {% if will_be_admin %}
-            <h1 class="page-title">Grant administrator access to &ldquo;{{ target.email }}&rdquo;?</h1>
+            <h1 class="page-title">{% blocktranslate with email=target.email %}Grant administrator access to &ldquo;{{ email }}&rdquo;?{% endblocktranslate %}</h1>
             <p class="lead">
-                This account will be able to moderate reports, manage
-                categories, and manage other accounts.
+                {% blocktranslate trimmed %}
+                    This account will be able to moderate reports, manage
+                    categories, and manage other accounts.
+                {% endblocktranslate %}
             </p>
         {% else %}
-            <h1 class="page-title">Revoke administrator access from &ldquo;{{ target.email }}&rdquo;?</h1>
+            <h1 class="page-title">{% blocktranslate with email=target.email %}Revoke administrator access from &ldquo;{{ email }}&rdquo;?{% endblocktranslate %}</h1>
             <p class="lead">
-                This account will lose access to the administration panel and
-                become a regular user.
+                {% blocktranslate trimmed %}
+                    This account will lose access to the administration panel and
+                    become a regular user.
+                {% endblocktranslate %}
             </p>
         {% endif %}
 
         <div class="meta-grid">
             <div class="meta-item">
-                <span class="meta-label">Email</span>
+                <span class="meta-label">{% translate "Email" %}</span>
                 {{ target.email }}
             </div>
             <div class="meta-item">
-                <span class="meta-label">Current role</span>
+                <span class="meta-label">{% translate "Current role" %}</span>
                 {{ target.get_role_display }}
             </div>
         </div>
@@ -33,13 +38,13 @@
             <form method="post">
                 {% csrf_token %}
                 {% if will_be_admin %}
-                    <button class="success" type="submit">Grant Admin Access</button>
+                    <button class="success" type="submit">{% translate "Grant Admin Access" %}</button>
                 {% else %}
-                    <button class="danger" type="submit">Revoke Admin Access</button>
+                    <button class="danger" type="submit">{% translate "Revoke Admin Access" %}</button>
                 {% endif %}
             </form>
             <a class="button quiet" href="{% url 'administration_administrator_list' %}">
-                Cancel
+                {% translate "Cancel" %}
             </a>
         </div>
     </section>

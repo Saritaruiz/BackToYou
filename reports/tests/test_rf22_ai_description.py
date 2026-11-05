@@ -1,14 +1,15 @@
 """RF22 - AI-Based Object Description.
 
-Las pruebas nunca llaman a Ollama: urlopen se reemplaza por uno simulado,
-asi que no necesitan tener Ollama instalado ni el modelo descargado.
+Las pruebas nunca llaman a Ollama ni a Gemini: urlopen se reemplaza por uno
+simulado, asi que no necesitan tener Ollama instalado, el modelo descargado
+ni una clave de Gemini.
 """
 
 import base64
 import io
 import json
 from unittest import mock
-from urllib.error import URLError
+from urllib.error import HTTPError, URLError
 
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -63,10 +64,30 @@ class FakeOllama:
         return io.BytesIO(json.dumps(body).encode("utf-8"))
 
 
+class FakeGemini:
+    """Responde como la API de Gemini: models/<modelo>:generateContent."""
+
+    def __init__(self):
+        self.reply = model_reply()
+        self.response = None  # respuesta completa, para casos especiales
+        self.error = None
+        self.requests = []
+
+    def urlopen(self, request, timeout):
+        self.requests.append((request, json.loads(request.data), timeout))
+        if self.error:
+            raise self.error
+        body = self.response or {
+            "candidates": [{"content": {"role": "model", "parts": [{"text": self.reply}]}}]
+        }
+        return io.BytesIO(json.dumps(body).encode("utf-8"))
+
+
 @override_settings(
     OLLAMA_HOST="http://ollama.test:11434",
     OLLAMA_VISION_MODEL="test-vision",
     OLLAMA_TIMEOUT=30,
+    GEMINI_API_KEY="",
 )
 class AIDescriptionTests(TestCase):
     def setUp(self):
@@ -281,3 +302,139 @@ class AIDescriptionTests(TestCase):
         html = response.content.decode()
         start = html.index('id="ai-suggest"')
         return "disabled" in html[start:html.index(">", start)]
+
+
+@override_settings(
+    GEMINI_API_KEY="test-key",
+    GEMINI_MODEL="test-gemini",
+    GEMINI_TIMEOUT=20,
+    OLLAMA_VISION_MODEL="test-vision",
+)
+class GeminiDescriptionTests(TestCase):
+    """Con GEMINI_API_KEY la sugerencia la hace Gemini, sin Ollama."""
+
+    def setUp(self):
+        User = get_user_model()
+        self.user = User.objects.create_user(
+            username="reporter@eafit.edu.co",
+            email="reporter@eafit.edu.co",
+            password="StrongPass123",
+        )
+        self.bottles = Category.objects.create(name="Bottles")
+        Category.objects.create(name="Electronics")
+        self.client.login(username=self.user.email, password="StrongPass123")
+        self.url = reverse("reports:ai_describe_item")
+
+        self.gemini = FakeGemini()
+        patcher = mock.patch("reports.ai_description.urlopen", self.gemini.urlopen)
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+    def post_image(self, image=None, report_type="FOUND"):
+        return self.client.post(
+            self.url,
+            {"image": image or png_upload(), "report_type": report_type},
+        )
+
+    def test_valid_image_returns_title_description_and_category(self):
+        response = self.post_image()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.json(),
+            {
+                "title": "Blue steel water bottle",
+                "description": "Blue insulated bottle with a dented lid.",
+                "category_id": self.bottles.id,
+            },
+        )
+
+    def test_request_sends_photo_report_type_and_existing_categories(self):
+        image = png_upload()
+        expected_image = base64.b64encode(image.read()).decode("ascii")
+        image.seek(0)
+
+        self.post_image(image=image, report_type="LOST")
+
+        self.assertEqual(len(self.gemini.requests), 1)
+        request, payload, timeout = self.gemini.requests[0]
+        self.assertEqual(
+            request.full_url,
+            "https://generativelanguage.googleapis.com/v1beta/models/test-gemini:generateContent",
+        )
+        self.assertEqual(timeout, 20)
+        text, photo = payload["contents"][0]["parts"]
+        self.assertIn("Report type: Lost item.", text["text"])
+        self.assertIn("Available categories: Bottles, Electronics.", text["text"])
+        self.assertEqual(photo["inline_data"], {"mime_type": "image/png", "data": expected_image})
+        self.assertEqual(
+            payload["generationConfig"]["responseJsonSchema"]["properties"]["category"]["enum"],
+            ["Bottles", "Electronics", ""],
+        )
+
+    def test_api_key_goes_in_a_header_not_in_the_url(self):
+        self.post_image()
+
+        request, _, _ = self.gemini.requests[0]
+        self.assertEqual(request.get_header("X-goog-api-key"), "test-key")
+        self.assertNotIn("test-key", request.full_url)
+
+    def test_thinking_parts_are_ignored(self):
+        self.gemini.response = {
+            "candidates": [
+                {
+                    "content": {
+                        "parts": [
+                            {"text": "The photo shows a bottle...", "thought": True},
+                            {"text": model_reply()},
+                        ]
+                    }
+                }
+            ]
+        }
+
+        response = self.post_image()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["title"], "Blue steel water bottle")
+
+    def test_blocked_response_shows_informative_message(self):
+        self.gemini.response = {"promptFeedback": {"blockReason": "SAFETY"}}
+
+        response = self.post_image()
+
+        self.assertEqual(response.status_code, 502)
+        self.assertIn("fill in the report manually", response.json()["error"])
+
+    def test_invalid_key_or_quota_error_shows_informative_message(self):
+        self.gemini.error = HTTPError(
+            "https://generativelanguage.googleapis.com", 429, "Too Many Requests", None, None
+        )
+
+        response = self.post_image()
+
+        self.assertEqual(response.status_code, 502)
+        self.assertIn("fill in the report manually", response.json()["error"])
+
+    def test_image_without_clear_item_shows_informative_message(self):
+        self.gemini.reply = model_reply(item_visible=False)
+
+        response = self.post_image()
+
+        self.assertEqual(response.status_code, 502)
+        self.assertIn("could not identify an item", response.json()["error"])
+
+    def test_create_form_enables_ai_button_without_calling_any_service(self):
+        response = self.client.get(reverse("reports:create_lost_report"))
+
+        html = response.content.decode()
+        start = html.index('id="ai-suggest"')
+        self.assertNotIn("disabled", html[start:html.index(">", start)])
+        self.assertEqual(self.gemini.requests, [])
+
+    @override_settings(GEMINI_MODEL="")
+    def test_ai_disabled_when_gemini_model_is_empty(self):
+        response = self.post_image()
+
+        self.assertEqual(response.status_code, 503)
+        self.assertEqual(self.gemini.requests, [])

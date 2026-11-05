@@ -8,11 +8,17 @@ from django.contrib.auth import get_user_model, logout
 from django.db import models
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.utils.translation import gettext as _
 
 from .decorators import administrator_required
 from .forms import AdministratorCreationForm, AdministratorEditForm
 from .models import User
 from .roles import RoleChangeError, change_role, change_status, record_changes
+
+
+def _status_message(target, will_be_active):
+    message = _("%(email)s is now active.") if will_be_active else _("%(email)s is now inactive.")
+    return message % {"email": target.email}
 
 
 @administrator_required
@@ -44,16 +50,16 @@ def toggle_administrator(request, user_id):
         if target == request.user and not will_be_admin:
             messages.success(
                 request,
-                "You are no longer an administrator. "
-                "Your account now has regular user access.",
+                _("You are no longer an administrator. Your account now has regular user access."),
             )
             return redirect("home")
 
-        messages.success(
-            request,
-            f"{target.email} is now "
-            f"{'an administrator' if will_be_admin else 'a regular user'}.",
+        message = (
+            _("%(email)s is now an administrator.")
+            if will_be_admin
+            else _("%(email)s is now a regular user.")
         )
+        messages.success(request, message % {"email": target.email})
         return redirect("administration_administrator_list")
 
     return render(
@@ -71,7 +77,7 @@ def administrator_create(request):
             account = form.save(commit=False)
             record_changes(account, None, changed_by=request.user)
             account.save()
-            messages.success(request, f"{account.email} was created as an administrator.")
+            messages.success(request, _("%(email)s was created as an administrator.") % {"email": account.email})
             return redirect("administration_administrator_list")
     else:
         form = AdministratorCreationForm()
@@ -93,7 +99,7 @@ def administrator_edit(request, user_id):
         form = AdministratorEditForm(request.POST, instance=target)
         if form.is_valid():
             form.save()
-            messages.success(request, f"{target.email} was updated.")
+            messages.success(request, _("%(email)s was updated.") % {"email": target.email})
             return redirect("administration_administrator_list")
     else:
         form = AdministratorEditForm(instance=target)
@@ -122,13 +128,10 @@ def toggle_administrator_status(request, user_id):
         # Quien se desactiva a si mismo pierde el acceso en ese momento.
         if target == request.user:
             logout(request)
-            messages.success(request, "Your administrator account is now inactive.")
+            messages.success(request, _("Your administrator account is now inactive."))
             return redirect("accounts:login")
 
-        messages.success(
-            request,
-            f"{target.email} is now {'active' if will_be_active else 'inactive'}.",
-        )
+        messages.success(request, _status_message(target, will_be_active))
         return redirect("administration_administrator_list")
 
     return render(
@@ -174,11 +177,7 @@ def toggle_user_status(request, user_id):
             update_fields=["is_active", "status_changed_by", "status_changed_at"]
         )
 
-        messages.success(
-            request,
-            f"{target.email} is now "
-            f"{'active' if will_be_active else 'inactive'}.",
-        )
+        messages.success(request, _status_message(target, will_be_active))
         return redirect("administration_user_list")
 
     return render(

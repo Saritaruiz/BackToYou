@@ -1,0 +1,4 @@
+{% load i18n %}
+{# RF03/RF04: cada campo dice si es obligatorio (*) u opcional, para no adivinarlo al llenar el reporte. #}
+{# El asterisco es solo visual: el campo lleva el atributo required, que el lector de pantalla anuncia. #}
+<label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} <span class="required-mark" aria-hidden="true">*</span>{% else %} <span class="optional-mark">{% translate "(optional)" %}</span>{% endif %}</label>

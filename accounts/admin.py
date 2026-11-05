@@ -4,6 +4,7 @@ from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.forms import AdminUserCreationForm, UserChangeForm
 from django.core.exceptions import ValidationError
 from django.db import transaction
+from django.utils.translation import gettext_lazy as _
 
 from .forms import clean_institutional_email
 from .models import User
@@ -14,7 +15,7 @@ class BackToYouUserCreationForm(AdminUserCreationForm):
     """Crear cuentas desde Django Admin igual que en el registro: con el
     correo institucional, que tambien queda como nombre de usuario."""
 
-    email = forms.EmailField(label="Institutional email")
+    email = forms.EmailField(label=_("Institutional email"))
 
     def clean_email(self):
         email = clean_institutional_email(self.cleaned_data.get("email"))

@@ -1,6 +1,10 @@
+from datetime import timedelta
+
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
 from django.db import models
+from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 
 # será para categorizar que tipo de objeto se perdió
 class Category(models.Model): 
@@ -9,18 +13,26 @@ class Category(models.Model):
     def __str__(self):
         return self.name
 
+# FR45: periodo de vigencia desde aprobacion o renovacion.
+REPORT_VALIDITY = timedelta(days=30)
+
+
+def default_report_expiration():
+    return timezone.now() + REPORT_VALIDITY
+
+
 # representa cada publicación
 class ItemReport(models.Model):
     class ReportType(models.TextChoices):
-        LOST = "LOST", "Lost"
-        FOUND = "FOUND", "Found"
+        LOST = "LOST", _("Lost")
+        FOUND = "FOUND", _("Found")
 
 
     class Status(models.TextChoices):
-        PENDING_REVIEW = "PENDING_REVIEW", "Pending Review"  # todo reporte nuevo queda automáticamente cómo pendiente
-        ACTIVE = "ACTIVE", "Active"
-        RECOVERED = "RECOVERED", "Recovered"
-        REJECTED = "REJECTED", "Rejected"
+        PENDING_REVIEW = "PENDING_REVIEW", _("Pending Review")  # todo reporte nuevo queda automáticamente cómo pendiente
+        ACTIVE = "ACTIVE", _("Active")
+        RECOVERED = "RECOVERED", _("Recovered")
+        REJECTED = "REJECTED", _("Rejected")
 
     title = models.CharField(max_length=150)
     description = models.TextField()
@@ -77,6 +89,12 @@ class ItemReport(models.Model):
         null=True,
     )
 
+    # RF10: por que se rechazo o se retiro el reporte. Solo lo ve su creador,
+    # para saber que corregir antes de enviarlo de nuevo a revision.
+    rejection_reason = models.CharField(max_length=255, blank=True)
+
+    expires_at = models.DateTimeField(default=default_report_expiration)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -84,9 +102,24 @@ class ItemReport(models.Model):
         return self.title
 
     @property
+    def is_expired(self):
+        return self.status == self.Status.ACTIVE and self.expires_at <= timezone.now()
+
+    @property
+    def is_public(self):
+        return self.status == self.Status.ACTIVE and not self.is_expired
+
+    @property
+    def can_be_renewed(self):
+        return self.status == self.Status.ACTIVE
+
+    @property
     def is_editable(self):
-        """RF11: el creador puede editar todo menos un reporte rechazado."""
-        return self.status != self.Status.REJECTED
+        """RF11: el creador puede editar cualquier reporte suyo.
+
+        Un reporte rechazado se corrige y vuelve a revision (ver edit_report).
+        """
+        return True
 
     @property
     def can_be_marked_recovered(self):
@@ -107,6 +140,14 @@ class ContactMessage(models.Model):
         related_name="sent_contact_messages",
     )
 
+    parent_message = models.ForeignKey(
+    "self",
+    on_delete=models.CASCADE,
+    related_name="replies",
+    blank=True,
+    null=True,
+    )
+
     message = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -117,10 +158,10 @@ class ContactMessage(models.Model):
 # RF43: aviso de un miembro de la comunidad sobre un reporte ya publicado.
 class ReportFlag(models.Model):
     class Reason(models.TextChoices):
-        FALSE_INFORMATION = "FALSE_INFORMATION", "False information"
-        OFFENSIVE = "OFFENSIVE", "Offensive content"
-        PERSONAL_DATA = "PERSONAL_DATA", "Personal data"
-        OTHER = "OTHER", "Other"
+        FALSE_INFORMATION = "FALSE_INFORMATION", _("False information")
+        OFFENSIVE = "OFFENSIVE", _("Offensive content")
+        PERSONAL_DATA = "PERSONAL_DATA", _("Personal data")
+        OTHER = "OTHER", _("Other")
 
     report = models.ForeignKey(
         ItemReport,
@@ -170,12 +211,12 @@ class ReportFlag(models.Model):
 # guarda la ultima decision.
 class ModerationLogEntry(models.Model):
     class Action(models.TextChoices):
-        APPROVED = "APPROVED", "Approved"
-        REJECTED = "REJECTED", "Rejected"
-        EDITED = "EDITED", "Edited"
-        REMOVED = "REMOVED", "Removed"
-        FLAGS_DISMISSED = "FLAGS_DISMISSED", "Flags dismissed"
-        REMOVED_FROM_PUBLIC = "REMOVED_FROM_PUBLIC", "Removed from public view"
+        APPROVED = "APPROVED", _("Approved")
+        REJECTED = "REJECTED", _("Rejected")
+        EDITED = "EDITED", _("Edited")
+        REMOVED = "REMOVED", _("Removed")
+        FLAGS_DISMISSED = "FLAGS_DISMISSED", _("Flags dismissed")
+        REMOVED_FROM_PUBLIC = "REMOVED_FROM_PUBLIC", _("Removed from public view")
 
     action = models.CharField(max_length=30, choices=Action.choices)
 
@@ -217,3 +258,34 @@ class ModerationLogEntry(models.Model):
 
     def delete(self, *args, **kwargs):
         raise PermissionDenied("Moderation log entries cannot be deleted.")
+
+
+class ReportReviewNotification(models.Model):
+    """FR26: aviso privado, uno por decision del historial de moderacion."""
+    class Kind(models.TextChoices):
+        APPROVED = "APPROVED", _("Approved")
+        REJECTED = "REJECTED", _("Rejected")
+
+    recipient = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
+        related_name="report_review_notifications",
+    )
+    report = models.ForeignKey(
+        ItemReport, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="review_notifications",
+    )
+    moderation_entry = models.OneToOneField(
+        ModerationLogEntry, on_delete=models.CASCADE,
+        related_name="review_notification",
+    )
+    kind = models.CharField(max_length=10, choices=Kind.choices)
+    # Copia de la decision: sigue legible si se edita o elimina el reporte.
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    read_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ("-created_at", "-id")
+
+    def __str__(self):
+        return self.message
