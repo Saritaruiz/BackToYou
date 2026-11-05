@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: BackToYou\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-11-03 12:00-0500\n"
-"PO-Revision-Date: 2026-11-03 12:00-0500\n"
+"PO-Revision-Date: 2026-11-05 12:00-0500\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: es\n"
@@ -869,8 +869,8 @@ msgstr "Envía un mensaje interno de BackToYou sobre <strong>%(title)s</strong>.
 
 #: reports/templates/reports/contact_reporter.html:17
 #, python-format
-msgid "The reporter will see your institutional email (%(email)s) and will reply to it. Their email stays private until they do."
-msgstr "Quien reportó verá tu correo institucional (%(email)s) y te responderá ahí. Su correo sigue privado hasta que te responda."
+msgid "The reporter will see your institutional email (%(email)s). Their reply will appear in this report, inside BackToYou, and their email stays private."
+msgstr "Quien reportó verá tu correo institucional (%(email)s). Su respuesta aparecerá en este reporte, dentro de BackToYou, y su correo sigue privado."
 
 #: reports/templates/reports/contact_reporter.html:35
 msgid "Send Message"
@@ -1091,10 +1091,6 @@ msgstr "Tasa de recuperación de los reportes de perdidos aprobados"
 #: reports/templates/reports/lost_statistics.html:19
 msgid "N/A"
 msgstr "N/D"
-
-#: reports/templates/reports/lost_statistics.html:20
-msgid "Recovered / (Active + Recovered). Pending and rejected reports are excluded."
-msgstr "Recuperados / (Activos + Recuperados). No se cuentan los pendientes ni los rechazados."
 
 #: reports/templates/reports/lost_statistics.html:24
 msgid "Lost submissions by category"
@@ -1401,14 +1397,6 @@ msgstr "Eliminar reporte"
 #: reports/templates/reports/report_detail.html:132
 msgid "Messages about this report"
 msgstr "Mensajes sobre este reporte"
-
-#: reports/templates/reports/report_detail.html:134
-msgid "Reply by email. Your reply shows your institutional email to the sender."
-msgstr "Responde por correo. Al responder, quien te escribió verá tu correo institucional."
-
-#: reports/templates/reports/report_detail.html:139
-msgid "Reply by email"
-msgstr "Responder por correo"
 
 #: reports/templates/reports/report_edit_form.html:15
 msgid "Fix the report and save it. It will go back to Pending Review."
@@ -2355,3 +2343,179 @@ msgstr "Tu contraseña no puede tener solo números."
 #. Texto de Django: su traduccion usa "usted" y BackToYou tutea.
 msgid "Your password can’t be too similar to your other personal information."
 msgstr "Tu contraseña no puede parecerse demasiado a tu nombre o tu correo."
+
+#: reports/templates/reports/lost_statistics.html:15
+msgid "Expired Lost reports"
+msgstr "Reportes de perdidos vencidos"
+
+#: reports/templates/reports/lost_statistics.html:21
+msgid "Recovered / (Active + Expired + Recovered). Pending and rejected reports are excluded."
+msgstr "Recuperados / (Activos + Vencidos + Recuperados). No se cuentan los pendientes ni los rechazados."
+
+#: reports/templates/reports/my_reports.html:58 reports/templates/reports/report_detail.html:37 reports/templates/reports/report_detail.html:72
+msgid "Expired"
+msgstr "Vencido"
+
+#: reports/templates/reports/my_reports.html:67 reports/templates/reports/report_confirm_renew.html:3 reports/templates/reports/report_confirm_renew.html:13 reports/templates/reports/report_detail.html:108
+msgid "Renew Report"
+msgstr "Renovar reporte"
+
+#: reports/templates/reports/notifications.html:12
+msgid "Report review notifications"
+msgstr "Notificaciones de revisión de reportes"
+
+#: reports/templates/reports/notifications.html:16
+msgid "Read"
+msgstr "Leída"
+
+#: reports/templates/reports/notifications.html:16
+msgid "Unread"
+msgstr "Sin leer"
+
+#: reports/templates/reports/notifications.html:22
+msgid "This report has been deleted."
+msgstr "Este reporte fue eliminado."
+
+#: reports/templates/reports/notifications.html:27
+msgid "Mark as read"
+msgstr "Marcar como leída"
+
+#: reports/templates/reports/notifications.html:3 reports/templates/reports/notifications.html:7 templates/base.html:59
+msgid "Notifications"
+msgstr "Notificaciones"
+
+#: reports/templates/reports/notifications.html:33
+msgid "You have no review notifications yet."
+msgstr "Todavía no tienes notificaciones de revisión."
+
+#: reports/templates/reports/notifications.html:8
+msgid "Decisions about your reports."
+msgstr "Decisiones sobre tus reportes."
+
+#: reports/templates/reports/notifications.html:9
+#, python-format
+msgid "%(counter)s unread notification"
+msgid_plural "%(counter)s unread notifications"
+msgstr[0] "%(counter)s notificación sin leer"
+msgstr[1] "%(counter)s notificaciones sin leer"
+
+#: reports/templates/reports/reply_contact_message.html:11
+msgid "Reply to message"
+msgstr "Responder mensaje"
+
+#: reports/templates/reports/reply_contact_message.html:14
+#, python-format
+msgid "Reply regarding \"%(title)s\"."
+msgstr "Respuesta sobre \"%(title)s\"."
+
+#: reports/templates/reports/reply_contact_message.html:38
+msgid "Send Reply"
+msgstr "Enviar respuesta"
+
+#: reports/templates/reports/reply_contact_message.html:4
+msgid "Reply to Message"
+msgstr "Responder mensaje"
+
+#: reports/templates/reports/reply_contact_message.html:9
+msgid "Internal message"
+msgstr "Mensaje interno"
+
+#: reports/templates/reports/report_confirm_renew.html:6
+msgid "Renew this report?"
+msgstr "¿Renovar este reporte?"
+
+#: reports/templates/reports/report_confirm_renew.html:8
+msgid "Renewal adds 30 days to the remaining validity, or starts 30 days from now if the report has expired."
+msgstr "Renovar suma 30 días al tiempo que le queda o, si el reporte ya venció, cuenta 30 días desde hoy."
+
+#: reports/templates/reports/report_confirm_renew.html:9
+#, python-format
+msgid "New expiration date: %(expiry)s"
+msgstr "Nueva fecha de vencimiento: %(expiry)s"
+
+#: reports/templates/reports/report_detail.html:146
+msgid "Possible matches"
+msgstr "Posibles coincidencias"
+
+#: reports/templates/reports/report_detail.html:150
+msgid "No similar active reports found yet."
+msgstr "Todavía no hay reportes activos parecidos."
+
+#: reports/templates/reports/report_detail.html:162
+msgid "Your messages about this report"
+msgstr "Tus mensajes sobre este reporte"
+
+#: reports/templates/reports/report_detail.html:184
+msgid "Reply in BackToYou"
+msgstr "Responder en BackToYou"
+
+#: reports/templates/reports/report_detail.html:192
+msgid "Reply from report creator"
+msgstr "Respuesta de quien reportó"
+
+#: reports/templates/reports/report_detail.html:82
+msgid "This report has expired and is no longer public. Renew it to publish it again."
+msgstr "Este reporte venció y ya no es público. Renuévalo para publicarlo de nuevo."
+
+#: reports/templates/reports/report_detail.html:84
+#, python-format
+msgid "Expiration date: %(expiry)s"
+msgstr "Fecha de vencimiento: %(expiry)s"
+
+#: reports/templates/reports/report_list.html:102
+msgid "Oldest first"
+msgstr "Más antiguos primero"
+
+#: reports/templates/reports/report_list.html:109
+msgid "Event date: newest"
+msgstr "Fecha en que pasó: más reciente"
+
+#: reports/templates/reports/report_list.html:116
+msgid "Event date: oldest"
+msgstr "Fecha en que pasó: más antigua"
+
+#: reports/templates/reports/report_list.html:123
+msgid "Title: A-Z"
+msgstr "Título: A-Z"
+
+#: reports/templates/reports/report_list.html:130
+msgid "Title: Z-A"
+msgstr "Título: Z-A"
+
+#: reports/templates/reports/report_list.html:63
+msgid "Library, Block 38..."
+msgstr "Biblioteca, Bloque 38..."
+
+#: reports/templates/reports/report_list.html:69
+msgid "Date from"
+msgstr "Fecha desde"
+
+#: reports/templates/reports/report_list.html:79
+msgid "Date to"
+msgstr "Fecha hasta"
+
+#: reports/templates/reports/report_list.html:89
+msgid "Sort by"
+msgstr "Ordenar por"
+
+#: reports/templates/reports/report_list.html:95
+msgid "Newest first"
+msgstr "Más recientes primero"
+
+#: reports/views/moderation.py:101
+#, python-format
+msgid "Your report \"%(title)s\" was approved."
+msgstr "Tu reporte \"%(title)s\" fue aprobado."
+
+#: reports/views/moderation.py:103
+#, python-format
+msgid "Your report \"%(title)s\" was rejected: %(reason)s"
+msgstr "Tu reporte \"%(title)s\" fue rechazado: %(reason)s"
+
+#: reports/views/owner.py:165
+msgid "Report renewed for 30 more days."
+msgstr "Reporte renovado por 30 días más."
+
+#: reports/views/public.py:285
+msgid "Your reply was sent inside BackToYou."
+msgstr "Tu respuesta se envió dentro de BackToYou."

@@ -11,7 +11,7 @@
             <h1>{% translate "Reply to message" %}</h1>
 
             <p class="lead">
-                {% blocktranslate with title=report.title %}
+                {% blocktranslate trimmed with title=report.title %}
                     Reply regarding "{{ title }}".
                 {% endblocktranslate %}
             </p>

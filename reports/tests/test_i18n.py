@@ -4,6 +4,8 @@ Los textos fuente estan en ingles (el resto de las pruebas los usan); aqui se
 pide el espanol de forma explicita con /es/ o translation.override("es").
 """
 
+import ast
+import gettext as gettext_module
 import re
 import struct
 from pathlib import Path
@@ -14,6 +16,7 @@ from django.contrib.messages import get_messages
 from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import translation
+from django.utils.translation import templatize
 
 from accounts.models import User
 
@@ -150,6 +153,17 @@ class SpanishContentTests(I18nTestCase):
         self.assertContains(response, '<span class="type-pill type-lost">Perdido</span>', html=False)
         self.assertContains(response, '<span class="status-pill status-active">Activo</span>', html=False)
 
+    # Los textos de Sprint 4 tambien se ven en espanol.
+    def test_sprint_4_features_are_shown_in_spanish(self):
+        list_page = self.client.get("/es/reports/")
+        self.assertContains(list_page, "Ordenar por")
+        self.assertContains(list_page, "Más recientes primero")
+        self.assertContains(list_page, "Fecha desde")
+
+        self.client.force_login(self.user)
+        self.assertContains(self.client.get(spanish("reports:notifications")), "Notificaciones")
+        self.assertNotContains(self.client.get(spanish("reports:notifications")), "unread notification")
+
     # Las categorias por defecto (seed_categories) se ven traducidas.
     def test_default_categories_are_shown_in_spanish(self):
         self.assertContains(self.client.get("/es/reports/"), "<span>Llaves</span>", html=False)
@@ -253,3 +267,58 @@ class CatalogTests(TestCase):
 
         self.assertEqual(magic, 0x950412DE)
         self.assertEqual(strings, entries, "Compila django.po: ver la seccion Traducciones del README")
+
+    # Un texto nuevo que nunca llego al .po no falla en las pruebas de arriba y
+    # sale en ingles en las paginas en espanol. Aqui se buscan los textos en
+    # las plantillas y en el codigo, con el mismo analisis que usa makemessages.
+    def test_every_text_of_the_application_is_in_the_catalog(self):
+        with (LOCALE / "django.mo").open("rb") as compiled:
+            catalog = gettext_module.GNUTranslations(compiled)._catalog
+        known = set()
+        for key in catalog:
+            msgid = key[0] if isinstance(key, tuple) else key
+            known.add(msgid.split("\x04")[-1])
+
+        missing = sorted(
+            f"{path.relative_to(settings.BASE_DIR)}: {text!r}"
+            for path, text in application_texts()
+            if text not in known
+        )
+
+        self.assertEqual(missing, [], "Faltan en django.po: ver la seccion Traducciones del README")
+
+
+# templatize escribe cada texto como gettext(u'...') o pgettext(u'contexto', u'...').
+STRING = r"""u?(?:'(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*")"""
+TEMPLATE_CALL = re.compile(rf"\b(?:gettext|ngettext|_)\(\s*({STRING})")
+TEMPLATE_CONTEXT_CALL = re.compile(rf"\b(?:pgettext|npgettext)\(\s*{STRING},\s*({STRING})")
+PYTHON_CALLS = {"_", "gettext", "gettext_lazy", "gettext_noop", "ngettext"}
+
+
+def application_texts():
+    """Cada texto traducible de la aplicacion, con el archivo donde esta."""
+    base = Path(settings.BASE_DIR)
+
+    for folder in (base / "templates", base / "accounts" / "templates", base / "reports" / "templates"):
+        for path in folder.rglob("*"):
+            if path.suffix not in (".html", ".txt"):
+                continue
+            source = templatize(path.read_text(encoding="utf-8"), origin=str(path))
+            for pattern in (TEMPLATE_CALL, TEMPLATE_CONTEXT_CALL):
+                for literal in pattern.findall(source):
+                    yield path, ast.literal_eval(literal)
+
+    for folder in ("accounts", "backtoyou", "reports"):
+        for path in (base / folder).rglob("*.py"):
+            if "tests" in path.name or "tests" in path.parts or "migrations" in path.parts:
+                continue
+            for node in ast.walk(ast.parse(path.read_text(encoding="utf-8"))):
+                if (
+                    isinstance(node, ast.Call)
+                    and isinstance(node.func, ast.Name)
+                    and node.func.id in PYTHON_CALLS
+                    and node.args
+                    and isinstance(node.args[0], ast.Constant)
+                    and isinstance(node.args[0].value, str)
+                ):
+                    yield path, node.args[0].value
