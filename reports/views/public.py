@@ -10,6 +10,7 @@ from django.core.exceptions import PermissionDenied
 from django.db.models import Q
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils.dateparse import parse_date
 from django.utils.translation import gettext as _
 
 from ..email_notifications import notify_report_contact
@@ -33,6 +34,16 @@ def home(request):
     )
 
 
+def _valid_date(value):
+    """FR42: la fecha en formato ISO, o "" si no es una fecha valida."""
+    try:
+        parsed = parse_date(value)
+    except ValueError:
+        # Tiene forma de fecha, pero no existe: 2026-02-30.
+        return ""
+    return parsed.isoformat() if parsed else ""
+
+
 def report_list(request):
     reports = public_reports().select_related("category")
     # NFR33: reutilizar el catalogo para traducir la busqueda y para el filtro.
@@ -42,8 +53,12 @@ def report_list(request):
     category_id = request.GET.get("category", "").strip()
     report_type = request.GET.get("type", "").strip()
     location = request.GET.get("location", "").strip()
-    date_from = request.GET.get("date_from", "").strip()
-    date_to = request.GET.get("date_to", "").strip()
+    # FR42: un valor invalido escrito a mano en la direccion no filtra, igual
+    # que un tipo o un orden que no existen. Sin esto, la pagina respondia 500.
+    date_from = _valid_date(request.GET.get("date_from", "").strip())
+    date_to = _valid_date(request.GET.get("date_to", "").strip())
+    if category_id not in {str(category.id) for category in categories}:
+        category_id = ""
     sort = request.GET.get("sort", "newest").strip()
 
     if query:
