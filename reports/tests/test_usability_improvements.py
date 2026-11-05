@@ -181,20 +181,23 @@ class ContactGuidanceTests(ReportTestCase):
         self.assertContains(response, reverse("reports:contact_reporter", args=[self.report.id]))
         self.assertNotContains(response, "Log in to Contact the Reporter")
 
-    def test_the_sender_knows_the_reporter_will_reply_to_their_email(self):
+    def test_the_sender_knows_who_sees_their_email_and_where_the_reply_appears(self):
         self.login_as(self.other)
 
         response = self.client.get(reverse("reports:contact_reporter", args=[self.report.id]))
 
         self.assertContains(response, "will see your institutional email (other@eafit.edu.co)")
+        self.assertContains(response, "Their reply will appear in this report, inside BackToYou")
+        self.assertNotContains(response, "will reply to it")
 
-    def test_the_reporter_can_reply_by_email(self):
-        ContactMessage.objects.create(report=self.report, sender=self.other, message="I think it is mine")
+    def test_the_reporter_replies_inside_backtoyou(self):
+        message = ContactMessage.objects.create(report=self.report, sender=self.other, message="I think it is mine")
         self.login_as(self.creator)
 
         response = self.client.get(self.detail_url)
 
-        self.assertContains(response, "mailto:other@eafit.edu.co?subject=BackToYou%3A%20Lost%20calculator")
+        self.assertContains(response, reverse("reports:reply_to_contact_message", args=[message.id]))
+        self.assertNotContains(response, "mailto:")
 
 
 class RejectionReasonTests(ReportTestCase):

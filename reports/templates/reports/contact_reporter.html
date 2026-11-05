@@ -12,11 +12,12 @@
                 <strong>{{ title }}</strong>.
             {% endblocktranslate %}
         </p>
-        {# RF08: quien escribe sabe por donde le van a responder y que dato comparte. #}
+        {# RF08 y FR40: quien escribe sabe que dato comparte y donde vera la respuesta. #}
         <p class="field-help">
             {% blocktranslate trimmed with email=user.email %}
-                The reporter will see your institutional email ({{ email }})
-                and will reply to it. Their email stays private until they do.
+                The reporter will see your institutional email ({{ email }}).
+                Their reply will appear in this report, inside BackToYou, and
+                their email stays private.
             {% endblocktranslate %}
         </p>
 
